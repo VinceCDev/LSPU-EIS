@@ -488,3 +488,176 @@ header {
     font-weight: 500;
     margin-right: 5px;
 }
+
+[v-cloak] {
+    display: none;
+  }
+        .ql-toolbar.ql-snow {
+    border-color: #d1d5db !important;
+    background: #f9fafb !important;
+  }
+  
+  .dark .ql-toolbar.ql-snow {
+    border-color: #4b5563 !important;
+    background: #1f2937 !important;
+  }
+  
+  .ql-container.ql-snow {
+    border-color: #d1d5db !important;
+    background: white !important;
+  }
+  
+  .dark .ql-container.ql-snow {
+    border-color: #4b5563 !important;
+    background: #111827 !important;
+  }
+  
+  .ql-editor {
+    color: #1f2937 !important;
+    font-family: inherit !important;
+  }
+  
+  .dark .ql-editor {
+    color: #f3f4f6 !important;
+  }
+  
+  .ql-snow .ql-stroke {
+    stroke: #4b5563 !important;
+  }
+  
+  .dark .ql-snow .ql-stroke {
+    stroke: #d1d5db !important;
+  }
+  
+  .ql-snow .ql-fill {
+    fill: #4b5563 !important;
+  }
+  
+  .dark .ql-snow .ql-fill {
+    fill: #d1d5db !important;
+  }
+  
+  .ql-snow .ql-picker {
+    color: #4b5563 !important;
+  }
+  
+  .dark .ql-snow .ql-picker {
+    color: #d1d5db !important;
+  }
+  
+  .ql-snow .ql-picker-options {
+    background-color: white !important;
+    border-color: #d1d5db !important;
+  }
+  
+  .dark .ql-snow .ql-picker-options {
+    background-color: #1f2937 !important;
+    border-color: #4b5563 !important;
+    color: #f3f4f6 !important;
+  }
+        @media print {
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .print-table th {
+                background-color: #1a73e8;
+                color: white;
+                padding: 8px;
+                text-align: left;
+                border: 1px solid #ddd;
+            }
+            
+            .print-table td {
+                padding: 8px;
+                border: 1px solid #ddd;
+                vertical-align: top;
+            }
+            
+            .print-table tr.even {
+                background-color: #f9f9f9;
+            }
+            
+            .print-table tr.unread {
+                background-color: #f0f7ff;
+            }
+            
+            .sender-col { width: 20%; }
+            .subject-col { width: 25%; }
+            .message-col { width: 40%; }
+            .time-col { width: 15%; }
+            
+            .no-messages {
+                text-align: center;
+                padding: 40px;
+                font-size: 16px;
+                color: #666;
+            }
+            
+            .no-messages i {
+                font-size: 48px;
+                color: #ccc;
+                margin-bottom: 15px;
+                display: block;
+            }
+            
+            .print-footer {
+                margin-top: 30px;
+                font-size: 10px;
+                color: #999;
+                display: flex;
+                justify-content: space-between;
+            }
+            
+            .print-watermark {
+                opacity: 0.5;
+            }
+            
+            @page {
+                size: auto;
+                margin: 15mm;
+            }
+}
+/* Custom scrollbar styling for Webkit browsers */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    border-radius: 5px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #4b5563; /* gray-600 */
+}
+
+/* Firefox */
+.overflow-x-auto {
+    scrollbar-width: thin;
+    scrollbar-color: #6b7280 #d1d5db;
+}
+
+/* Dark mode support */
+.dark .overflow-x-auto::-webkit-scrollbar-track {
+    background: #4b5563; /* gray-600 */
+}
+
+.dark .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #9ca3af; /* gray-400 */
+}
+
+.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db; /* gray-300 */
+}
+
+.dark .overflow-x-auto {
+    scrollbar-color: #9ca3af #4b5563;
+}

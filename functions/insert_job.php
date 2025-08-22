@@ -5,49 +5,73 @@ require_once '../conn/db_conn.php';
 $inputData = json_decode(file_get_contents('php://input'), true);
 
 // Check if the required data is provided
-if (isset($inputData['title'], $inputData['department'], $inputData['type'], $inputData['location'], $inputData['description'], $inputData['requirements'], $inputData['status'], $inputData['employerQuestion'], $inputData['qualifications'])) {
-    // First, fetch the company_id based on the department (company_name)
-    $department = $inputData['department'];
+if (isset(
+    $inputData['title'],
+    $inputData['company'],
+    $inputData['type'],
+    $inputData['location'],
+    $inputData['description'],
+    $inputData['requirements'],
+    $inputData['qualifications'],
+    $inputData['employerQuestion'],
+    $inputData['salary'],
+    $inputData['status']
+)) {
+    // First, fetch the company_id based on the company (company_name)
+    $company = $inputData['company'];
 
     // Prepare and execute the query to fetch company_id
-    $stmt = $pdo->prepare("SELECT id FROM company WHERE company_name = :department");
-    $stmt->bindParam(':department', $department, PDO::PARAM_STR);
+    $query = "SELECT id FROM company_profile WHERE company_name = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param('s', $company);  // Bind company parameter
     $stmt->execute();
+    $result = $stmt->get_result();
 
     // Check if a matching company was found
-    if ($stmt->rowCount() > 0) {
-        $company = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result->num_rows > 0) {
+        $company = $result->fetch_assoc();
         $company_id = $company['id']; // Get the company_id
 
         // Now, insert the job data with the correct company_id
-        $stmt = $pdo->prepare("INSERT INTO jobs (title, department, type, location, description, requirements, salary, status, employer_question, qualifications, company_id) VALUES (:title, :department, :type, :location, :description, :requirements, :salary, :status, :employerQuestion, :qualifications, :company_id)");
+        $insertQuery = "INSERT INTO jobs (company_id, title, company, type, location, description, requirements, qualifications, employer_question, salary, status) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $insertStmt = $conn->prepare($insertQuery);
 
-        // Bind parameters using named placeholders
-        $stmt->bindParam(':title', $inputData['title'], PDO::PARAM_STR);
-        $stmt->bindParam(':department', $inputData['department'], PDO::PARAM_STR);
-        $stmt->bindParam(':type', $inputData['type'], PDO::PARAM_STR);
-        $stmt->bindParam(':location', $inputData['location'], PDO::PARAM_STR);
-        $stmt->bindParam(':description', $inputData['description'], PDO::PARAM_STR);
-        $stmt->bindParam(':requirements', $inputData['requirements'], PDO::PARAM_STR);
-        $stmt->bindParam(':salary', $inputData['salary'], PDO::PARAM_STR);  // Salary can be NULL or string
-        $stmt->bindParam(':status', $inputData['status'], PDO::PARAM_STR);
-        $stmt->bindParam(':employerQuestion', $inputData['employerQuestion'], PDO::PARAM_STR);
-        $stmt->bindParam(':qualifications', $inputData['qualifications'], PDO::PARAM_STR);
-        $stmt->bindParam(':company_id', $company_id, PDO::PARAM_INT); // Use the fetched company_id
+        // Bind parameters using the appropriate types
+        $insertStmt->bind_param(
+            'issssssssss',
+            $company_id, // company_id (int)
+            $inputData['title'], // title (string)
+            $inputData['company'], // company (string) -- Reuse the same company name
+            $inputData['type'], // type (string)
+            $inputData['location'], // location (string)
+            $inputData['description'], // description (string)
+            $inputData['requirements'], // requirements (string)
+            $inputData['qualifications'], // qualifications (string)
+            $inputData['employerQuestion'], // employer_question (string)
+            $inputData['salary'], // salary (string or numeric, adjust if needed)
+            $inputData['status'] // status (string)
+        );
 
         // Execute the query and check for success
-        if ($stmt->execute()) {
+        if ($insertStmt->execute()) {
             echo json_encode(['success' => true]);
         } else {
-            echo json_encode(['success' => false, 'error' => $stmt->errorInfo()]);
+            echo json_encode(['success' => false, 'error' => $insertStmt->error]);
         }
+
+        // Close the insert statement
+        $insertStmt->close();
     } else {
-        // If no company was found matching the department
-        echo json_encode(['success' => false, 'error' => 'No company found with that department name']);
+        // If no company was found matching the company name
+        echo json_encode(['success' => false, 'error' => 'No company found with that company name']);
     }
+
+    // Close the first statement
+    $stmt->close();
 } else {
     echo json_encode(['success' => false, 'error' => 'Missing required fields']);
 }
 
 // Close the connection
-$pdo = null;
+$conn->close();

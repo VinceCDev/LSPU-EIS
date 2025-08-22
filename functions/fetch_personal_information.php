@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../conn/db_conn.php'; // Ensure this file sets up $pdo as a PDO instance
+require_once '../conn/db_conn.php'; // This should initialize $conn as mysqli connection
 
 if (!isset($_SESSION['email'])) {
     echo json_encode(['error' => 'User not logged in']);
@@ -9,29 +9,28 @@ if (!isset($_SESSION['email'])) {
 
 $email = $_SESSION['email'];
 
-try {
-    $sql = "SELECT 
-                u.email,
-                pi.first_name,
-                pi.middle_name,
-                pi.last_name,
-                pi.contact_number,
-                pi.city,
-                pi.province,
-                pi.birth_date,
-                pi.gender,
-                pi.campus_graduated,
-                pi.course,
-                pi.year_graduated
-            FROM users u
-            JOIN personal_information pi ON u.id = pi.user_id
-            WHERE u.email = :email";
+// Use prepared statement with mysqli
+$sql = "SELECT 
+            u.email,
+            pi.*
+        FROM users u
+        JOIN alumni_profile pi ON u.id = pi.user_id
+        WHERE u.email = ?";
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['email' => $email]);
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmt = mysqli_prepare($conn, $sql);
 
-    echo json_encode($data ?: ['error' => 'No profile data found']);
-} catch (PDOException $e) {
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+if ($stmt) {
+    mysqli_stmt_bind_param($stmt, "s", $email);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($row = mysqli_fetch_assoc($result)) {
+        echo json_encode($row);
+    } else {
+        echo json_encode(['error' => 'No profile data found']);
+    }
+
+    mysqli_stmt_close($stmt);
+} else {
+    echo json_encode(['error' => 'Database error: ' . mysqli_error($conn)]);
 }

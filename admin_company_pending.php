@@ -1,1052 +1,437 @@
+<?php
+session_start();
+if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header('Location: login.php');
+    exit();
+}
+// Fetch user_id from user table using email
+require_once 'conn/db_conn.php';
+$db = Database::getInstance()->getConnection();
+$user_id = null;
+$email = $_SESSION['email'];
+$stmt = $db->prepare('SELECT user_id FROM user WHERE email = ? LIMIT 1');
+$stmt->bind_param('s', $email);
+$stmt->execute();
+$stmt->bind_result($user_id);
+$stmt->fetch();
+$stmt->close();
+$_SESSION['user_id'] = $user_id;
+?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employer Dashboard - Pending Companies</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --header-height: 70px;
-            --sidebar-width: 280px;
-            --logo-size: 40px;
-            --profile-img-size: 40px;
-            --primary-color: #2557a7;
-            --secondary-color: #f8f9fa;
-            --sidebar-bg: #2c3e50;
-            --sidebar-text: #ecf0f1;
-            --sidebar-hover: #34495e;
-            --sidebar-active: #3498db;
-
-            /* Enhanced Table Variables */
-            --table-border-radius: 12px;
-            --table-header-bg: #f8fafc;
-            --table-row-hover: #f1f5f9;
-            --table-border: #e2e8f0;
-            --table-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --table-transition: all 0.2s ease;
-            --table-cell-padding: 1rem 1.25rem;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f5f7fa;
-            padding-top: var(--header-height);
-            min-height: 100vh;
-        }
-
-        /* Header Styles */
-        header {
-            height: var(--header-height);
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            width: 100%;
-            padding: 0 20px;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--sidebar-bg);
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            z-index: 1100;
-            display: flex;
-            flex-direction: column;
-            color: var(--sidebar-text);
-        }
-
-        .sidebar-brand {
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            height: var(--header-height);
-            background-color: rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-logo {
-            width: var(--logo-size);
-            height: var(--logo-size);
-            margin-right: 10px;
-        }
-
-        .sidebar-brand-name {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 0;
-        }
-
-        .sidebar-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            color: var(--sidebar-text);
-            text-decoration: none;
-            transition: all 0.2s;
-            margin: 0 10px;
-            border-radius: 5px;
-        }
-
-        .sidebar-item:hover {
-            background-color: var(--sidebar-hover);
-            color: white;
-        }
-
-        .sidebar-item.active {
-            background-color: var(--sidebar-active);
-            color: white;
-            font-weight: 500;
-        }
-
-        .sidebar-item i {
-            width: 24px;
-            margin-right: 12px;
-            text-align: center;
-            font-size: 1rem;
-        }
-
-        .sidebar-item span {
-            font-size: 0.95rem;
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 25px;
-            transition: all 0.3s ease;
-            min-height: calc(100vh - var(--header-height));
-        }
-
-        /* Dashboard Cards */
-        .dashboard-card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
-            padding: 25px;
-            margin-bottom: 25px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-            border: none;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Enhanced Table Styles */
-        .enhanced-table {
-            width: 100%;
-        }
-
-        .enhanced-table .table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            border-radius: var(--table-border-radius);
-            overflow: hidden;
-            box-shadow: var(--table-shadow);
-        }
-
-        .enhanced-table .table thead th {
-            background-color: var(--table-header-bg);
-            padding: var(--table-cell-padding);
-            font-weight: 600;
-            color: #334155;
-            border-bottom: 1px solid var(--table-border);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .enhanced-table .table tbody tr {
-            transition: var(--table-transition);
-        }
-
-        .enhanced-table .table tbody tr:hover {
-            background-color: var(--table-row-hover);
-        }
-
-        .enhanced-table .table td {
-            padding: var(--table-cell-padding);
-            border-bottom: 1px solid var(--table-border);
-            vertical-align: middle;
-            font-size: 0.925rem;
-        }
-
-        .enhanced-table .table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Company Logo */
-        .company-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            object-fit: cover;
-            margin-right: 12px;
-            border: 1px solid #e2e8f0;
-            background-color: white;
-            padding: 2px;
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            white-space: nowrap;
-        }
-
-        .status-badge i {
-            margin-right: 4px;
-            font-size: 0.65rem;
-        }
-
-        .status-pending {
-            background-color: #fffbeb;
-            color: #d97706;
-        }
-
-        .status-pending i {
-            color: #f59e0b;
-        }
-
-        .status-approved {
-            background-color: #ecfdf5;
-            color: #059669;
-        }
-
-        .status-approved i {
-            color: #10b981;
-        }
-
-        .status-rejected {
-            background-color: #fef2f2;
-            color: #dc2626;
-        }
-
-        .status-rejected i {
-            color: #ef4444;
-        }
-
-        /* Action Dropdown */
-        .action-dropdown .btn {
-            padding: 5px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            color: #64748b;
-            transition: all 0.2s;
-        }
-
-        .action-dropdown .btn:hover {
-            background-color: #f1f5f9;
-            color: #334155;
-        }
-
-        .action-dropdown .dropdown-menu {
-            border: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 8px;
-        }
-
-        .action-dropdown .dropdown-item {
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.2s;
-        }
-
-        .action-dropdown .dropdown-item i {
-            width: 20px;
-            margin-right: 8px;
-            font-size: 0.8rem;
-        }
-
-        .action-dropdown .dropdown-item.view {
-            color: #2563eb;
-        }
-
-        .action-dropdown .dropdown-item.approve {
-            color: #059669;
-        }
-
-        .action-dropdown .dropdown-item.reject {
-            color: #dc2626;
-        }
-
-        .action-dropdown .dropdown-item:hover {
-            background-color: #f8fafc;
-        }
-
-        /* Search Box */
-        .search-box {
-            position: relative;
-            width: 300px;
-            transition: all 0.3s;
-        }
-
-        .search-box:focus-within {
-            width: 350px;
-        }
-
-        .search-box input {
-            padding-left: 40px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            height: 40px;
-            font-size: 0.925rem;
-            transition: all 0.3s;
-        }
-
-        .search-box input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 0.95rem;
-        }
-
-        /* Pagination */
-        .pagination-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        .pagination-info {
-            font-size: 0.875rem;
-            color: #64748b;
-        }
-
-        .pagination .page-item {
-            margin: 0 4px;
-        }
-
-        .pagination .page-link {
-            border: none;
-            border-radius: 8px;
-            min-width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #334155;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-
-        .pagination .page-link:hover {
-            background-color: #f1f5f9;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .pagination .page-item.disabled .page-link {
-            color: #cbd5e1;
-            background-color: transparent;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .mobile-menu-btn {
-                display: block !important;
-            }
-
-            .header-content {
-                justify-content: space-between;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 15px;
-            }
-
-            .dashboard-card {
-                padding: 20px;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
-            .search-box:focus-within {
-                width: 100%;
-            }
-
-            .enhanced-table .table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-        }
-
-        /* Mobile Menu Button */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.25rem;
-            color: #555;
-            padding: 5px;
-        }
-
-        /* Profile Dropdown */
-        .profile-dropdown {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .profile-img {
-            width: var(--profile-img-size);
-            height: var(--profile-img-size);
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 10px;
-            border: 2px solid #eee;
-        }
-
-        .profile-name {
-            font-weight: 500;
-            margin-right: 5px;
-        }
-
-        /* View Company Modal */
-        .company-modal .modal-header {
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 1rem;
-        }
-
-        .company-modal .modal-body {
-            padding-top: 1.5rem;
-        }
-
-        .company-modal .company-logo-lg {
-            width: 80px;
-            height: 80px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 1px solid #e2e8f0;
-            background-color: white;
-            padding: 4px;
-        }
-
-        .company-modal .detail-item {
-            margin-bottom: 1rem;
-        }
-
-        .company-modal .detail-label {
-            font-weight: 600;
-            color: #64748b;
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .company-modal .detail-value {
-            font-size: 0.95rem;
-            color: #334155;
-        }
-
-        /* Loading State */
-        .loading-state {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .loading-spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(37, 87, 167, 0.2);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Empty State */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem 0;
-            text-align: center;
-        }
-
-        .empty-state i {
-            font-size: 2.5rem;
-            color: #cbd5e1;
-            margin-bottom: 1rem;
-        }
-
-        .empty-state h5 {
-            color: #64748b;
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-state p {
-            color: #94a3b8;
-            font-size: 0.925rem;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-    </style>
+    <title>Pending Companies | LSPU - EIS</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/admin_company_pending.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: {} }
+        }
+    </script>
 </head>
-
-<body>
-    <div id="app">
-        <!-- Sidebar -->
-        <div class="sidebar" :class="{ 'active': sidebarActive }">
-            <div class="sidebar-brand">
-                <img src="images/alumni.png" alt="Logo" class="sidebar-logo">
-                <span class="sidebar-brand-name">LSPU Employer</span>
+<body :class="[darkMode ? 'dark' : '', 'font-sans bg-gray-50 dark:bg-gray-800 min-h-screen']" id="app" v-cloak>
+    <div v-if="showLogoutModal" class="fixed inset-0 flex items-start justify-center z-[100]">
+        <div class="fixed inset-0 bg-black bg-opacity-50" @click="showLogoutModal = false"></div>
+        <div class="absolute top-8 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-700 rounded-lg shadow-xl p-6 w-full max-w-md mx-1">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Confirm Logout</h3>
+                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="sidebar-menu">
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-briefcase"></i>
-                    <span>Job Postings</span>
-                </a>
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-users"></i>
-                    <span>Applicants</span>
-                </a>
-                <a href="#" class="sidebar-item active">
-                    <i class="fas fa-building"></i>
-                    <span>Companies</span>
-                </a>
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-user-graduate"></i>
-                    <span>Alumni</span>
-                </a>
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>Announcements</span>
-                </a>
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-envelope"></i>
-                    <span>Messages</span>
-                </a>
-                <div class="mt-auto px-3 py-4">
-                    <div class="d-flex align-items-center">
-                        <img :src="employer.logo || 'https://via.placeholder.com/150'" alt="Profile" class="profile-img">
-                        <div class="ms-2">
-                            <div class="text-white small">{{ employer.name }}</div>
-                            <div class="text-muted small">{{ employer.email }}</div>
-                        </div>
-                    </div>
-                </div>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to logout?</p>
+            <div class="flex justify-end space-x-3">
+                <button @click="showLogoutModal = false" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+                <button @click="logout" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
+                    Logout
+                </button>
             </div>
         </div>
+    </div>
 
+    <div v-if="sidebarActive" class="fixed top-0 left-0 bottom-0 w-[280px] bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xl z-50 transition-all duration-300 ease-in-out transform md:translate-x-0" :class="{'-translate-x-full': !sidebarActive && isMobile}">
         <!-- Header -->
-        <header>
-            <div class="container-fluid">
-                <div class="header-content">
-                    <button class="mobile-menu-btn" @click="toggleSidebar">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="profile-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="profile-name d-none d-md-inline">{{ employer.name }}</span>
-                        <img :src="employer.logo || 'https://via.placeholder.com/150'" alt="Profile" class="profile-img">
-                        <i class="fas fa-chevron-down small ms-1 d-none d-md-inline"></i>
-                    </div>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                    </ul>
+        <div class="bg-white dark:bg-gray-700 shadow-sm h-[70px] border-b border-slate-200 dark:border-slate-700">
+            <div class="flex items-center h-full px-6 mx-auto max-w-7xl">
+                <!-- Logo with increased size -->
+                <div class="flex items-center">
+                    <img 
+                            src="images/logo.png" 
+                            alt="Logo" 
+                            class="w-12 h-12 mr-4 rounded-lg bg-white p-1 shadow-md ring-1 ring-slate-200/50 dark:bg-slate-700 dark:ring-slate-600/50"
+                        >
+                    
+                    <!-- Text with better visibility -->
+                    <span class="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                        LSPU EIS
+                    </span>
+                </div>
+
+                <!-- Close button -->
+                <button class="md:hidden ml-auto p-2 rounded-full hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/30" @click="toggleSidebar">
+                    <i class="fas fa-times text-xl text-slate-600 dark:text-slate-300"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menu Items -->
+        <div class="overflow-y-auto pt-4 pb-20 h-[calc(100%-64px)] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 dark:scrollbar-thumb-slate-600 dark:scrollbar-track-slate-800/50">
+            <!-- Main Section -->
+            <div class="px-6 py-2 mb-2">
+                <span class="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">Main</span>
+            </div>
+            
+            <!-- Dashboard -->
+            <a href="admin_dashboard" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-tachometer-alt w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <!-- Jobs -->
+            <a href="admin_job" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-briefcase w-5 mr-3 text-center text-emerald-500 dark:text-emerald-400"></i>
+                <span class="font-medium">Jobs</span>
+            </a>
+            
+            <!-- Applicants -->
+            <a href="admin_applicant" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-users w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
+                <span class="font-medium">Applicants</span>
+            </a>
+            
+            <!-- Companies Dropdown -->
+            <div class="mx-2 mb-1">
+                <button @click="companiesDropdownOpen = !companiesDropdownOpen" class="flex items-center w-full px-6 py-3 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors duration-200 borde            r-l-4 border-blue-500 dark:border-blue-400">
+                    <i class="fas fa-building w-5 mr-3 text-center text-purple-500 dark:text-purple-400"></i>
+                    <span class="font-medium">Companies</span>
+                    <i class="fas fa-chevron-down ml-auto text-xs transition-transform duration-200" :class="{'rotate-180': companiesDropdownOpen}"></i>
+                </button>
+                <div class="overflow-hidden transition-all duration-300 ease-in-out" :style="companiesDropdownOpen ? 'max-height: 100px' : 'max-height: 0'">
+                    <a href="admin_company" class="block py-2 pl-14 pr-6 mx-2 rounded-lg text-sm hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200"  @click="handleNavClick">Manage Companies</a>
+                    <a href="admin_company_pending" class="block py-2 pl-14 pr-6 mx-2 rounded-lg text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-500/40 dark:hover:bg-blue-500/40 transition-colors duration-200" @click="handleNavClick">Pending Companies</a>
                 </div>
             </div>
-        </header>
+            
+            <!-- Alumni Dropdown with Active State -->
+            <div class="mx-2 mb-1">
+                <!-- Button (Blue) -->
+                <button 
+                    @click="alumniDropdownOpen = !alumniDropdownOpen" 
+                    class="flex items-center w-full px-6 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200"
+                >
+                    <i class="fas fa-user-graduate w-5 mr-3 text-center text-cyan-500 dark:text-cyan-400"></i>
+                    <span class="font-medium">Alumni</span>
+                    <i class="fas fa-chevron-down ml-auto text-xs transition-transform duration-200" :class="{'rotate-180': alumniDropdownOpen}"></i>
+                </button>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="container-fluid">
-                <div class="dashboard-card">
-                    <div class="table-header">
-                        <h2 class="mb-0">Pending Companies</h2>
-                        <div class="d-flex align-items-center">
-                            <div class="search-box me-3">
-                                <i class="fas fa-search"></i>
-                                <input type="text" class="form-control" placeholder="Search companies..." v-model="searchQuery" @input="filterCompanies">
+                <!-- Dropdown Links -->
+                <div class="overflow-hidden mt-[10px] transition-all duration-300 ease-in-out" :style="alumniDropdownOpen ? 'max-height: 100px' : 'max-height: 0'">
+                    <!-- Active Link (Darker Blue) -->
+                    <a 
+                        href="admin_alumni" 
+                        class="block py-2 pl-14 pr-6 mx-2 rounded-lg text-sm hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200"
+                        @click="handleNavClick"
+                    >
+                        Manage Alumni
+                    </a>
+
+                    <!-- Inactive Link (Lighter Blue) -->
+                    <a 
+                        href="admin_alumni_pending"
+                       class="block py-2 pl-14 pr-6 mx-2 rounded-lg text-sm hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200"
+                        @click="handleNavClick"
+                    >
+                        Pending Alumni
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Accounts -->
+            <a href="admin_user" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200">
+                <i class="fas fa-user-shield w-5 mr-3 text-center text-red-500 dark:text-red-400"></i>
+                <span class="font-medium">Accounts</span>
+            </a>
+            
+            <!-- Reports -->
+            <a href="admin_reports" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-chart-bar w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Reports</span>
+            </a>
+            
+            <!-- Messages -->
+            <a href="admin_message" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-envelope w-5 mr-3 text-center text-pink-500 dark:text-pink-400"></i>
+                <span class="font-medium">Messages</span>
+            </a>
+        </div>
+    </div>
+    <!-- Sidebar overlay for mobile only -->
+    <div v-if="sidebarActive && isMobile" class="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden" @click="toggleSidebar"></div>
+
+    <!-- Notification Toast (single, overlay, slide animation) -->
+    <transition 
+        enter-active-class="slide-enter-active"
+        enter-from-class="slide-enter-from"
+        leave-active-class="slide-leave-active"
+        leave-to-class="slide-leave-to"
+    >
+        <div v-if="notifications.length > 0" @click="removeNotification(notifications[0].id)"
+            :class="[
+                'notification-toast cursor-pointer fixed top-4 right-4 z-[100] max-w-sm w-full pointer-events-auto',
+                notifications[0].type === 'success' ? 'bg-green-100 border-green-500 text-green-700 dark:bg-green-900 dark:border-green-700 dark:text-green-100' : '',
+                notifications[0].type === 'error' ? 'bg-red-100 border-red-500 text-red-700 dark:bg-red-900 dark:border-red-700 dark:text-red-100' : '',
+                notifications[0].type === 'info' ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-100' : '',
+                'border-l-4 p-4 rounded shadow-lg'
+            ]">
+            <div class="flex items-center">
+                <i v-if="notifications[0].type === 'success'" class="fas fa-check-circle text-green-500 dark:text-green-300 mr-3"></i>
+                <i v-if="notifications[0].type === 'error'" class="fas fa-exclamation-circle text-red-500 dark:text-red-300 mr-3"></i>
+                <i v-if="notifications[0].type === 'info'" class="fas fa-info-circle text-blue-500 dark:text-blue-300 mr-3"></i>
+                <div>
+                    <p class="font-medium">{{ notifications[0].message }}</p>
+                </div>
+            </div>
+        </div>
+    </transition>
+    
+    <!-- Header (always fixed, not pushed by sidebar) -->
+    <header class="fixed top-0 left-0 right-0 h-[70px] bg-white dark:bg-gray-700 shadow-md z-40 flex items-center px-4">
+        <div class="flex items-center justify-between w-full">
+            <button class="md:hidden text-gray-600 dark:text-gray-300 p-1" @click="toggleSidebar">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-4 ml-auto">
+                <div class="relative">
+                    <div class="cursor-pointer flex items-center" @click="toggleProfileDropdown">
+                        <img :src="profile.profile_pic || 'images/logo.png'" alt="Profile" class="w-10 h-10 rounded-full border-2 border-gray-200 dark:border-gray-500">
+                        <span class="ml-2 font-medium text-gray-700 dark:text-gray-200">{{ profile.name ? profile.name.split(' ')[0] : 'Admin' }}</span>
+                        <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 text-gray-700 dark:text-white" :class="{'rotate-180': profileDropdownOpen}"></i>
+                    </div>
+                    <transition 
+                        enter-active-class="dropdown-enter-active"
+                        enter-from-class="dropdown-enter-from"
+                        enter-to-class="dropdown-enter-to"
+                        leave-active-class="dropdown-leave-active"
+                        leave-from-class="dropdown-leave-from"
+                        leave-to-class="dropdown-leave-to"
+                    >
+                        <div v-if="profileDropdownOpen" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-600 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-500 transform origin-top-right">
+                            <div class="flex items-center justify-between px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500 cursor-pointer" @click="toggleDarkMode">
+                                <div class="flex items-center">
+                                    <i class="fas fa-sun mr-3 theme-light" v-if="!darkMode"></i>
+                                    <i class="fas fa-moon mr-3 theme-dark" v-if="darkMode"></i>
+                                    <span class="text-sm">Theme</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer" @click.stop>
+                                    <input type="checkbox" class="sr-only peer" v-model="darkMode" @change="toggleDarkMode">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-400 peer-checked:bg-blue-600"></div>
+                                </label>
                             </div>
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_profile">
+                                <i class="fas fa-user mr-3"></i> 
+                                <span class="text-sm">View Profile</span>
+                            </a>
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_reminder_settings">
+                                <i class="fas fa-bell mr-3"></i> 
+                                <span class="text-sm">Reminder Settings</span>
+                            </a>
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="forgot_password">
+                                <i class="fas fa-cog mr-3"></i> 
+                                <span class="text-sm">Forgot Password</span>
+                            </a>
+                            <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="confirmLogout">
+                                <i class="fas fa-sign-out-alt mr-3"></i> 
+                                <span class="text-sm">Logout</span>
+                            </a>
                         </div>
-                    </div>
-
-                    <div class="enhanced-table">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Company</th>
-                                    <th>Industry</th>
-                                    <th>Location</th>
-                                    <th>Contact</th>
-                                    <th>Status</th>
-                                    <th>Applied Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-if="loading">
-                                    <td colspan="7" class="text-center py-4">
-                                        <div class="loading-state">
-                                            <div class="loading-spinner"></div>
-                                            <span>Loading companies...</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr v-else-if="filteredCompanies.length === 0">
-                                    <td colspan="7">
-                                        <div class="empty-state">
-                                            <i class="fas fa-building"></i>
-                                            <h5>No Pending Companies</h5>
-                                            <p>There are currently no companies waiting for approval.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr v-for="company in paginatedCompanies" :key="company.id">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img :src="company.logo || 'https://via.placeholder.com/150'" alt="Logo" class="company-logo">
-                                            <div>
-                                                <strong>{{ company.name }}</strong>
-                                                <div class="small text-muted">{{ company.email }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{{ company.industry }}</td>
-                                    <td>{{ company.location }}</td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span>{{ company.contactPerson }}</span>
-                                            <small class="text-muted">{{ company.contactPhone }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span :class="'status-badge status-' + company.status.toLowerCase()">
-                                            <i class="fas" :class="{
-                                                'fa-clock': company.status === 'Pending',
-                                                'fa-check-circle': company.status === 'Approved',
-                                                'fa-times-circle': company.status === 'Rejected'
-                                            }"></i>
-                                            {{ company.status }}
-                                        </span>
-                                    </td>
-                                    <td>{{ formatDate(company.appliedDate) }}</td>
-                                    <td>
-                                        <div class="action-dropdown dropdown">
-                                            <button class="btn" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                <li><a class="dropdown-item view" href="#" @click="viewCompany(company)">
-                                                        <i class="fas fa-eye"></i> View Details
-                                                    </a></li>
-                                                <li><a class="dropdown-item approve" href="#" @click="approveCompany(company)">
-                                                        <i class="fas fa-check"></i> Approve
-                                                    </a></li>
-                                                <li><a class="dropdown-item reject" href="#" @click="rejectCompany(company)">
-                                                        <i class="fas fa-times"></i> Reject
-                                                    </a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="pagination-container" v-if="filteredCompanies.length > 0">
-                        <div class="pagination-info">
-                            Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredCompanies.length) }} of {{ filteredCompanies.length }} entries
-                        </div>
-                        <nav>
-                            <ul class="pagination">
-                                <li class="page-item" :class="{ 'disabled': currentPage === 1 }">
-                                    <a class="page-link" href="#" @click.prevent="prevPage">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item" v-for="page in totalPages" :key="page" :class="{ 'active': page === currentPage }">
-                                    <a class="page-link" href="#" @click.prevent="goToPage(page)">{{ page }}</a>
-                                </li>
-                                <li class="page-item" :class="{ 'disabled': currentPage === totalPages }">
-                                    <a class="page-link" href="#" @click.prevent="nextPage">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                    </transition>
                 </div>
             </div>
-        </main>
-
-        <!-- View Company Modal -->
-        <div class="modal fade company-modal" id="viewCompanyModal" tabindex="-1" aria-labelledby="viewCompanyModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewCompanyModalLabel">Company Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+    </header>
+    
+    <main :class="[isMobile ? 'ml-0' : (sidebarActive ? 'ml-[280px]' : 'ml-0'), 'transition-all duration-300 min-h-[calc(100vh-70px)] p-6 pt-lg-5 mt-[70px] bg-gray-50 dark:bg-gray-800']">
+        <div class="container-fluid max-w-7xl mx-auto">
+            <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm main-shadow p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <h2 class="text-2xl font-bold mb-2 md:mb-0 text-gray-800 dark:text-gray-100">Company Profiles</h2>
+                    <!-- Removed Add, Export Excel, Export PDF buttons -->
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-2 w-full md:w-auto mb-2 md:mb-0">
+                        <div class="relative w-full md:w-80">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </span>
+                            <input type="text" class="form-input w-full pl-10 px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search company..." v-model="searchQuery" @input="filterCompanies">
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <div v-if="selectedCompany" class="row">
-                            <div class="col-md-3 text-center mb-4 mb-md-0">
-                                <img :src="selectedCompany.logo || 'https://via.placeholder.com/150'" alt="Logo" class="company-logo-lg mb-3">
-                                <div class="mb-3">
-                                    <span :class="'status-badge status-' + selectedCompany.status.toLowerCase()">
-                                        <i class="fas" :class="{
-                                            'fa-clock': selectedCompany.status === 'Pending',
-                                            'fa-check-circle': selectedCompany.status === 'Approved',
-                                            'fa-times-circle': selectedCompany.status === 'Rejected'
-                                        }"></i>
-                                        {{ selectedCompany.status }}
+                    <!-- Advanced Filter -->
+                    <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full md:w-auto">
+                        <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-auto" v-model="filters.industry_type" @change="filterCompanies">
+                            <option value="">All Types</option>
+                            <option v-for="industry_type in uniqueIndustryTypes" :key="industry_type">{{ industry_type }}</option>
+                        </select>
+                        <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-auto" v-model="filters.nature_of_business" @change="filterCompanies">
+                            <option value="">All Nature</option>
+                            <option v-for="nature_of_business in uniqueNatureOfBusiness" :key="nature_of_business">{{ nature_of_business }}</option>
+                        </select>
+                        <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-auto" v-model="filters.accreditation_status" @change="filterCompanies">
+                            <option value="">Status</option>
+                            <option v-for="accreditation_status in uniqueAccreditationStatus" :key="accreditation_status">{{ accreditation_status }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-center data-table">
+                        <thead>
+                            <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                <th class="px-4 py-2">Name of Company</th>
+                                <th class="px-4 py-2">Location</th>
+                                <th class="px-4 py-2">Contact Email</th>
+                                <th class="px-4 py-2">Industry Type</th>
+                                <th class="px-4 py-2">Nature of Business</th>
+                                <th class="px-4 py-2">Status</th>
+                                <th class="px-4 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="employer in filteredEmployers" :key="employer.user_id" class="border-b border-gray-200 dark:border-gray-600">
+                                <td class="px-4 py-2 font-semibold text-gray-700 dark:text-gray-200">{{ employer.company_name }}</td>
+                                <td class="px-4 py-2 text-gray-700 dark:text-gray-200">{{ employer.company_location }}</td>
+                                <td class="px-4 py-2 text-gray-700 dark:text-gray-200">{{ employer.contact_email }}</td>
+                                <td class="px-4 py-2 text-gray-700 dark:text-gray-200">{{ employer.industry_type }}</td>
+                                <td class="px-4 py-2 text-gray-700 dark:text-gray-200">{{ employer.nature_of_business }}</td>
+                                <td class="px-4 py-2 text-gray-700 dark:text-gray-200">
+                                    <span :class="[
+                                        'inline-block px-2 py-1 rounded text-xs font-semibold',
+                                        employer.status === 'Approved'
+                                            ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200'
+                                            : 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200'
+                                    ]">
+                                        {{ employer.status }}
                                     </span>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Applied Date</div>
-                                    <div class="detail-value">{{ formatDate(selectedCompany.appliedDate) }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-9">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Company Name</div>
-                                            <div class="detail-value">{{ selectedCompany.name }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Industry</div>
-                                            <div class="detail-value">{{ selectedCompany.industry }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Location</div>
-                                            <div class="detail-value">{{ selectedCompany.location }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Website</div>
-                                            <div class="detail-value">
-                                                <a :href="selectedCompany.website" target="_blank">{{ selectedCompany.website }}</a>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <div class="relative inline-block text-left">
+                                        <button @click="toggleActionDropdown(employer.user_id)" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-500 dark:text-gray-200">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <div v-if="actionDropdown === employer.user_id" class="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-50 drop-shadow-lg">
+                                            <div class="py-1">
+                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" @click.prevent="viewEmployer(employer)"><i class="fas fa-eye mr-2"></i>View</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-green-600 hover:bg-green-100 dark:hover:bg-green-800" @click.prevent="approveEmployer(employer)"><i class="fas fa-check-circle mr-2"></i>Approve</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 dark:hover:bg-red-800" @click.prevent="deleteEmployer(employer)"><i class="fas fa-trash-alt mr-2"></i>Delete</a>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Contact Person</div>
-                                            <div class="detail-value">{{ selectedCompany.contactPerson }}</div>
-                                        </div>
+                                </td>
+                            </tr>
+                            <tr v-if="filteredEmployers.length === 0">
+                                <td colspan="7" class="py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <i class="fas fa-building text-4xl text-gray-300 mb-2"></i>
+                                        <span class="text-lg text-gray-400">No company register found</span>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Contact Email</div>
-                                            <div class="detail-value">{{ selectedCompany.contactEmail }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Contact Phone</div>
-                                            <div class="detail-value">{{ selectedCompany.contactPhone }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-12" v-if="selectedCompany.description">
-                                        <div class="detail-item">
-                                            <div class="detail-label">Description</div>
-                                            <div class="detail-value">{{ selectedCompany.description }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination (same style as jobs page) -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mt-4 gap-2">
+                    <div class="text-gray-600 dark:text-gray-300 text-sm">
+                        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredEmployers.length) }} of {{ filteredEmployers.length }} entries
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" v-if="selectedCompany && selectedCompany.status === 'Pending'" @click="approveCompany(selectedCompany)" data-bs-dismiss="modal">
-                            <i class="fas fa-check me-1"></i> Approve
+                    <div class="flex gap-1">
+                        <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === 1" @click="prevPage">
+                            <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button type="button" class="btn btn-danger" v-if="selectedCompany && selectedCompany.status === 'Pending'" @click="rejectCompany(selectedCompany)" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i> Reject
+                        <button v-for="page in totalPages" :key="page" class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900" :class="{'bg-blue-600 text-white dark:bg-blue-500 dark:text-white': page === currentPage}" @click="goToPage(page)">{{ page }}</button>
+                        <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === totalPages" @click="nextPage">
+                            <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Bootstrap 5 JS Bundle with Popper -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Vue.js -->
-        <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
-        <script>
-            const {
-                createApp
-            } = Vue;
-
-            createApp({
-                data() {
-                    return {
-                        sidebarActive: false,
-                        employer: {
-                            name: "LSPU Admin",
-                            email: "admin@lspu.edu.ph",
-                            logo: "https://via.placeholder.com/150"
-                        },
-                        companies: [{
-                                id: 1,
-                                name: "Tech Innovations Inc.",
-                                email: "contact@techinnovations.com",
-                                logo: "https://logo.clearbit.com/techinnovations.com",
-                                industry: "Information Technology",
-                                location: "Manila, Philippines",
-                                website: "https://techinnovations.com",
-                                contactPerson: "John Smith",
-                                contactEmail: "john@techinnovations.com",
-                                contactPhone: "+63 912 345 6789",
-                                description: "A leading technology company specializing in software development and AI solutions.",
-                                status: "Pending",
-                                appliedDate: "2023-06-15"
-                            },
-                            {
-                                id: 2,
-                                name: "Green Energy Solutions",
-                                email: "info@greenenergy.com",
-                                logo: "https://logo.clearbit.com/greenenergy.com",
-                                industry: "Renewable Energy",
-                                location: "Cebu, Philippines",
-                                website: "https://greenenergy.com",
-                                contactPerson: "Maria Garcia",
-                                contactEmail: "maria@greenenergy.com",
-                                contactPhone: "+63 917 890 1234",
-                                description: "Providing sustainable energy solutions for a greener future.",
-                                status: "Pending",
-                                appliedDate: "2023-06-14"
-                            },
-                            {
-                                id: 3,
-                                name: "Global Logistics PH",
-                                email: "support@globallogistics.ph",
-                                logo: "https://logo.clearbit.com/globallogistics.ph",
-                                industry: "Logistics",
-                                location: "Davao, Philippines",
-                                website: "https://globallogistics.ph",
-                                contactPerson: "Robert Lim",
-                                contactEmail: "robert@globallogistics.ph",
-                                contactPhone: "+63 918 765 4321",
-                                description: "International logistics and supply chain management company.",
-                                status: "Pending",
-                                appliedDate: "2023-06-12"
-                            },
-                            {
-                                id: 4,
-                                name: "FinServ Corporation",
-                                email: "hello@finserv.ph",
-                                logo: "https://logo.clearbit.com/finserv.ph",
-                                industry: "Financial Services",
-                                location: "Makati, Philippines",
-                                website: "https://finserv.ph",
-                                contactPerson: "Anna Reyes",
-                                contactEmail: "anna@finserv.ph",
-                                contactPhone: "+63 920 123 4567",
-                                description: "Financial technology company offering innovative banking solutions.",
-                                status: "Pending",
-                                appliedDate: "2023-06-10"
-                            },
-                            {
-                                id: 5,
-                                name: "HealthPlus Medical",
-                                email: "contact@healthplusmedical.com",
-                                logo: "https://logo.clearbit.com/healthplusmedical.com",
-                                industry: "Healthcare",
-                                location: "Quezon City, Philippines",
-                                website: "https://healthplusmedical.com",
-                                contactPerson: "Michael Tan",
-                                contactEmail: "michael@healthplusmedical.com",
-                                contactPhone: "+63 921 987 6543",
-                                description: "Healthcare provider with state-of-the-art medical facilities.",
-                                status: "Pending",
-                                appliedDate: "2023-06-08"
-                            }
-                        ],
-                        selectedCompany: null,
-                        searchQuery: "",
-                        filteredCompanies: [],
-                        currentPage: 1,
-                        itemsPerPage: 5,
-                        loading: false
-                    }
-                },
-                created() {
-                    // Simulate loading data
-                    this.loading = true;
-                    setTimeout(() => {
-                        this.filterCompanies();
-                        this.loading = false;
-                    }, 800);
-                },
-                computed: {
-                    totalPages() {
-                        return Math.ceil(this.filteredCompanies.length / this.itemsPerPage);
-                    },
-                    paginatedCompanies() {
-                        const start = (this.currentPage - 1) * this.itemsPerPage;
-                        const end = start + this.itemsPerPage;
-                        return this.filteredCompanies.slice(start, end);
-                    }
-                },
-                methods: {
-                    toggleSidebar() {
-                        this.sidebarActive = !this.sidebarActive;
-                    },
-                    filterCompanies() {
-                        if (!this.searchQuery) {
-                            this.filteredCompanies = this.companies.filter(company => company.status === "Pending");
-                            this.currentPage = 1;
-                            return;
-                        }
-
-                        const query = this.searchQuery.toLowerCase();
-                        this.filteredCompanies = this.companies.filter(company =>
-                            (company.status === "Pending") && (
-                                company.name.toLowerCase().includes(query) ||
-                                company.industry.toLowerCase().includes(query) ||
-                                company.location.toLowerCase().includes(query) ||
-                                company.contactPerson.toLowerCase().includes(query)
-                            )
-                        );
-                        this.currentPage = 1;
-                    },
-                    formatDate(dateString) {
-                        const options = {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        };
-                        return new Date(dateString).toLocaleDateString('en-US', options);
-                    },
-                    prevPage() {
-                        if (this.currentPage > 1) {
-                            this.currentPage--;
-                        }
-                    },
-                    nextPage() {
-                        if (this.currentPage < this.totalPages) {
-                            this.currentPage++;
-                        }
-                    },
-                    goToPage(page) {
-                        this.currentPage = page;
-                    },
-                    viewCompany(company) {
-                        this.selectedCompany = company;
-                        const modal = new bootstrap.Modal(document.getElementById('viewCompanyModal'));
-                        modal.show();
-                    },
-                    approveCompany(company) {
-                        if (confirm(`Are you sure you want to approve ${company.name}?`)) {
-                            company.status = "Approved";
-                            this.filterCompanies();
-                            // In a real app, you would make an API call here
-                            alert(`${company.name} has been approved successfully!`);
-                        }
-                    },
-                    rejectCompany(company) {
-                        if (confirm(`Are you sure you want to reject ${company.name}?`)) {
-                            company.status = "Rejected";
-                            this.filterCompanies();
-                            // In a real app, you would make an API call here
-                            alert(`${company.name} has been rejected.`);
-                        }
-                    }
-                }
-            }).mount('#app');
-        </script>
+    </main>
+    <!-- Remove Add/Edit Company Modal -->
+    <!-- Delete Confirmation Modal for Company -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Confirm Delete</h3>
+            <p class="mb-6 text-gray-700 dark:text-gray-200">Are you sure you want to delete this company?</p>
+            <div class="flex justify-end gap-2">
+                <button class="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-700" @click="showDeleteModal = false">Cancel</button>
+                <button class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition" @click="confirmDeleteCompany">Delete</button>
+            </div>
+        </div>
+    </div>
+    <!-- View Company Details Modal -->
+    <div v-if="showViewModal" class="fixed inset-0 z-[210] flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-xl mx-2 p-0 relative max-h-[95vh] overflow-y-auto">
+            <button class="absolute top-3 right-3 flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition text-base font-semibold z-20" @click="showViewModal = false">
+                <i class="fas fa-times"></i> <span>Close</span>
+            </button>
+            <!-- Header with gradient and icon -->
+            <div class="rounded-t-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 dark:from-blue-900 dark:via-blue-800 dark:to-blue-700 px-0 pt-6 pb-8 flex flex-col items-center relative">
+                <div class="absolute top-4 left-4 bg-white dark:bg-gray-700 rounded-full p-2 shadow-lg">
+                    <i class="fas fa-building text-blue-600 dark:text-blue-300 text-2xl"></i>
+                </div>
+                <img :src="viewedEmployer.logo" alt="Company Logo" class="w-28 h-28 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-xl mb-2 mt-2">
+                <h3 class="text-3xl font-extrabold text-white drop-shadow-lg mb-1 text-center">{{ viewedEmployer.company_name }}</h3>
+                <span
+                    :class="[
+                        'inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold shadow',
+                        viewedEmployer.status === 'Active'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200'
+                            : 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200'
+                    ]"
+                >{{ viewedEmployer.status }}</span>
+            </div>
+            <!-- Company Details Section -->
+            <div class="px-6 py-6">
+                <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-info-circle text-blue-500 dark:text-blue-300"></i> <span>Company Details</span></h4>
+                <div class="grid grid-cols-1 gap-3 bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Location:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewedEmployer.company_location }}</span></div>
+                    <div class="flex items-center gap-3"><i class="fas fa-envelope text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Contact Email:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewedEmployer.contact_email }}</span></div>
+                    <div class="flex items-center gap-3"><i class="fas fa-industry text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Industry Type:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewedEmployer.industry_type }}</span></div>
+                    <div class="flex items-center gap-3"><i class="fas fa-briefcase text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Nature of Business:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewedEmployer.nature_of_business }}</span></div>
+                    <div class="flex items-center gap-3"><i class="fas fa-certificate text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Accreditation Status:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewedEmployer.accreditation_status || 'N/A' }}</span></div>
+                </div>
+                <div class="my-6 border-t border-gray-200 dark:border-gray-700"></div>
+                <!-- Documents Section -->
+                <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-file-alt text-blue-500 dark:text-blue-300"></i> <span>Documents</span></h4>
+                <div v-if="viewedEmployer.documents && viewedEmployer.documents.length" class="space-y-3">
+                    <div v-for="doc in viewedEmployer.documents" :key="doc.name" class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/40 shadow hover:bg-blue-100 dark:hover:bg-blue-800/60 transition">
+                        <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                        <a :href="doc.url" target="_blank" class="text-blue-700 dark:text-blue-300 underline font-medium hover:text-blue-900 dark:hover:text-white transition">{{ doc.name }}</a>
+                    </div>
+                </div>
+                <div v-else class="text-gray-500 dark:text-gray-400">No documents submitted.</div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer (same as jobs page) -->
+    <footer class="bg-white dark:bg-gray-700 border-t dark:border-gray-600 py-3 sticky bottom-0 w-full">
+        <div class="container text-center">
+            <small class="text-gray-600 dark:text-gray-300">
+                &copy; 2025 Laguna State Polytechnic University - Employment and Information System. All rights reserved.
+            </small>
+        </div>
+    </footer>
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/admin_company_pending.js"></script>
 </body>
-
 </html>

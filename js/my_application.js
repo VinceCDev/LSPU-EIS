@@ -1,262 +1,568 @@
-const {
-    createApp
-} = Vue;
+const { createApp } = Vue;
 
-createApp({
-    data() {
-        return {
-            loading: true,
-            activeTab: 'applied',
-            appliedJobs: [],
-            savedJobs: [],
-            selectedJob: null,
-            jobModal: null
-        }
-    },
-    methods: {
-        async fetchJobs() {
-            try {
-                this.loading = true;
-                // Simulate API call with timeout
-                await new Promise(resolve => setTimeout(resolve, 800));
-
-                // Mock data for applied jobs
-                this.appliedJobs = [{
-                        id: 1,
-                        title: 'Frontend Developer',
-                        company: 'Tech Solutions Inc.',
-                        location: 'Manila, Philippines (Remote)',
-                        description: 'We are looking for a skilled Frontend Developer to join our team. You will be responsible for building user interfaces and implementing features for our web applications.',
-                        fullDescription: 'We are looking for a skilled Frontend Developer to join our growing team. In this role, you will collaborate with designers and backend developers to create responsive, user-friendly web applications using modern JavaScript frameworks. The ideal candidate has 3+ years of experience with Vue.js or React and a strong understanding of responsive design principles.',
-                        postedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-                        appliedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-                        status: 'Under Review',
-                        requirements: [
-                            '3+ years experience with Vue.js or React',
-                            'Strong understanding of HTML5, CSS3, and JavaScript ES6+',
-                            'Experience with responsive design',
-                            'Familiarity with RESTful APIs',
-                            'Bachelor\'s degree in Computer Science or related field'
-                        ],
-                        aboutCompany: 'Tech Solutions Inc. is a leading software development company specializing in enterprise solutions for businesses worldwide. Founded in 2010, we have grown to over 200 employees across 5 countries.'
-                    },
-                    {
-                        id: 2,
-                        title: 'Backend Engineer',
-                        company: 'Data Systems Co.',
-                        location: 'Laguna, Philippines',
-                        description: 'Join our backend team to develop and maintain our server infrastructure. Experience with Node.js and databases required.',
-                        fullDescription: 'We are seeking a Backend Engineer to help build and scale our server infrastructure. You will work closely with our product team to design and implement APIs, optimize database queries, and ensure system reliability. The ideal candidate has experience with Node.js, MongoDB, and cloud services like AWS or Azure.',
-                        postedDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-                        appliedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-                        status: 'Interview Scheduled',
-                        requirements: [
-                            'Proficiency in Node.js and Express',
-                            'Experience with MongoDB or other NoSQL databases',
-                            'Knowledge of REST API design',
-                            'Understanding of authentication protocols',
-                            'Experience with cloud platforms preferred'
-                        ],
-                        aboutCompany: 'Data Systems Co. provides data management solutions for financial institutions. Our platform processes millions of transactions daily with 99.99% uptime.'
+        createApp({
+            data() {
+                return {
+                    darkMode: localStorage.getItem('darkMode') === 'true' || 
+                     (localStorage.getItem('darkMode') === null && 
+                      window.matchMedia('(prefers-color-scheme: dark)').matches),
+                    mobileMenuOpen: false,
+                    profileDropdownOpen: false,
+                    unreadNotifications: 0,
+                    notifications: [],
+                    activeTab: 'applied',
+                    loading: true, // Add loading state
+                    showJobPanel: false,
+                    selectedJob: null,
+                    selectedJobDetails: null, // Store fetched job details
+                    jobDetailsLoading: false, // Loading state for sidebar
+                    showConfirmation: false,
+                    confirmationTitle: '',
+                    confirmationMessage: '',
+                    confirmationAction: null,
+                    confirmationIsDestructive: false,
+                    mobileProfileDropdownOpen: false,
+                    notificationId: 0,
+                    appliedJobs: [],
+                    savedJobs: [
+                        {
+                            id: 3,
+                            title: 'Data Analyst',
+                            company: 'Analytics Inc',
+                            location: 'Remote',
+                            description: 'We are seeking a Data Analyst to help turn data into information, information into insight and insight into business decisions.',
+                            fullDescription: 'We are seeking a Data Analyst to help turn data into information, information into insight and insight into business decisions. You will conduct full lifecycle analysis to include requirements, activities and design. Data analysts will develop analysis and reporting capabilities.',
+                            requirements: [
+                                'Bachelor\'s degree in Mathematics, Economics, Computer Science or related field',
+                                'Strong analytical skills',
+                                'Knowledge of SQL and Python',
+                                'Experience with data visualization tools'
+                            ],
+                            qualifications: [
+                                'Strong analytical and problem-solving skills',
+                                'Proficient in data analysis tools (Excel, Python, R)',
+                                'Experience with data modeling and statistical analysis',
+                                'Ability to communicate complex findings clearly'
+                            ],
+                            aboutCompany: 'Analytics Inc provides data solutions to businesses looking to leverage their data for strategic decisions.',
+                            savedDate: '2023-05-18',
+                            postedDate: '2023-05-05'
+                        },
+                        {
+                            id: 4,
+                            title: 'Product Manager',
+                            company: 'Product Labs',
+                            location: 'Laguna',
+                            description: 'We are looking for a Product Manager to join our team and help drive product development from conception to launch.',
+                            fullDescription: 'We are looking for a Product Manager to join our team and help drive product development from conception to launch. You will work with cross-functional teams to define product vision, strategy, and roadmap. You will gather and prioritize product and customer requirements.',
+                            requirements: [
+                                'Bachelor\'s degree in Business, Computer Science or related field',
+                                '3+ years of product management experience',
+                                'Excellent communication skills',
+                                'Strong problem-solving skills'
+                            ],
+                            qualifications: [
+                                'Experience in product management, including roadmap, strategy, and execution',
+                                'Strong leadership and communication skills',
+                                'Ability to influence cross-functional teams',
+                                'Experience with agile methodologies'
+                            ],
+                            aboutCompany: 'Product Labs is an innovative company focused on building products that solve real-world problems.',
+                            savedDate: '2023-05-22',
+                            postedDate: '2023-05-15'
+                        }
+                    ],
+                    profile: { name: '' },
+                    profilePicData: { file_name: '' },
+                    showLogoutModal: false,
+                    showApplicationModal: false,
+                    applicationStep: 1,
+                    applicationPersonal: null,
+                    applicationEducation: null,
+                    applicationSkills: null,
+                    applicationExperience: null,
+                    applicationResume: null,
+                };
+            },
+            watch: {
+                darkMode(val) {
+                    localStorage.setItem('darkMode', val.toString());
+                    this.applyDarkMode();
+                }
+            },
+            methods: {
+                applyDarkMode() {
+                    const html = document.documentElement;
+                    if (this.darkMode) {
+                        html.classList.add('dark');
+                    } else {
+                        html.classList.remove('dark');
                     }
-                ];
-
-                // Mock data for saved jobs
-                this.savedJobs = [{
-                        id: 3,
-                        title: 'UI/UX Designer',
-                        company: 'Creative Minds Agency',
-                        location: 'Cavite, Philippines (Hybrid)',
-                        description: 'We need a talented UI/UX designer to create beautiful and functional interfaces for our clients. Portfolio required.',
-                        fullDescription: 'Creative Minds Agency is looking for a UI/UX Designer to join our creative team. You will be responsible for designing user interfaces, creating prototypes, and conducting user research. The ideal candidate has a strong portfolio showcasing mobile and web design projects and experience with tools like Figma or Adobe XD.',
-                        postedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-                        savedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago,
-                        requirements: [
-                            '2+ years UI/UX design experience',
-                            'Proficiency in Figma or Adobe XD',
-                            'Understanding of user-centered design',
-                            'Ability to create wireframes and prototypes',
-                            'Strong visual design skills'
-                        ],
-                        aboutCompany: 'Creative Minds Agency is a boutique design studio specializing in digital products. We work with startups and established brands to create memorable user experiences.'
-                    },
-                    {
-                        id: 4,
-                        title: 'Full Stack Developer',
-                        company: 'Innovate Tech',
-                        location: 'Batangas, Philippines',
-                        description: 'Looking for a full stack developer proficient in both frontend and backend technologies to work on exciting new projects.',
-                        fullDescription: 'Innovate Tech is seeking a Full Stack Developer to join our product development team. You will work across our entire stack, from frontend interfaces to backend services and database design. The ideal candidate is comfortable with both client-side and server-side programming and enjoys solving complex problems.',
-                        postedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-                        savedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago,
-                        requirements: [
-                            'Experience with React and Node.js',
-                            'Knowledge of SQL databases',
-                            'Understanding of full SDLC',
-                            'Ability to write clean, maintainable code',
-                            'Strong problem-solving skills'
-                        ],
-                        aboutCompany: 'Innovate Tech builds custom software solutions for businesses of all sizes. Our team of 50+ engineers delivers high-quality products on time and on budget.'
+                },
+                async fetchUnreadNotifications() {
+                    try {
+                      const response = await fetch('functions/get_unread_notifications.php');
+                      const data = await response.json();
+                      if (data.success) {
+                        this.unreadNotifications = data.unread_count;
+                      }
+                    } catch (error) {
+                      console.error('Error fetching unread notifications:', error);
                     }
-                ];
-            } catch (error) {
-                console.error('Error fetching jobs:', error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        formatDate(date) {
-            const now = new Date();
-            const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-
-            if (diffInDays === 0) return 'today';
-            if (diffInDays === 1) return 'yesterday';
-            if (diffInDays < 7) return `${diffInDays} days ago`;
-            if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        },
-        viewJob(job) {
-            this.selectedJob = job;
-            this.jobModal.show();
-        },
-        async withdrawApplication(jobId) {
-            try {
-                const result = await Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, withdraw it!'
+                  },
+                formatDate(dateString) {
+                    if (!dateString) return '';
+                    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                    return new Date(dateString).toLocaleDateString(undefined, options);
+                },
+                addNotification(type, title, message) {
+                    const id = this.notificationId++;
+                    this.notifications.push({
+                        id,
+                        type,
+                        title,
+                        message
+                    });
+                    setTimeout(() => {
+                        this.removeNotification(id);
+                    }, 5000);
+                },
+                removeNotification(id) {
+                    this.notifications = this.notifications.filter(n => n.id !== id);
+                },
+                async fetchJobDetails(jobId) {
+                    this.jobDetailsLoading = true;
+                    this.selectedJobDetails = null;
+                    try {
+                        const res = await fetch(`functions/get_job_details.php?job_id=${jobId}`);
+                        const data = await res.json();
+                        if (data.success) {
+                            this.selectedJobDetails = data.job;
+                        } else {
+                            this.selectedJobDetails = null;
+                            this.addNotification('error', 'Failed to fetch job details.', 'Failed to fetch job details.');
+                        }
+                    } catch (e) {
+                        this.selectedJobDetails = null;
+                        this.addNotification('error', 'Failed to fetch job details.', 'Failed to fetch job details.');
+                    }
+                    this.jobDetailsLoading = false;
+                },
+                closeJobPanel() {
+                    this.showJobPanel = false;
+                    setTimeout(() => {
+                        if (window.jobMap) {
+                            window.jobMap.remove();
+                            window.jobMap = null;
+                        }
+                    }, 500);
+                },
+                viewJob(job) {
+                    this.selectedJob = job;
+                    this.showJobPanel = true;
+                    this.fetchJobDetails(job.job_id || job.id);
+                    this.$nextTick(() => {
+                        setTimeout(async () => {
+                            // Wait for sidebar to be visible in DOM
+                            const mapContainer = document.getElementById('job-map');
+                            if (!mapContainer) return;
+                        if (window.jobMap) {
+                            window.jobMap.remove();
+                        }
+                        window.jobMap = L.map('job-map').setView([13.9644, 121.1631], 13); // Default: San Pablo
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '© OpenStreetMap'
+                        }).addTo(window.jobMap);
+                        // Geocode location
+                            const loc = job.location || (this.selectedJobDetails && this.selectedJobDetails.location);
+                            if (loc) {
+                            try {
+                                const apiKey = 'b25cb94f83684f6aa21cbd86f93c9417';
+                                const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(loc)}&apiKey=${apiKey}`;
+                                const res = await fetch(url);
+                                const data = await res.json();
+                                if (data.features && data.features.length > 0) {
+                                    const coords = data.features[0].geometry.coordinates;
+                                    const latlng = [coords[1], coords[0]];
+                                    window.jobMap.setView(latlng, 15);
+                                    L.marker(latlng).addTo(window.jobMap).bindPopup(loc).openPopup();
+                                }
+                            } catch (e) {}
+                        }
+                        }, 100);
+                    });
+                },
+                showConfirm(title, message, action, isDestructive = true) {
+                    this.confirmationTitle = title;
+                    this.confirmationMessage = message;
+                    this.confirmationAction = action;
+                    this.confirmationIsDestructive = isDestructive;
+                    this.showConfirmation = true;
+                },
+                executeConfirmation() {
+                    if (this.confirmationAction) {
+                        this.confirmationAction();
+                    }
+                    this.showConfirmation = false;
+                    this.confirmationAction = null;
+                },
+                async removeApplication(jobId) {
+                    try {
+                        const res = await fetch('functions/delete_application.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `job_id=${jobId}`
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.appliedJobs = this.appliedJobs.filter(job => job.id !== jobId);
+                            this.addNotification('success', 'Success', 'Application removed successfully');
+                            this.showJobPanel = false;
+                        } else {
+                            this.addNotification('error', 'Error', data.message || 'Failed to remove application');
+                        }
+                    } catch (e) {
+                        this.addNotification('error', 'Error', 'Failed to remove application');
+                    }
+                },
+                confirmRemoveApplication(jobId) {
+                    this.showConfirm(
+                        'Remove Application',
+                        'Are you sure you want to remove this application? This action cannot be undone.',
+                        () => this.removeApplication(jobId),
+                        true
+                    );
+                },
+                withdrawApplication(jobId) {
+                    this.removeApplication(jobId);
+                },
+                applyJob(jobId) {
+                    this.showConfirm(
+                        'Apply for Job',
+                        'Are you sure you want to apply for this job? Please review your application before submitting.',
+                        () => {
+                            // Store the job ID for the application
+                            this.selectedJob = this.savedJobs.find(j => j.id === jobId);
+                            // Open the application modal
+                            this.openApplicationModal(jobId);
+                        },
+                        false
+                    );
+                },
+                unsaveJob(jobId) {
+                    this.showConfirm(
+                        'Remove Saved Job',
+                        'Are you sure you want to remove this saved job? This action cannot be undone.',
+                        async () => {
+                            try {
+                                const res = await fetch('functions/delete_saved_job.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: `job_id=${jobId}`
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                            this.savedJobs = this.savedJobs.filter(job => job.id !== jobId);
+                            this.addNotification('success', 'Success', 'Job removed from saved list');
+                                } else {
+                                    this.addNotification('error', 'Error', data.message || 'Failed to remove saved job');
+                                }
+                            } catch (e) {
+                                this.addNotification('error', 'Error', 'Failed to remove saved job');
+                            }
+                        }
+                    );
+                },
+                logout() {
+                    window.location.href = 'logout.php';
+                },
+                async fetchApplicationData() {
+                    // Fetch all data using the same fetch files as my_profile.php
+                    try {
+                        // Personal Details
+                        const personalRes = await fetch('functions/fetch_alumni_details.php');
+                        const personalData = await personalRes.json();
+                        if (personalData.success && personalData.profile) {
+                            this.applicationPersonal = personalData.profile;
+                            this.profile.name = `${personalData.profile.first_name} ${personalData.profile.last_name}`;
+                        } else {
+                            this.applicationPersonal = null;
+                        }
+                        // Education
+                        const eduRes = await fetch('functions/fetch_education.php');
+                        const eduData = await eduRes.json();
+                        if (eduData.success && Array.isArray(eduData.education)) {
+                            this.applicationEducation = eduData.education;
+                        } else {
+                            this.applicationEducation = [];
+                        }
+                        // Skills
+                        const skillRes = await fetch('functions/fetch_skill.php');
+                        const skillData = await skillRes.json();
+                        if (skillData.success && Array.isArray(skillData.skills)) {
+                            this.applicationSkills = skillData.skills;
+                        } else {
+                            this.applicationSkills = [];
+                        }
+                        // Work Experience
+                        const expRes = await fetch('functions/fetch_experience.php');
+                        const expData = await expRes.json();
+                        if (expData.success && Array.isArray(expData.experience)) {
+                            this.applicationExperience = expData.experience;
+                        } else {
+                            this.applicationExperience = [];
+                        }
+                        // Resume
+                        const resumeRes = await fetch('functions/fetch_resume.php');
+                        const resumeData = await resumeRes.json();
+                        if (resumeData.success && resumeData.resume) {
+                            this.applicationResume = resumeData.resume;
+                        } else {
+                            this.applicationResume = null;
+                        }
+                    } catch (e) {
+                        this.showNotification('Failed to fetch application data.', 'error');
+                    }
+                },
+                async fetchEducationDetails() {
+                    try {
+                        const res = await fetch(`functions/get_education_details.php?user_id=${window.USER_ID}`);
+                        const data = await res.json();
+                        if (data.success) {
+                            this.applicationEducation = data.data;
+                        } else {
+                            this.showNotification('Failed to fetch education details.', 'error');
+                        }
+                    } catch (e) {
+                        this.showNotification('Failed to fetch education details.', 'error');
+                    }
+                },
+                async fetchSkills() {
+                    try {
+                        const res = await fetch(`functions/get_skills.php?user_id=${window.USER_ID}`);
+                        const data = await res.json();
+                        if (data.success) {
+                            this.applicationSkills = data.data;
+                        } else {
+                            this.showNotification('Failed to fetch skills.', 'error');
+                        }
+                    } catch (e) {
+                        this.showNotification('Failed to fetch skills.', 'error');
+                    }
+                },
+                async fetchExperience() {
+                    try {
+                        const res = await fetch(`functions/get_experience.php?user_id=${window.USER_ID}`);
+                        const data = await res.json();
+                        if (data.success) {
+                            this.applicationExperience = data.data;
+                        } else {
+                            this.showNotification('Failed to fetch work experience.', 'error');
+                        }
+                    } catch (e) {
+                        this.showNotification('Failed to fetch work experience.', 'error');
+                    }
+                },
+                async fetchResume() {
+                    try {
+                        const res = await fetch(`functions/get_resume.php?user_id=${window.USER_ID}`);
+                        const data = await res.json();
+                        if (data.success) {
+                            this.applicationResume = data.data;
+                        } else {
+                            this.showNotification('Failed to fetch resume.', 'error');
+                        }
+                    } catch (e) {
+                        this.showNotification('Failed to fetch resume.', 'error');
+                    }
+                },
+                async submitApplication() {
+                    if (!this.applicationResume) {
+                        this.addNotification('error', 'Error', 'Please upload a resume before submitting.');
+                        return;
+                    }
+                
+                    const formData = new FormData();
+                    formData.append('job_id', this.selectedJob.id);
+                    
+                    if (this.applicationResume.file) {
+                        formData.append('resume_file', this.applicationResume.file);
+                    } else if (this.applicationResume.file_name) {
+                        formData.append('resume_file_name', this.applicationResume.file_name);
+                    }
+                
+                    try {
+                        const res = await fetch('functions/insert_application.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await res.json();
+                
+                        if (data.success) {
+                            this.addNotification('success', 'Success', 'Application submitted successfully!');
+                            this.closeApplicationModal();
+                            
+                            // Move job from saved to applied
+                            const jobIndex = this.savedJobs.findIndex(j => j.id === this.selectedJob.id);
+                            if (jobIndex !== -1) {
+                                const appliedJob = {...this.savedJobs[jobIndex]};
+                                appliedJob.appliedDate = new Date().toISOString().split('T')[0];
+                                this.appliedJobs.unshift(appliedJob);
+                                this.savedJobs.splice(jobIndex, 1);
+                            }
+                            
+                            // Reset application data
+                            this.applicationStep = 1;
+                            this.applicationPersonal = null;
+                            this.applicationEducation = null;
+                            this.applicationSkills = null;
+                            this.applicationExperience = null;
+                            this.applicationResume = null;
+                        } else {
+                            this.addNotification('error', 'Error', data.message || 'You already submit application');
+                        }
+                    } catch (e) {
+                        this.addNotification('error', 'Error', 'Failed to submit application');
+                    }
+                },
+                handleApplicationResumeUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.applicationResume = {
+                            ...this.applicationResume,
+                            file: file,
+                            file_name: file.name,
+                            uploaded_at: new Date().toISOString()
+                        };
+                    }
+                },
+                openApplicationModal(jobId) {
+                    this.showApplicationModal = true;
+                    this.applicationStep = 1;
+                    this.selectedJob = this.savedJobs.find(j => j.id === jobId) || this.appliedJobs.find(j => j.id === jobId);
+                    this.fetchApplicationData(); // Fetch all data on modal open
+                },
+                closeApplicationModal() {
+                    this.showApplicationModal = false;
+                    this.applicationStep = 1;
+                    this.applicationPersonal = null;
+                    this.applicationEducation = null;
+                    this.applicationSkills = null;
+                    this.applicationExperience = null;
+                    this.applicationResume = null;
+                },
+                nextStep() {
+                    this.applicationStep++;
+                    if (this.applicationStep === 2) this.fetchPersonalDetails();
+                    else if (this.applicationStep === 3) this.fetchEducationDetails();
+                    else if (this.applicationStep === 4) this.fetchSkills();
+                    else if (this.applicationStep === 5) this.fetchExperience();
+                },
+                prevStep() {
+                    this.applicationStep--;
+                    if (this.applicationStep === 1) this.fetchPersonalDetails();
+                    else if (this.applicationStep === 2) this.fetchPersonalDetails();
+                    else if (this.applicationStep === 3) this.fetchEducationDetails();
+                    else if (this.applicationStep === 4) this.fetchSkills();
+                    else if (this.applicationStep === 5) this.fetchExperience();
+                },
+                formatTime(time) {
+                    const [hours, minutes] = time.split(':');
+                    const date = new Date();
+                    date.setHours(hours, minutes, 0, 0);
+                    return date.toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' });
+                },
+                async fetchAppliedJobs() {
+                    try {
+                        const res = await fetch('functions/get_applied_jobs.php');
+                        const data = await res.json();
+                        if (Array.isArray(data.appliedJobs)) {
+                            this.appliedJobs = data.appliedJobs.map(job => ({
+                                id: job.job_id, // for v-for and button
+                                job_id: job.job_id, // for fetching details
+                                title: job.title,
+                                company: job.company_name || job.company || '',
+                                location: job.location,
+                                description: job.description,
+                                fullDescription: job.fullDescription || job.description,
+                                requirements: job.requirements ? job.requirements.split('\n') : [],
+                                qualifications: job.qualifications ? job.qualifications.split('\n') : [],
+                                appliedDate: job.appliedDate || job.applied_at || '',
+                                postedDate: job.postedDate || job.created_at || '',
+                                companyDetails: job.companyDetails || {},
+                            }));
+                        }
+                    } catch (e) {
+                        this.addNotification('error', 'Failed to fetch applied jobs.', 'Failed to fetch applied jobs.');
+                    }
+                },
+                async fetchSavedJobs() {
+                    try {
+                        const res = await fetch('functions/get_saved_jobs.php');
+                        const data = await res.json();
+                        if (Array.isArray(data.savedJobs)) {
+                            this.savedJobs = data.savedJobs.map(job => ({
+                                id: job.job_id,
+                                title: job.title,
+                                company: job.company_name || job.company || '',
+                                location: job.location,
+                                description: job.description,
+                                fullDescription: job.fullDescription || job.description,
+                                requirements: job.requirements ? job.requirements.split('\n') : [],
+                                qualifications: job.qualifications ? job.qualifications.split('\n') : [],
+                                aboutCompany: job.aboutCompany || '',
+                                savedDate: job.savedDate || '',
+                                postedDate: job.postedDate || '',
+                                companyDetails: job.companyDetails || {},
+                            }));
+                        }
+                    } catch (e) {
+                        // fallback: keep hardcoded jobs if fetch fails
+                    }
+                }
+            },
+            mounted() {
+                // Set dark mode on initial load
+                const storedMode = localStorage.getItem('darkMode');
+                if (storedMode !== null) {
+                    this.darkMode = storedMode === 'true';
+                } else {
+                    this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                }
+                this.applyDarkMode();
+                this.fetchUnreadNotifications();
+  
+                // Optional: Poll for new notifications every 30 seconds
+                this.notificationInterval = setInterval(this.fetchUnreadNotifications, 30000);
+                // Fetch applied and saved jobs for the current user
+                Promise.all([
+                    this.fetchAppliedJobs(),
+                    this.fetchSavedJobs()
+                ]).finally(() => {
+                    this.loading = false;
                 });
-
-                if (result.isConfirmed) {
-                    this.appliedJobs = this.appliedJobs.filter(job => job.id !== jobId);
-                    Swal.fire(
-                        'Withdrawn!',
-                        'Your application has been withdrawn.',
-                        'success'
-                    );
+                fetch('functions/fetch_profile_pic.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.file_name) {
+                            this.profilePicData.file_name = data.file_name;
+                        } else {
+                            this.profilePicData.file_name = '';
+                        }
+                    });
+                fetch('functions/fetch_alumni_details.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.profile) {
+                            this.profile.name = `${data.profile.first_name} ${data.profile.last_name}`;
+                        }
+                    });
+            },
+            beforeUnmount() {
+                // Clean up the interval
+                if (this.notificationInterval) {
+                  clearInterval(this.notificationInterval);
                 }
-            } catch (error) {
-                console.error('Error withdrawing application:', error);
-                Swal.fire(
-                    'Error',
-                    'There was a problem withdrawing your application.',
-                    'error'
-                );
-            }
-        },
-        async applyJob(jobId) {
-            try {
-                const result = await Swal.fire({
-                    title: 'Apply for this job?',
-                    text: "Make sure your profile is up to date before applying.",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, apply now!'
-                });
-
-                if (result.isConfirmed) {
-                    // In a real app, this would submit the application
-                    const job = this.savedJobs.find(j => j.id === jobId);
-                    this.savedJobs = this.savedJobs.filter(j => j.id !== jobId);
-                    job.appliedDate = new Date();
-                    this.appliedJobs.unshift(job);
-
-                    Swal.fire(
-                        'Applied!',
-                        'Your application has been submitted.',
-                        'success'
-                    );
-
-                    this.jobModal.hide();
-                }
-            } catch (error) {
-                console.error('Error applying to job:', error);
-                Swal.fire(
-                    'Error',
-                    'There was a problem submitting your application.',
-                    'error'
-                );
-            }
-        },
-        async unsaveJob(jobId) {
-            try {
-                const result = await Swal.fire({
-                    title: 'Remove this job?',
-                    text: "This job will be removed from your saved list.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, remove it!'
-                });
-
-                if (result.isConfirmed) {
-                    this.savedJobs = this.savedJobs.filter(job => job.id !== jobId);
-                    Swal.fire(
-                        'Removed!',
-                        'This job has been removed from your saved list.',
-                        'success'
-                    );
-                }
-            } catch (error) {
-                console.error('Error removing saved job:', error);
-                Swal.fire(
-                    'Error',
-                    'There was a problem removing this job.',
-                    'error'
-                );
-            }
-        },
-        markAllAsRead() {
-            // In a real app, this would mark all notifications as read
-            Swal.fire(
-                'Marked as read',
-                'All applications have been marked as read.',
-                'success'
-            );
-        },
-        clearAllApplications() {
-            Swal.fire({
-                title: 'Clear all applications?',
-                text: "This will remove all your application history. This action cannot be undone.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, clear all!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    this.appliedJobs = [];
-                    Swal.fire(
-                        'Cleared!',
-                        'All applications have been cleared.',
-                        'success'
-                    );
-                }
-            });
-        }
-    },
-    mounted() {
-        this.fetchJobs();
-        this.jobModal = new bootstrap.Modal(document.getElementById('jobModal'));
-
-        // Listen for tab changes to update activeTab
-        const tabEls = document.querySelectorAll('#myTab button[data-bs-toggle="tab"]');
-        tabEls.forEach(tabEl => {
-            tabEl.addEventListener('shown.bs.tab', event => {
-                this.activeTab = event.target.id.includes('applied') ? 'applied' : 'saved';
-            });
-        });
-    }
-}).mount('#app');
+              }
+        }).mount('#app');

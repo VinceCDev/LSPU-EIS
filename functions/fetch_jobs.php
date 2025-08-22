@@ -1,37 +1,37 @@
 <?php
 header('Content-Type: application/json');
-require_once '../conn/db_conn.php'; // This should initialize the $pdo variable using PDO
+require_once '../conn/db_conn.php'; // This should initialize the $conn variable using MySQLi
 
 try {
-    $sql = "SELECT jobs.*, company.company_name AS company, company.logo AS logo
+    $sql = "SELECT jobs.*, company.company_name AS company, company.company_logo AS logo
             FROM jobs
-            LEFT JOIN company ON jobs.company_id = company.id
+            LEFT JOIN company_profile AS company ON jobs.company_id = company.id
             WHERE jobs.status = 'active'
             ORDER BY jobs.id DESC";
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $result = $conn->query($sql);
     $jobs = [];
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $jobs[] = [
             'id' => $row['id'],
             'title' => $row['title'],
-            'department' => $row['department'],
+            'department' => $row['company'],
             'location' => $row['location'],
             'type' => $row['type'],
             'salary' => $row['salary'],
             'description' => $row['description'],
             'company' => $row['company'],
-            'logo' => $row['logo'], // adjust if needed
+            'logo' => $row['logo'],
+            'requirements' => explode("\n", $row['requirements']),
             'qualifications' => explode("\n", $row['qualifications']),
-            'questions' => json_decode($row['employer_question'], true),
+            'questions' => explode("\n", $row['employer_question']),
             'saved' => false
         ];
     }
 
     echo json_encode($jobs);
-} catch (PDOException $e) {
+} catch (Exception $e) {
     echo json_encode([
         'error' => 'Database error: ' . $e->getMessage()
     ]);

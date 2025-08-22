@@ -1,21 +1,18 @@
 <?php
-header('Content-Type: application/json');
-header("Access-Control-Allow-Origin: *");
-
 require_once '../conn/db_conn.php';
+header('Content-Type: application/json');
 
-try {
-    $stmt = $pdo->prepare("SELECT * FROM jobs ORDER BY id DESC");
-    $stmt->execute();
-    $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$db = Database::getInstance()->getConnection();
+$sql = "SELECT j.job_id, j.employer_id, j.title, j.location, j.type, j.salary, 
+               j.description, j.requirements, j.qualifications, j.status, j.employer_question, j.created_at,
+               e.company_name, e.company_logo
+        FROM jobs j
+        LEFT JOIN employer e ON j.employer_id = e.user_id
+        ORDER BY j.created_at DESC, j.job_id DESC";
+$result = $db->query($sql);
 
-    echo json_encode([
-        'success' => true,
-        'jobs' => $jobs
-    ]);
-} catch (PDOException $e) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Database error: ' . $e->getMessage()
-    ]);
+$jobs = [];
+while ($row = $result->fetch_assoc()) {
+    $jobs[] = $row;
 }
+echo json_encode($jobs);

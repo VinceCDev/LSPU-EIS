@@ -1,122 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LSPU Alumni Portal</title>
+    <title>Employer Sign Up - LSPU EIS</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/sign_up.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'unifraktur': ['UnifrakturCook', 'serif'],
+                        'poppins': ['Poppins', 'sans-serif']
+                    },
+                    colors: {
+                        'lspu-blue': '#00A0E9',
+                        'lspu-dark': '#1A1A1A',
+                        'lspu-gold': '#FFD54F'
+                    },
+                    animation: {
+                        'slide-in': 'slideIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-
-<body>
-
-    <div class="header d-flex flex-column flex-md-row align-items-center justify-content-center text-white p-3text-center">
-        <img src="images/logo.png" alt="LSPU Logo" class="mb-1 mb-md-0 me-md-1" style="width: 150px; height: auto;">
-        <div>
-            <h2 class="font-lspu m-0 p-0">Laguna State Polytechnic University</h2>
-            <p class="motto m-0 small">INTEGRITY • PROFESSIONALISM • INNOVATION</p>
-        </div>
-    </div>
-    <div class="menu-bar">
-    </div>
-
-    <div class="login-container">
-        <div class="d-flex align-items-center pb-10 justify-content-center">
-            <img src="images/alumni.png" alt="LSPU Logo" class="me-0" style="width: 90px; height: auto;">
-            <div class="lspu-eis-container">
-                <p class="lspu-eis m-0"><span class="bold-text">LSPU</span><span class="thin-text">EIS</span></p>
+<body class="bg-gray-50 font-poppins">
+    <!-- Header Section with Sky Blue to Black Gradient -->
+    <header class="bg-gradient-to-r from-lspu-blue to-lspu-dark text-white shadow-md">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-4 py-4 px-6 animate-slide-in">
+            <img src="images/logo.png" alt="LSPU Logo" class="h-20 w-auto">
+            <div class="text-center md:text-left">
+                <h1 class="font-unifraktur text-2xl md:text-3xl leading-tight">Laguna State Polytechnic University</h1>
+                <p class="font-semibold text-sm md:text-base">INTEGRITY • PROFESSIONALISM • INNOVATION</p>
             </div>
         </div>
+    </header>
 
-        <div class="p-3 mt-2">
-            <form action="functions/employer_registration.php" method="POST" enctype="multipart/form-data">
-                <!-- CSRF Token -->
+    <!-- Menu Bar -->
+    <div class="bg-lspu-gold py-2 shadow-sm"></div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- White Container Box -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-slide-in">
+            <!-- Blue Background LSPU EIS Header -->
+            <div class="flex items-center justify-center pt-5">
+                <img src="images/alumni.png" alt="LSPU Logo" class="mr-0 w-[90px] h-auto">
+                <div class="border-b-2 border-lspu-blue">
+                    <p class="text-[2.5rem] font-bold uppercase flex items-center m-0">
+                        <span class="font-black text-gray-800">LSPU</span>
+                        <span class="font-light text-lspu-blue font-sans">EIS</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <!-- Feedback message above the form -->
+            <!-- Feedback message above the form -->
+
+            <form @submit.prevent="submitForm" enctype="multipart/form-data" class="p-6 md:p-8">
+            <div v-if="message" :class="['my-4', messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700', 'border px-4 py-3 rounded']">
+  {{ message }}
+</div>
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-                <div class="row">
-                    <!-- Left: Account Information -->
-                    <div class="col-md-4 info">
-                        <h5 class="fw-bold">Account Information</h5>
-                        <div class="mb-3">
-                            <label class="form-label" for="email">Email</label>
-                            <div class="input-icon">
-                                <i class="bi bi-envelope"></i>
-                                <input type="email" class="form-control" id="email" placeholder="Enter your email" name="email" required>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Account Information -->
+                    <div class="md:col-span-1 space-y-6">
+                        <h4 class="text-lg font-semibold text-gray-800 border-b-2 border-lspu-blue pb-2">Account Information</h4>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                            <div class="relative">
+                                <i class="bi bi-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="email" name="email" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="your@email.com" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="password">Password</label>
-                            <div class="input-icon">
-                                <i class="bi bi-lock"></i>
-                                <input type="password" class="form-control" id="password" placeholder="Enter your password" name="password" required>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Password</label>
+                            <div class="relative">
+                                <i class="bi bi-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="password" name="password" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="Create password" required minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" title="Password must be at least 8 characters with uppercase, lowercase, number, and special character">
                             </div>
+                            <p class="text-xs text-gray-500 mt-1">Minimum 8 characters with uppercase, lowercase, number, and special character</p>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="current_password">Current Password</label>
-                            <div class="input-icon">
-                                <i class="bi bi-shield-lock"></i>
-                                <input type="password" class="form-control" id="current_password" placeholder="Enter current password" name="current_password" required>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                            <div class="relative">
+                                <i class="bi bi-shield-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="password" name="current_password" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="Confirm password" required minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right: Company Details -->
-                    <div class="col-md-8">
-                        <h5 class="fw-bold">Company Details</h5>
-                        <div class="row">
-                            <!-- Company Name -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="company_name">Company Name</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-building"></i>
-                                    <input type="text" class="form-control" id="company_name" name="company_name" placeholder="Company Name" required>
+                    <!-- Company Information -->
+                    <div class="md:col-span-2 md:border-l md:border-gray-200 md:pl-8 space-y-6">
+                        <h4 class="text-lg font-semibold text-gray-800 border-b-2 border-lspu-blue pb-2">Company Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Company Name</label>
+                                <div class="relative">
+                                    <i class="bi bi-building absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="company_name" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="Company Name" required>
                                 </div>
                             </div>
-
-                            <!-- Company Logo (optional) -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="company_logo">Company Logo (Optional)</label>
-                                <input type="file" class="form-control" id="company_logo" name="company_logo">
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Company Logo (Optional)</label>
+                                <input type="file" name="company_logo" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" accept="image/jpeg, image/png, image/gif">
                             </div>
-
-                            <!-- Company Address -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="company_location">Company Address</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-geo-alt"></i>
-                                    <input type="text" class="form-control" id="company_location" name="company_location" placeholder="Company Address" required>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Company Address</label>
+                                <div class="relative">
+                                    <i class="bi bi-geo-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="company_location" v-model="companyLocation" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="Company Address" required autocomplete="off">
+                                    <ul v-if="addressSuggestions.length" class="bg-white border rounded shadow mt-1 absolute z-10 w-full">
+                                        <li v-for="suggestion in addressSuggestions"
+                                            :key="suggestion"
+                                            @click="selectSuggestion(suggestion)"
+                                            class="px-4 py-2 hover:bg-lspu-blue hover:text-white cursor-pointer">
+                                            {{ suggestion }}
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
-
-                            <!-- Contact Email -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="contact_email">Contact Email</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-envelope"></i>
-                                    <input type="email" class="form-control" id="contact_email" name="contact_email" placeholder="Contact Email" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Contact Email</label>
+                                <div class="relative">
+                                    <i class="bi bi-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="email" name="contact_email" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="Contact Email" required>
                                 </div>
                             </div>
-
-                            <!-- Contact Number -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="contact_number">Contact Number</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-telephone"></i>
-                                    <input type="text" class="form-control" id="contact_number" name="contact_number" placeholder="Landline or Mobile Number" required>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Contact Number</label>
+                                <div class="relative">
+                                    <i class="bi bi-telephone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="contact_number" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="Landline or Mobile Number" required>
                                 </div>
                             </div>
-
-                            <!-- Industry Type -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="industry_type">Industry Type</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-layers"></i>
-                                    <select class="form-control" id="industry_type" name="industry_type" required>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Industry Type</label>
+                                <div class="relative">
+                                    <i class="bi bi-layers absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <select name="industry_type" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition appearance-none" required>
                                         <option value="" disabled selected>Select Industry</option>
                                         <option value="Retail">Retail</option>
                                         <option value="Technology">Technology</option>
@@ -128,40 +168,36 @@
                                     </select>
                                 </div>
                             </div>
-
-                            <!-- Nature of Business -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="nature_of_business">Nature of Business</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-briefcase"></i>
-                                    <input type="text" class="form-control" id="nature_of_business" name="nature_of_business" placeholder="e.g., IT Services, Consulting" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Nature of Business</label>
+                                <div class="relative">
+                                    <i class="bi bi-briefcase absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="nature_of_business" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="e.g., IT Services, Consulting" required>
                                 </div>
                             </div>
-
-                            <!-- TIN -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="tin">TIN</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                    <input type="text" class="form-control" id="tin" name="tin" placeholder="e.g., 123-456-789" required>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">TIN</label>
+                                <div class="relative">
+                                    <i class="bi bi-file-earmark-text absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="tin" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" placeholder="e.g., 123-456-789" required>
                                 </div>
                             </div>
-
-                            <!-- Date Established -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="date_established">Date Established</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-calendar"></i>
-                                    <input type="date" class="form-control" id="date_established" name="date_established" required>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Date Established</label>
+                                <div class="relative">
+                                    <i class="bi bi-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input type="date" name="date_established" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" required>
                                 </div>
                             </div>
-
-                            <!-- Company Type -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="company_type">Type of Company</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-diagram-3"></i>
-                                    <select class="form-control" id="company_type" name="company_type" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Type of Company</label>
+                                <div class="relative">
+                                    <i class="bi bi-diagram-3 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <select name="company_type" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition appearance-none" required>
                                         <option value="" disabled selected>Select Type</option>
                                         <option value="LLC">LLC</option>
                                         <option value="Corporation">Corporation</option>
@@ -171,13 +207,11 @@
                                     </select>
                                 </div>
                             </div>
-
-                            <!-- Accreditation Status -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="accreditation_status">Accreditation Status</label>
-                                <div class="input-icon">
-                                    <i class="bi bi-patch-check"></i>
-                                    <select class="form-control" id="accreditation_status" name="accreditation_status" required>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Accreditation Status</label>
+                                <div class="relative">
+                                    <i class="bi bi-patch-check absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <select name="accreditation_status" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition appearance-none" required>
                                         <option value="" disabled selected>Select Accreditation</option>
                                         <option value="None">None</option>
                                         <option value="DOLE">DOLE Accredited</option>
@@ -188,29 +222,29 @@
                                     </select>
                                 </div>
                             </div>
-
-                            <!-- Upload Document (Preserved) -->
-                            <div class="col-md-4">
-                                <label class="form-label" for="document">Upload Document</label>
-                                <input type="file" class="form-control" id="document" name="document_file" required>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-gray-700">Upload Document</label>
+                                <input type="file" name="document_file" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" required>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="d-flex justify-content-center">
-                    <button type="submit" class="btn-register mt-3">REGISTER</button>
+                <!-- Submit Button -->
+                <div class="mt-8 flex justify-center">
+                    <button type="submit" class="px-8 py-3 bg-lspu-blue hover:bg-lspu-dark text-white font-semibold rounded-lg shadow-md transition duration-300 transform hover:scale-105">
+                        REGISTER NOW
+                    </button>
                 </div>
             </form>
-        </div>
-
-        <div class="text-center mt-1">
-            <a href="employer_login.php">Already have an employer account? Login here</a><br>
+            <div class="text-center pb-6 px-6">
+                <p class="text-gray-600">Already have an employer account? 
+                    <a href="employer_login" class="text-lspu-blue hover:text-lspu-dark font-medium transition">Login here</a>
+                </p>
+            </div>
         </div>
     </div>
-
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="js/employer_signup.js"></script>
 </body>
-
 </html>
