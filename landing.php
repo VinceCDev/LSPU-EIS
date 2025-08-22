@@ -181,104 +181,104 @@
 
        <!-- Hero Section with Enhanced Design -->
        <section id="home" class="relative pt-16 min-h-screen flex items-center overflow-hidden">
-    <!-- Enhanced Background with LSPU Campus Image -->
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/85 to-indigo-900/90 dark:from-gray-900/95 dark:via-gray-800/90 dark:to-gray-900/95">
-        <!-- LSPU Campus Background Image -->
-        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url('images/lspu_campus.jpg'), linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #4f46e5 100%);"></div>
-        
-        <!-- Animated Background Pattern Overlay -->
-        <div class="absolute inset-0 opacity-5">
-            <div class="absolute top-0 left-0 w-48 h-48 md:w-72 md:h-72 bg-lspu-gold rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-            <div class="absolute top-0 right-0 w-48 h-48 md:w-72 md:h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style="animation-delay: 2s;"></div>
-            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-48 md:w-72 md:h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style="animation-delay: 4s;"></div>
-        </div>
-        
-        <!-- Subtle Grid Pattern -->
-        <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 30px 30px, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px;"></div>
-    </div>
-    
-    <!-- Content Overlay -->
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
-            <!-- Left Content -->
-            <div class="space-y-6 md:space-y-8 text-white text-center lg:text-left">
-                <!-- Badge - Slide Down -->
-                <div class="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm font-medium text-white/90 animate-[slideInDown_0.8s_ease-out] mx-auto lg:mx-0">
-                    <i class="fas fa-star text-lspu-gold mr-2"></i>
-                    Official LSPU Employment Platform
+            <!-- Enhanced Background with LSPU Campus Image -->
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/85 to-indigo-900/90 dark:from-gray-900/95 dark:via-gray-800/90 dark:to-gray-900/95">
+                <!-- LSPU Campus Background Image -->
+                <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url('images/lspu_campus.jpg'), linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #4f46e5 100%);"></div>
+                
+                <!-- Animated Background Pattern Overlay -->
+                <div class="absolute inset-0 opacity-5">
+                    <div class="absolute top-0 left-0 w-48 h-48 md:w-72 md:h-72 bg-lspu-gold rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+                    <div class="absolute top-0 right-0 w-48 h-48 md:w-72 md:h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style="animation-delay: 2s;"></div>
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-48 md:w-72 md:h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style="animation-delay: 4s;"></div>
                 </div>
                 
-                <!-- Main Heading - Slide Left -->
-                <div class="space-y-4 md:space-y-6">
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[slideInLeft_0.8s_ease-out]">
-                        Welcome to 
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-lspu-gold to-yellow-400 block sm:inline-block">LSPU-EIS</span>
-                    </h1>
-                    <p class="text-lg sm:text-xl lg:text-2xl text-blue-100 leading-relaxed max-w-2xl mx-auto lg:mx-0 animate-[slideInLeft_1s_ease-out]">
-                        The official Employment Information System of Laguna State Polytechnic University. 
-                        Connecting our talented alumni with exceptional career opportunities worldwide.
-                    </p>
-                </div>
-                
-                <!-- Enhanced CTA Button - Slide Up -->
-                <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center lg:justify-start animate-[slideInUp_1.2s_ease-out]">
-                    <a href="signup" class="group relative inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-lspu-gold to-yellow-500 text-white font-semibold text-base md:text-lg rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg overflow-hidden w-full sm:w-auto">
-                        <span class="absolute inset-0 bg-gradient-to-r from-yellow-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        <span class="relative flex items-center justify-center">
-                            <i class="fas fa-rocket mr-3 text-lg md:text-xl group-hover:animate-bounce"></i>
-                            Get Started
-                        </span>
-                    </a>
+                <!-- Subtle Grid Pattern -->
+                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 30px 30px, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px;"></div>
+            </div>
+            
+            <!-- Content Overlay -->
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+                    <!-- Left Content -->
+                    <div class="space-y-6 md:space-y-8 text-white text-center lg:text-left">
+                        <!-- Badge - Slide Down -->
+                        <div class="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm font-medium text-white/90 animate-[slideInDown_0.8s_ease-out] mx-auto lg:mx-0">
+                            <i class="fas fa-star text-lspu-gold mr-2"></i>
+                            Official LSPU Employment Platform
+                        </div>
+                        
+                        <!-- Main Heading - Slide Left -->
+                        <div class="space-y-4 md:space-y-6">
+                            <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[slideInLeft_0.8s_ease-out]">
+                                Welcome to 
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-lspu-gold to-yellow-400 block sm:inline-block">LSPU-EIS</span>
+                            </h1>
+                            <p class="text-lg sm:text-xl lg:text-2xl text-blue-100 leading-relaxed max-w-2xl mx-auto lg:mx-0 animate-[slideInLeft_1s_ease-out]">
+                                The official Employment Information System of Laguna State Polytechnic University. 
+                                Connecting our talented alumni with exceptional career opportunities worldwide.
+                            </p>
+                        </div>
+                        
+                        <!-- Enhanced CTA Button - Slide Up -->
+                        <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center lg:justify-start animate-[slideInUp_1.2s_ease-out]">
+                            <a href="signup" class="group relative inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-lspu-gold to-yellow-500 text-white font-semibold text-base md:text-lg rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg overflow-hidden w-full sm:w-auto">
+                                <span class="absolute inset-0 bg-gradient-to-r from-yellow-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                                <span class="relative flex items-center justify-center">
+                                    <i class="fas fa-rocket mr-3 text-lg md:text-xl group-hover:animate-bounce"></i>
+                                    Get Started
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Content - Enhanced Logo Display - Slide Right -->
+                    <div class="relative animate-[slideInRight_1s_ease-out] mt-10 lg:mt-0 lg:col-span-1">
+                        <!-- Main Logo Container - Made Wider -->
+                        <div class="relative group w-full max-w-lg mx-auto lg:mx-0 lg:ml-auto">
+                            <!-- Glow Effect -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-lspu-gold to-yellow-400 rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+                            
+                            <!-- Logo Container - Made Wider -->
+                            <div class="relative bg-white/5 backdrop-blur-sm p-6 md:p-10 lg:p-12 rounded-3xl border border-white/10 shadow-2xl group-hover:shadow-3xl transition-all duration-500 transform group-hover:scale-105 w-full">
+                                <!-- Wider Image Container -->
+                                <div class="w-full h-[405px] mx-auto flex justify-center">
+                                    <img src="images/logo.png" alt="LSPU Logo" class="w-full max-w-md object-contain">
+                                </div>
+                                
+                                <!-- Floating Elements -->
+                                <div class="absolute -top-3 -right-3 md:-top-4 md:-right-4 w-6 h-6 md:w-8 md:h-8 bg-lspu-gold rounded-full flex items-center justify-center animate-bounce">
+                                    <i class="fas fa-check text-white text-xs md:text-sm"></i>
+                                </div>
+                                <div class="absolute -bottom-3 -left-3 md:-bottom-4 md:-left-4 w-5 h-5 md:w-6 md:h-6 bg-blue-400 rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating Cards -->
+                        <div class="absolute -top-6 -left-2 md:-top-8 md:-left-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-2xl border border-white/20 shadow-lg animate-[slideInRight_1.2s_ease-out] hidden sm:block">
+                            <div class="flex items-center space-x-2 md:space-x-3">
+                                <div class="w-2 h-2 md:w-3 md:h-3 bg-green-400 rounded-full animate-pulse"></div>
+                                <span class="text-white text-xs md:text-sm font-medium">Live Platform</span>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute -bottom-6 -right-4 md:-bottom-8 md:-right-8 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-2xl border border-white/20 shadow-lg animate-[slideInRight_1.4s_ease-out] hidden sm:block">
+                            <div class="flex items-center space-x-2 md:space-x-3">
+                                <i class="fas fa-shield-alt text-lspu-gold text-xs md:text-base"></i>
+                                <span class="text-white text-xs md:text-sm font-medium">Secure & Verified</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <!-- Right Content - Enhanced Logo Display - Slide Right -->
-            <div class="relative animate-[slideInRight_1s_ease-out] mt-10 lg:mt-0 lg:col-span-1">
-                <!-- Main Logo Container - Made Wider -->
-                <div class="relative group w-full max-w-lg mx-auto lg:mx-0 lg:ml-auto">
-                    <!-- Glow Effect -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-lspu-gold to-yellow-400 rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
-                    
-                    <!-- Logo Container - Made Wider -->
-                    <div class="relative bg-white/5 backdrop-blur-sm p-6 md:p-10 lg:p-12 rounded-3xl border border-white/10 shadow-2xl group-hover:shadow-3xl transition-all duration-500 transform group-hover:scale-105 w-full">
-                        <!-- Wider Image Container -->
-                        <div class="w-full h-[405px] mx-auto flex justify-center">
-                            <img src="images/logo.png" alt="LSPU Logo" class="w-full max-w-md object-contain">
-                        </div>
-                        
-                        <!-- Floating Elements -->
-                        <div class="absolute -top-3 -right-3 md:-top-4 md:-right-4 w-6 h-6 md:w-8 md:h-8 bg-lspu-gold rounded-full flex items-center justify-center animate-bounce">
-                            <i class="fas fa-check text-white text-xs md:text-sm"></i>
-                        </div>
-                        <div class="absolute -bottom-3 -left-3 md:-bottom-4 md:-left-4 w-5 h-5 md:w-6 md:h-6 bg-blue-400 rounded-full animate-pulse"></div>
-                    </div>
-                </div>
-                
-                <!-- Floating Cards -->
-                <div class="absolute -top-6 -left-2 md:-top-8 md:-left-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-2xl border border-white/20 shadow-lg animate-[slideInRight_1.2s_ease-out] hidden sm:block">
-                    <div class="flex items-center space-x-2 md:space-x-3">
-                        <div class="w-2 h-2 md:w-3 md:h-3 bg-green-400 rounded-full animate-pulse"></div>
-                        <span class="text-white text-xs md:text-sm font-medium">Live Platform</span>
-                    </div>
-                </div>
-                
-                <div class="absolute -bottom-6 -right-4 md:-bottom-8 md:-right-8 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-2xl border border-white/20 shadow-lg animate-[slideInRight_1.4s_ease-out] hidden sm:block">
-                    <div class="flex items-center space-x-2 md:space-x-3">
-                        <i class="fas fa-shield-alt text-lspu-gold text-xs md:text-base"></i>
-                        <span class="text-white text-xs md:text-sm font-medium">Secure & Verified</span>
-                    </div>
+            <!-- Scroll Indicator - Slide Up -->
+            <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce animate-[slideInUp_1.6s_ease-out] hidden md:block">
+                <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+                    <div class="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Scroll Indicator - Slide Up -->
-    <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce animate-[slideInUp_1.6s_ease-out] hidden md:block">
-        <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-            <div class="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
-        </div>
-    </div>
-</section>
+        </section>
 
         <!-- Features Section -->
         <section class="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
