@@ -17,7 +17,7 @@ setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], 0, '/', '', false, false);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LSPU EIS - Login</title>
+    <title>Login | LSPU EIS</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,7 +136,7 @@ setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], 0, '/', '', false, false);
                 <!-- Signup Link -->
                 <div class="text-center mt-4 pt-4 border-t border-gray-200">
                     <p class="text-gray-600 text-sm">Don't have an account? 
-                        <a href="signup" class="text-lspu-blue hover:text-lspu-dark font-medium transition">Register now</a>
+                        <a href="user_type" class="text-lspu-blue hover:text-lspu-dark font-medium transition">Register now</a>
                     </p>
                 </div>
             </div>

@@ -12,7 +12,10 @@ const { createApp } = Vue;
                         age: '',
                         email: '',
                         message: ''
-                    }
+                    },
+                    storiesLoading: false,
+                    publishedStories: [],
+                    selectedStory: null
                 }
             },
             mounted() {
@@ -24,6 +27,7 @@ const { createApp } = Vue;
                     this.darkMode = false; // Default to light mode
                 }
                 this.applyDarkMode();
+                this.fetchSuccessStories();
             },
             methods: {
                 scrollToSection(sectionId) {
@@ -57,7 +61,7 @@ const { createApp } = Vue;
                     const html = document.documentElement;
                     if (this.darkMode) {
                         html.classList.add('dark');
-} else {
+                    } else {
                         html.classList.remove('dark');
                     }
                 },
@@ -89,6 +93,40 @@ const { createApp } = Vue;
                         console.error('Error:', error);
                         this.showNotification('Failed to send message. Please try again later.', 'error');
                     }
+                },
+
+                async fetchSuccessStories() {
+                    this.storiesLoading = true;
+                    try {
+                        const response = await fetch('functions/get_public_success_stories.php');
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.publishedStories = data.stories;
+                        } else {
+                            console.error('Failed to load success stories:', data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching success stories:', error);
+                        this.showNotification('Error loading success stories', 'error');
+                    } finally {
+                        this.storiesLoading = false;
+                    }
+                },
+                
+                // View story in modal
+                viewStory(story) {
+                    this.selectedStory = story;
+                },
+                
+                // Format date for display
+                formatStoryDate(dateString) {
+                    if (!dateString) return '';
+                    return new Date(dateString).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
                 }
             }
         }).mount('#app');

@@ -109,11 +109,11 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'allencristal12@gmail.com';
-    $mail->Password = 'ugwb vksz wjto zbwf';
+    $mail->Username = 'lspueis@gmail.com';
+    $mail->Password = 'afbp fcwf oujr yqzr';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
-    $mail->setFrom('allencristal12@gmail.com', 'LSPU EIS');
+    $mail->setFrom('lspueis@gmail.com', 'LSPU EIS');
     $mail->addAddress($email);
     $mail->isHTML(true);
     $mail->Subject = 'Welcome to LSPU EIS Employer Portal';
@@ -152,7 +152,7 @@ try {
                     </ul>
                 </div>
                 <p><strong>Login to your account:</strong></p>
-                <a href="http://localhost/lspu_eis/employer_login.php" class="button">Login to LSPU EIS</a>
+                <a href="http://localhost/lspu_eis/login.php" class="button">Login to LSPU EIS</a>
                 <p>If you have any questions or need assistance, please contact the LSPU EIS support team.</p>
                 <p>Best regards,<br>
                 <strong>LSPU EIS Team</strong></p>
@@ -164,7 +164,7 @@ try {
         </div>
     </body>
     </html>';
-    $mail->AltBody = "Welcome, $company_name!\n\nYour employer account has been created successfully. We will review your documents and notify you once your account is approved.\n\nLogin: http://localhost/lspu_eis/employer_login.php\n\nBest regards,\nLSPU EIS Team";
+    $mail->AltBody = "Welcome, $company_name!\n\nYour employer account has been created successfully. We will review your documents and notify you once your account is approved.\n\nLogin: http://localhost/lspu_eis/login.php\n\nBest regards,\nLSPU EIS Team";
     $mail->send();
 } catch (Exception $e) {}
 echo json_encode(['success' => true, 'message' => 'Registration successful! Please wait for admin approval. Check your email for confirmation.']);

@@ -22,24 +22,44 @@ if (!$alumni_id) {
 }
 
 // Get all applications for this alumni
-$stmt = $db->prepare('SELECT app.job_id, app.applied_at, j.title, j.type, j.location, j.salary, j.status, j.created_at, j.description, j.requirements, j.qualifications, j.employer_question, j.employer_id FROM applications app JOIN jobs j ON app.job_id = j.job_id WHERE app.alumni_id = ? ORDER BY app.applied_at DESC');
+$stmt = $db->prepare('SELECT app.job_id, app.applied_at, app.status AS application_status, j.title, j.type, j.location, j.salary, j.status, j.created_at, j.description, j.requirements, j.qualifications, j.employer_question, j.employer_id FROM applications app JOIN jobs j ON app.job_id = j.job_id WHERE app.alumni_id = ? ORDER BY app.applied_at DESC');
 $stmt->bind_param('i', $alumni_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $appliedJobs = [];
 while ($row = $result->fetch_assoc()) {
-    // Get company name
+    // Get company details including logo
     $company_name = '';
+    $company_logo = '';
+    $company_location = '';
+    $contact_email = '';
+    $contact_number = '';
+    $nature_of_business = '';
+    $industry_type = '';
+    $accreditation_status = '';
+    
     if ($row['employer_id']) {
-        $emp_stmt = $db->prepare('SELECT company_name FROM employer WHERE employer_id = ? LIMIT 1');
+        // Use employer_id from jobs table to match user_id in employer table
+        $emp_stmt = $db->prepare('SELECT company_name, company_logo, company_location, contact_email, contact_number, nature_of_business, industry_type, accreditation_status FROM employer WHERE user_id = ?');
         $emp_stmt->bind_param('i', $row['employer_id']);
         $emp_stmt->execute();
-        $emp_stmt->bind_result($company_name);
+        $emp_stmt->bind_result($company_name, $company_logo, $company_location, $contact_email, $contact_number, $nature_of_business, $industry_type, $accreditation_status);
         $emp_stmt->fetch();
         $emp_stmt->close();
     }
+    
+    $row['application_status'] = $row['application_status'];
     $row['company_name'] = $company_name;
+    $row['company_logo'] = $company_logo;
+    $row['company_location'] = $company_location;
+    $row['contact_email'] = $contact_email;
+    $row['contact_number'] = $contact_number;
+    $row['nature_of_business'] = $nature_of_business;
+    $row['industry_type'] = $industry_type;
+    $row['accreditation_status'] = $accreditation_status;
+    
     $appliedJobs[] = $row;
 }
 $stmt->close();
-echo json_encode(['appliedJobs' => $appliedJobs]); 
+echo json_encode(['appliedJobs' => $appliedJobs]);
+?>

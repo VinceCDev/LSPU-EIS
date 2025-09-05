@@ -29,10 +29,10 @@ $default_config = [
     'email' => [
         'enabled' => true,
         'smtp_host' => 'smtp.gmail.com',
-        'smtp_username' => 'allencristal12@gmail.com',
-        'smtp_password' => 'ugwb vksz wjto zbwf',
+        'smtp_username' => 'lspueis@gmail.com',
+        'smtp_password' => 'afbp fcwf oujr yqzr',
         'smtp_port' => 587,
-        'from_email' => 'allencristal12@gmail.com',
+        'from_email' => 'lspueis@gmail.com',
         'from_name' => 'LSPU EIS System',
     ],
         'sms' => [

@@ -24,22 +24,25 @@ if (!$user_id) {
     exit();
 }
 
-// Fetch notifications for this user
-$stmt = $db->prepare('SELECT id, type, message, details, is_read, created_at FROM notifications WHERE user_id = ? ORDER BY created_at DESC');
+// Fetch notifications for this user - include job_id
+$stmt = $db->prepare('SELECT id, type, message, details, is_read, created_at, job_id FROM notifications WHERE user_id = ? ORDER BY created_at DESC');
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
-$stmt->bind_result($id, $type, $message, $details, $is_read, $created_at);
+$result = $stmt->get_result();
 $notifications = [];
-while ($stmt->fetch()) {
+
+while ($row = $result->fetch_assoc()) {
     $notifications[] = [
-        'id' => $id,
-        'type' => $type,
-        'message' => $message,
-        'details' => $details,
-        'read' => (bool)$is_read,
-        'time' => $created_at
+        'id' => $row['id'],
+        'type' => $row['type'],
+        'message' => $row['message'],
+        'details' => $row['details'],
+        'read' => (bool)$row['is_read'],
+        'time' => $row['created_at'],
+        'job_id' => $row['job_id']
     ];
 }
 $stmt->close();
 
-echo json_encode(['success' => true, 'notifications' => $notifications]); 
+echo json_encode(['success' => true, 'notifications' => $notifications]);
+?>

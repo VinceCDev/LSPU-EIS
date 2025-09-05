@@ -156,8 +156,8 @@ createApp({
                         email: app.email,
                         appliedFor: app.title,
                         appliedDate: app.applied_at,
+                        status: app.application_status || 'Pending', // Use application_status instead of job_status
                         experience: app.year_graduated ? (new Date().getFullYear() - parseInt(app.year_graduated)) : '',
-                        status: app.job_status,
                         company_name: app.company_name,
                         alumni: app, // full alumni details
                         job: app // full job details
@@ -262,6 +262,16 @@ createApp({
                 }
             } catch (e) {
                 this.showNotification('Failed to update status.', 'error');
+            }
+        },
+        async contactAlumni(alumni) {
+            try {
+                // Redirect to messages page with alumni email as parameter
+                const messagesUrl = `employer_messages.php?compose=true&to=${encodeURIComponent(alumni.email)}`;
+                window.location.href = messagesUrl;
+            } catch (error) {
+                console.error('Error redirecting to messages:', error);
+                this.showNotification('Error opening message composer', 'error');
             }
         }
     }

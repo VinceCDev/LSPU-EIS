@@ -72,13 +72,13 @@ function sendApprovalEmail($email, $name) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'allencristal12@gmail.com'; // Change to your email
-        $mail->Password = 'ugwb vksz wjto zbwf';
+        $mail->Username = 'lspueis@gmail.com'; // Change to your email
+        $mail->Password = 'afbp fcwf oujr yqzr';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         
         // Recipients
-        $mail->setFrom('allencristal12@gmail.com', 'LSPU EIS System');
+        $mail->setFrom('lspueis@gmail.com', 'LSPU EIS System');
         $mail->addAddress($email, $name);
         
         // Content

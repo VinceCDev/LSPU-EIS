@@ -1,10 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LSPU - EIS | Laguna State Polytechnic University Employment Information System</title>
+    <title>Laguna State Polytechnic University Employment Information System | LSPU - EIS</title>
+    <meta name="description" content="LSPU Employment Information System connects LSPU alumni with quality career opportunities. Find jobs, post vacancies, and advance your career with our official platform.">
+    <meta name="keywords" content="LSPU employment, LSPU jobs, Laguna State Polytechnic University careers, alumni employment, job matching Philippines, LSPU EIS">
+    <meta name="author" content="Laguna State Polytechnic University">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://yourdomain.com/">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="LSPU Employment Information System | Connect with Career Opportunities">
+    <meta property="og:description" content="Official employment platform for LSPU alumni and employers. Find quality job matches and talented candidates.">
+    <meta property="og:image" content="https://yourdomain.com/images/logo-social.png">
+    <meta property="og:url" content="https://yourdomain.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LSPU Employment Information System">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LSPU Employment Information System | Career Platform">
+    <meta name="twitter:description" content="Connect LSPU alumni with quality employment opportunities through our official job matching system.">
+    <meta name="twitter:image" content="https://yourdomain.com/images/logo-twitter.png">
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "LSPU Employment Information System",
+      "url": "https://yourdomain.com/",
+      "description": "Official employment platform connecting LSPU alumni with quality career opportunities",
+      "applicationCategory": "EmploymentApplication",
+      "operatingSystem": "Web Browser",
+      "permissions": "browser",
+      "creator": {
+        "@type": "CollegeOrUniversity",
+        "name": "Laguna State Polytechnic University",
+        "url": "https://lspu.edu.ph",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "PH",
+          "addressRegion": "Laguna",
+          "addressLocality": "San Pablo City"
+        }
+      }
+    }
+    </script>
+    
     <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js" as="script">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="images/lspu_campus.jpg" as="image">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -124,14 +177,18 @@
                         <a href="#about" @click="scrollToSection('about')" 
                         class="text-gray-700 dark:text-gray-300 hover:text-lspu-blue dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 transform hover:-translate-y-0.5"
                         style="animation: slideInDown 0.5s ease-out 0.2s both">About</a>
+
+                        <a href="#success-stories" @click="scrollToSection('success-stories')" 
+                        class="text-gray-700 dark:text-gray-300 hover:text-lspu-blue dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 transform hover:-translate-y-0.5"
+                        style="animation: slideInDown 0.5s ease-out 0.3s both">Stories</a>
                         
                         <a href="#contact" @click="scrollToSection('contact')" 
                         class="text-gray-700 dark:text-gray-300 hover:text-lspu-blue dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 transform hover:-translate-y-0.5"
-                        style="animation: slideInDown 0.5s ease-out 0.3s both">Contact</a>
+                        style="animation: slideInDown 0.5s ease-out 0.4s both">Contact</a>
                         
                         <a href="login" 
                         class="bg-lspu-blue hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        style="animation: slideInDown 0.5s ease-out 0.4s both">Login</a>
+                        style="animation: slideInDown 0.5s ease-out 0.5s both">Login</a>
                     </div>
                     
                     <!-- Mobile menu button with bounce animation -->
@@ -163,6 +220,11 @@
                         <a href="#about" @click="scrollToSection('about'); mobileMenuOpen = false" 
                         class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-lspu-blue dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-all duration-200 transform hover:translate-x-2">
                         <i class="fas fa-info-circle mr-2"></i> About
+                        </a>
+
+                        <a href="#success-stories" @click="scrollToSection('success-stories'); mobileMenuOpen = false" 
+                        class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-lspu-blue dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md text-base font-medium transition-all duration-200 transform hover:translate-x-2">
+                        <i class="fas fa-book mr-2"></i> Stories
                         </a>
                         
                         <a href="#contact" @click="scrollToSection('contact'); mobileMenuOpen = false" 
@@ -396,7 +458,156 @@
             </div>
         </section>
 
+     <!-- Success Stories Section -->
+        <section id="success-stories" class="py-20 bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-200">Success Stories</h2>
+                    <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-200">
+                        Discover inspiring journeys of LSPU alumni who have achieved remarkable success in their careers
+                    </p>
+                </div>
+                
+                <!-- Loading State -->
+                <div v-if="storiesLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div v-for="n in 3" :key="n" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 animate-pulse">
+                        <div class="h-48 bg-gray-200 dark:bg-gray-700 rounded-xl mb-4"></div>
+                        <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    </div>
+                </div>
+                
+                <!-- Stories Grid with Dynamic Layout -->
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" :class="{
+                    'md:grid-cols-1 lg:grid-cols-1': publishedStories.length === 1,
+                    'lg:grid-cols-2': publishedStories.length === 2 || publishedStories.length === 4
+                }">
+                    <div v-for="story in publishedStories" :key="story.story_id" 
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group flex flex-col h-full">
+                        
+                        <!-- Story Image/Placeholder -->
+                        <div class="h-48 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-gray-700 dark:to-gray-600 rounded-xl mb-4 overflow-hidden relative">
+                            <img v-if="story.profile_picture" 
+                                :src="'/lspu_eis/uploads/profile_picture/' + story.profile_picture" 
+                                :alt="story.author_full_name" 
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div v-else class="w-full h-full flex items-center justify-center text-blue-400 dark:text-blue-300">
+                                <i class="fas fa-user-circle text-5xl opacity-50"></i>
+                            </div>
+                            <div class="absolute top-4 right-4 bg-lspu-blue text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                <i class="fas fa-star mr-1"></i> Success
+                            </div>
+                        </div>
+                        
+                        <!-- Story Content -->
+                        <div class="flex-grow">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2 transition-colors duration-200 group-hover:text-lspu-blue dark:group-hover:text-blue-400">
+                                {{ story.title }}
+                            </h3>
+                            
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 transition-colors duration-200">
+                                {{ story.content.substring(0, 120) + (story.content.length > 120 ? '...' : '') }}
+                            </p>
+                        </div>
+                        
+                        <!-- Author Info -->
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700 mt-auto">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center mr-3 overflow-hidden ring-2 ring-white dark:ring-gray-700 shadow-md">
+                                    <img v-if="story.profile_picture" 
+                                        :src="'/lspu_eis/uploads/profile_picture/' + story.profile_picture" 
+                                        :alt="story.author_full_name" 
+                                        class="w-full h-full object-cover">
+                                    <span v-else class="text-white font-semibold text-sm">
+                                        {{ story.author_full_name ? story.author_full_name.charAt(0).toUpperCase() : 'A' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ story.author_full_name }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatStoryDate(story.created_at) }}</p>
+                                </div>
+                            </div>
+                            <button @click="viewStory(story)" 
+                                    class="text-lspu-blue dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 transform hover:scale-110"
+                                    title="Read full story">
+                                <i class="fas fa-arrow-right text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div v-if="!storiesLoading && publishedStories.length === 0" class="text-center py-12">
+                    <div class="w-24 h-24 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-book-open text-3xl text-blue-500 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No success stories yet</h3>
+                    <p class="text-gray-500 dark:text-gray-400">Check back later for inspiring stories from our alumni</p>
+                </div>
+            </div>
+        </section>
 
+        <!-- Enhanced Story View Modal -->
+        <div v-if="selectedStory" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70 p-4 md:p-6 transition-opacity duration-300">
+            <div class="bg-gradient-to-br from-blue-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl mx-auto max-h-[95vh] overflow-y-auto relative">
+                <!-- Close Button -->
+                <button @click="selectedStory = null" 
+                        class="absolute top-4 right-4 z-20 w-10 h-10 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                
+                <!-- Modal Content -->
+                <div class="relative">
+                    <!-- Hero Section with LSPU Campus Background -->
+                    <div class="h-64 md:h-80 relative overflow-hidden rounded-t-2xl">
+                        <!-- LSPU Campus Background with Gradient -->
+                        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url('images/lspu_campus.jpg'), linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #4f46e5 100%);"></div>
+                        
+                        <!-- Gradient Overlay using your specified linear gradient -->
+                        <div class="absolute inset-0 opacity-40" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #4f46e5 100%);"></div>
+
+                                                
+                        <!-- Content Overlay -->
+                        <div class="relative z-10 h-full flex flex-col justify-end p-6 md:p-8 text-white">
+                            <h1 class="text-2xl md:text-3xl font-bold mb-2 drop-shadow-lg">{{ selectedStory.title }}</h1>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center mr-4 overflow-hidden">
+                                    <img v-if="selectedStory.profile_picture" 
+                                        :src="'/lspu_eis/uploads/profile_picture/' + selectedStory.profile_picture" 
+                                        :alt="selectedStory.author_full_name" 
+                                        class="w-full h-full object-cover">
+                                    <span v-else class="text-white font-semibold text-lg">
+                                        {{ selectedStory.author_full_name ? selectedStory.author_full_name.charAt(0).toUpperCase() : 'A' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white/90">{{ selectedStory.author_full_name }}</p>
+                                    <p class="text-sm text-white/70">{{ formatStoryDate(selectedStory.created_at) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Story Content -->
+                    <div class="p-6 md:p-8 bg-white dark:bg-gray-800 rounded-b-2xl">
+                        <div class="prose prose-lg dark:prose-invert max-w-none">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                                {{ selectedStory.content }}
+                            </p>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <button @click="selectedStory = null" 
+                                    class="w-full px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 text-lg">
+                                Close Story
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Contact Section -->
         <section id="contact" class="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">

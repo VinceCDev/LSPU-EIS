@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employer Sign Up - LSPU EIS</title>
+    <title>Employer Sign Up | LSPU EIS</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -227,8 +227,100 @@
                                 <input type="file" name="document_file" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" required>
                             </div>
                         </div>
+                        <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-xs text-blue-800 font-medium mb-1">Accepted Documents:</p>
+                            <ul class="text-xs text-blue-700 space-y-1">
+                                <li>• Business Permit / Mayor's Permit</li>
+                                <li>• SEC/DTI Registration Certificate</li>
+                                <li>• BIR Registration Form (2303)</li>
+                                <li>• Company Profile with Official Seal</li>
+                                <li>• Partnership Documents</li>
+                                <li>• Any official government-issued business registration document</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Add this right before the Submit Button section -->
+
+                <!-- Disclaimer Agreement -->
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start mb-3">
+                        <div class="flex items-center h-5">
+                            <input id="employer_disclaimer" type="checkbox" v-model="agreeToDisclaimer" class="w-4 h-4 text-lspu-blue bg-gray-100 border-gray-300 rounded focus:ring-lspu-blue focus:ring-2" required>
+                        </div>
+                        <label for="employer_disclaimer" class="ms-2 text-sm font-medium text-gray-900">
+                            I have read, understood, and agree to the terms of the 
+                            <a href="#" class="text-lspu-blue hover:underline" @click.prevent="openDisclaimerModal">Employer Terms & Data Privacy Policy</a>.
+                            <span class="text-red-600">*</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-blue-700">
+                        <strong>Employer Disclaimer:</strong> By registering, you confirm your company is legitimate and agree to use alumni data solely for legitimate hiring purposes in compliance with the Data Privacy Act. You understand that misuse of alumni information will result in immediate account termination and potential legal action.
+                    </p>
+                </div>
+
+                <!-- Add this modal right after the Disclaimer Agreement section -->
+                <!-- Employer Disclaimer Modal -->
+                <div id="employerDisclaimerModal" v-if="showDisclaimerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-start justify-center z-50 pt-10">
+                    <div class="relative mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
+                        <div class="mt-3">
+                            <div class="flex justify-between items-center pb-3 border-b">
+                                <h3 class="text-xl font-semibold text-gray-900">Employer Terms of Service & Data Privacy Policy</h3>
+                                <button @click="closeDisclaimerModal" class="text-gray-500 hover:text-gray-700">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div class="mt-4 mb-6 max-h-96 overflow-y-auto text-sm">
+                                <p class="font-semibold mb-2 text-lspu-blue">1. EMPLOYER RESPONSIBILITIES</p>
+                                <p class="mb-4">By registering as an employer on the LSPU Alumni Employment Information System, you affirm that your company is a legitimate business entity and that all information provided is accurate and truthful. You agree to use this platform exclusively for legitimate hiring purposes and career opportunity postings.</p>
+
+                                <p class="font-semibold mb-2 text-lspu-blue">2. DATA PRIVACY ACT COMPLIANCE (RA 10173)</p>
+                                <p class="mb-4">LSPU strictly adheres to the Philippine Data Privacy Act of 2012. All company information collected through this system is processed in accordance with the law's principles of transparency, legitimate purpose, and proportionality. We implement appropriate organizational, physical, and technical security measures to protect your data against unauthorized access, disclosure, or destruction.</p>
+
+                                <p class="font-semibold mb-2 text-lspu-blue">3. ALUMNI DATA USAGE RESTRICTIONS</p>
+                                <p class="mb-4">Alumni information accessed through this system must be used exclusively for employment consideration purposes. You are prohibited from:</p>
+                                <ul class="list-disc pl-5 mb-4">
+                                    <li>Sharing alumni data with third parties without explicit consent</li>
+                                    <li>Using alumni information for marketing purposes unrelated to employment</li>
+                                    <li>Storing alumni data beyond what is necessary for the hiring process</li>
+                                    <li>Discriminating based on protected characteristics (gender, religion, etc.)</li>
+                                    <li>Making hiring decisions based on non-job-related criteria</li>
+                                </ul>
+
+                                <p class="font-semibold mb-2 text-lspu-blue">4. JOB POSTING GUIDELINES</p>
+                                <p class="mb-4">All job postings must represent actual employment opportunities with fair compensation and legitimate working conditions. LSPU reserves the right to remove any job posting that:</p>
+                                <ul class="list-disc pl-5 mb-4">
+                                    <li>Contains false or misleading information</li>
+                                    <li>Requires payment from applicants</li>
+                                    <li>Involves pyramid schemes or illegal activities</li>
+                                    <li>Discriminates against protected groups</li>
+                                    <li>Offers compensation below minimum wage standards</li>
+                                </ul>
+
+                                <p class="font-semibold mb-2 text-lspu-blue">5. VERIFICATION PROCESS</p>
+                                <p class="mb-4">LSPU conducts verification of employer accounts to ensure legitimacy. This may include contacting your company directly, verifying business registration documents, and checking with appropriate government agencies. Until verification is complete, your access to employer account will be approved.</p>
+
+                                <p class="font-semibold mb-2 text-lspu-blue">6. DATA SECURITY REQUIREMENTS</p>
+                                <p class="mb-4">Employers must implement appropriate technical and organizational measures to protect alumni data against unauthorized access, disclosure, or destruction. This includes secure storage, access controls, and proper disposal methods when data is no longer needed for hiring purposes.</p>
+
+                                <p class="font-semibold mb-2 text-lspu-blue">7. CONTACT INFORMATION</p>
+                                    <p class="mb-4">For questions, concerns, or requests regarding your personal data, please contact our Alumni Affairs and Placement Services Office at: <br>
+                                    <strong>LSPU Alumni Affairs and Placement Services Office</strong><br>
+                                    Laguna State Polytechnic University<br>
+                                    lspuspcc.alumni@lspu.edu.ph | +63 (049) 554 9910</p>
+
+                                <p class="text-xs text-gray-500 italic">This Privacy Policy and Disclaimer was last updated on August 2025 and may be updated periodically to reflect changes in our practices or legal requirements. Continued use of the system constitutes acceptance of any modifications.</p>
+                            </div>
+                            <div class="items-center px-4 py-3">
+                                <button @click="closeDisclaimerModal" class="px-4 py-2 bg-lspu-blue text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-lspu-dark focus:outline-none focus:ring-2 focus:ring-lspu-blue">
+                                    I Understand and Agree
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="mt-8 flex justify-center">
                     <button type="submit" class="px-8 py-3 bg-lspu-blue hover:bg-lspu-dark text-white font-semibold rounded-lg shadow-md transition duration-300 transform hover:scale-105">
@@ -238,7 +330,7 @@
             </form>
             <div class="text-center pb-6 px-6">
                 <p class="text-gray-600">Already have an employer account? 
-                    <a href="employer_login" class="text-lspu-blue hover:text-lspu-dark font-medium transition">Login here</a>
+                    <a href="login" class="text-lspu-blue hover:text-lspu-dark font-medium transition">Sign in here</a>
                 </p>
             </div>
         </div>

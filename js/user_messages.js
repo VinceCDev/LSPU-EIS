@@ -1,12 +1,22 @@
 const { createApp } = Vue;
+
 createApp({
     data() {
         return {
             darkMode: false,
             showCompose: false,
             activeFolder: 'inbox',
+            showTutorialButton: true, // Start as false, will be updated after check
+            showWelcomeModal: false, // Start as false
+            currentWelcomeSlide: 0,
+            welcomeSlides: [
+                { title: "Welcome", content: "intro" },
+                { title: "Navigation", content: "navigation" },
+                { title: "Job Search", content: "job_search" },
+                { title: "Profile", content: "profile" }
+            ],
             compose: {
-                role: '',
+                role: 'Alumni',
                 receiver: '',
                 subject: '',
                 message: ''
@@ -19,7 +29,7 @@ createApp({
             selectedMessages: [],
             selectAll: false,
             quill: null,
-            allUsers: [], // List of all users with email, name, and role
+            allUsers: [],
             inboxCount: 0,
             sentCount: 0,
             importantCount: 0,
@@ -28,9 +38,10 @@ createApp({
             profile: {},
             profilePicData: {},
             showLogoutModal: false,
-            sidebarOpen: false, // Changed to false for mobile
+            sidebarOpen: false,
             notifications: [],
-            selectedMessage: null
+            selectedMessage: null,
+            quillInitialized: false // Track if Quill is initialized
         };
     },
     computed: {
@@ -65,6 +76,7 @@ createApp({
                 sender: this.activeFolder === 'inbox' ? m.sender_email : m.receiver_email,
                 time: m.created_at || m.time
             }));
+            
             const s = this.search.toLowerCase();
             return base.filter(m =>
                 ((m.sender_email && m.sender_email.toLowerCase().includes(s)) ||
@@ -81,6 +93,12 @@ createApp({
         }
     },
     mounted() {
+        // Check if Quill is available
+        if (typeof Quill === 'undefined') {
+            console.error('Quill editor is not loaded. Please include Quill.js in your project.');
+            this.showError('Rich text editor is not available. Please refresh the page.');
+        }
+        
         // Fetch all users for receiver dropdown
         fetch('functions/fetch_all_accounts.php')
             .then(res => res.json())
@@ -89,6 +107,7 @@ createApp({
                     this.allUsers = data.accounts;
                 }
             });
+            
         // Fetch profile pic and alumni details
         Promise.all([
             fetch('functions/fetch_profile_pic.php').then(res => res.json()),
@@ -101,14 +120,19 @@ createApp({
                 this.profile = profileData.profile;
             }
         });
+
+        this.checkUrlParameters();
+        
         // Fetch messages for inbox and sent
         this.fetchMessages();
+        
         // Initialize dark mode from localStorage
         const savedDarkMode = localStorage.getItem('darkMode');
-        if (savedDarkMode === 'true') {
-            this.darkMode = true;
-        } else {
-            this.darkMode = false;
+        this.darkMode = savedDarkMode === 'true';
+        
+        // Apply dark mode class immediately
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
         }
     },
     watch: {
@@ -131,24 +155,76 @@ createApp({
         showCompose(val) {
             if (val) {
                 this.$nextTick(() => {
-                    if (!this.quill) {
-                        this.quill = new Quill('#editor', {
-                            theme: 'snow',
-                            placeholder: 'Write your message...'
-                        });
-                    }
+                    this.initQuill();
                 });
+            } else if (this.quill) {
+                // Clear the editor when closing
+                this.quill.setContents([]);
             }
         }
     },
     methods: {
+        initQuill() {
+            // Only initialize Quill if it's available and not already initialized
+            if (typeof Quill === 'undefined') {
+                console.error('Quill is not available');
+                this.showError('Rich text editor is not available');
+                return;
+            }
+            
+            if (!this.quillInitialized && document.getElementById('editor')) {
+                try {
+                    this.quill = new Quill('#editor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'color': [] }, { 'background': [] }],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link', 'image'],
+                                ['clean']
+                            ]
+                        }
+                    });
+                    this.quillInitialized = true;
+                } catch (error) {
+                    console.error('Error initializing Quill:', error);
+                    this.showError('Failed to initialize text editor');
+                }
+            }
+        },
+        checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const composeParam = urlParams.get('compose');
+            const toParam = urlParams.get('to');
+            
+            if (composeParam === 'true') {
+                this.showCompose = true;
+                
+                if (toParam) {
+                    // Set the receiver email if provided
+                    this.compose.receiver = decodeURIComponent(toParam);
+                    
+                    // Try to find the user in allUsers to set the role
+                    const user = this.allUsers.find(u => u.email === this.compose.receiver);
+                    if (user) {
+                        this.compose.role = user.role;
+                    } else {
+                        // If user not found, try to determine role from email pattern
+                        this.compose.role = this.determineRoleFromEmail(this.compose.receiver);
+                    }
+                }
+            }
+        },
+        
         goBack() {
             window.history.back();
         },
         copyTable() {
             // Prepare data
             const data = [
-                ['Sender/Receiver', 'Subject', 'Message', 'Time'], // Header row
+                ['Sender/Receiver', 'Subject', 'Message', 'Time'],
                 ...this.filteredMessages.map(msg => [
                     msg.sender,
                     msg.subject,
@@ -169,6 +245,89 @@ createApp({
                     console.error('Failed to copy: ', err);
                     this.showError('Failed to copy table to clipboard');
                 });
+        },
+        replyToMessage(message) {
+            // Set up the compose modal for reply
+            this.compose = {
+                receiver: message.sender_email,
+                role: this.getRoleFromEmail(message.sender_email),
+                subject: `Re: ${message.subject}`,
+                message: ''
+            };
+            
+            // Initialize Quill editor with quoted message
+            this.showCompose = true;
+            this.$nextTick(() => {
+                this.initQuill();
+                
+                if (this.quill) {
+                    // Add quoted message
+                    const quotedMessage = `
+                        <br><br>
+                        <div style="border-left: 3px solid #ccc; padding-left: 10px; margin-left: 10px; color: #666;">
+                            <p><strong>Original message from ${message.sender_email}:</strong></p>
+                            <div>${message.message}</div>
+                        </div>
+                    `;
+                    
+                    this.quill.clipboard.dangerouslyPasteHTML(0, quotedMessage);
+                    
+                    // Set cursor to the beginning
+                    this.quill.setSelection(0, 0);
+                }
+            });
+            
+            // Close the message view
+            this.selectedMessage = null;
+        },
+        
+        forwardMessage(message) {
+            // Set up the compose modal for forwarding
+            this.compose = {
+                receiver: '',
+                role: '',
+                subject: `Fwd: ${message.subject}`,
+                message: ''
+            };
+            
+            this.showCompose = true;
+            this.$nextTick(() => {
+                this.initQuill();
+                
+                if (this.quill) {
+                    // Add forwarded message content
+                    const forwardedMessage = `
+                        <br><br>
+                        <div style="border-left: 3px solid #ccc; padding-left: 10px; margin-left: 10px; color: #666;">
+                            <p><strong>---------- Forwarded message ----------</strong></p>
+                            <p><strong>From:</strong> ${message.sender_email}</p>
+                            <p><strong>Date:</strong> ${this.formatDate(message.created_at)}</p>
+                            <p><strong>Subject:</strong> ${message.subject}</p>
+                            <p><strong>To:</strong> ${message.receiver_email}</p>
+                            <br>
+                            <div>${message.message}</div>
+                        </div>
+                    `;
+                    
+                    this.quill.clipboard.dangerouslyPasteHTML(0, forwardedMessage);
+                    
+                    // Set cursor to the beginning
+                    this.quill.setSelection(0, 0);
+                }
+            });
+            
+            // Close the message view
+            this.selectedMessage = null;
+        },
+        
+        getRoleFromEmail(email) {
+            const user = this.allUsers.find(u => u.email === email);
+            if (user) {
+                // Map backend role to user-friendly label
+                const roleMap = { admin: 'Administrator', employer: 'Employer', alumni: 'Alumni' };
+                return roleMap[user.user_role] || user.user_role;
+            }
+            return '';
         },
         addNotification(type, message) {
             const id = Date.now();
@@ -251,9 +410,6 @@ createApp({
             `;
         
             this.filteredMessages.forEach((msg, index) => {
-                // Highlight unread messages (if you track read status)
-                const isUnread = msg.is_unread ? 'unread' : '';
-                
                 // Truncate message for better printing
                 const messagePreview = this.stripHtml(msg.message);
                 const truncatedMsg = messagePreview.length > 100 
@@ -261,7 +417,7 @@ createApp({
                     : messagePreview;
         
                 table += `
-                    <tr class="${isUnread} ${index % 2 === 0 ? 'even' : 'odd'}">
+                    <tr class="${index % 2 === 0 ? 'even' : 'odd'}">
                         <td class="sender-cell">
                             <div class="sender-info">
                                 ${this.activeFolder === 'inbox' ? 
@@ -297,9 +453,15 @@ createApp({
         },
     
         exportToExcel() {
+            // Check if XLSX is available
+            if (typeof XLSX === 'undefined') {
+                this.showError('Excel export library is not loaded');
+                return;
+            }
+            
             // Prepare data
             const data = [
-                ['Sender/Receiver', 'Subject', 'Message', 'Time'], // Header row
+                ['Sender/Receiver', 'Subject', 'Message', 'Time'],
                 ...this.filteredMessages.map(msg => [
                     msg.sender,
                     msg.subject,
@@ -323,7 +485,12 @@ createApp({
         },
     
         exportToPDF() {
-            const { jsPDF } = window.jspdf;
+            // Check if jsPDF is available
+            if (typeof jsPDF === 'undefined') {
+                this.showError('PDF export library is not loaded');
+                return;
+            }
+            
             const doc = new jsPDF();
             
             // Set document metadata
@@ -336,7 +503,7 @@ createApp({
         
             // Add header with logo and title
             doc.setFontSize(20);
-            doc.setTextColor(26, 115, 232); // LSPU blue color
+            doc.setTextColor(26, 115, 232);
             doc.setFont('helvetica', 'bold');
             doc.text('Alumni Portal', 105, 15, { align: 'center' });
             
@@ -404,17 +571,17 @@ createApp({
                         fillColor: [240, 240, 240]
                     },
                     columnStyles: {
-                        0: { cellWidth: 35, fontStyle: 'bold' }, // Sender/Receiver
-                        1: { cellWidth: 40 }, // Subject
-                        2: { cellWidth: 70 }, // Message
-                        3: { cellWidth: 25, halign: 'center' } // Time
+                        0: { cellWidth: 35, fontStyle: 'bold' },
+                        1: { cellWidth: 40 },
+                        2: { cellWidth: 70 },
+                        3: { cellWidth: 25, halign: 'center' }
                     },
                     didDrawPage: (data) => {
                         // Footer
                         doc.setFontSize(8);
                         doc.setTextColor(150, 150, 150);
                         doc.text(
-                            `Page ${data.pageCount}`, 
+                            `Page ${data.pageNumber}`, 
                             105, 
                             doc.internal.pageSize.height - 10,
                             { align: 'center' }
@@ -423,14 +590,7 @@ createApp({
                 });
             }
             
-            // Add watermark for confidential documents
-            if (this.activeFolder === 'inbox' || this.activeFolder === 'sent') {
-                doc.setFontSize(60);
-                doc.setTextColor(230, 230, 230);
-                doc.setFont('helvetica', 'bold');
-            }
-            
-            // Save the PDF with a more descriptive filename
+            // Save the PDF
             const fileName = `AlumniPortal_Messages_${this.folderTitle}_${new Date().toISOString().slice(0,10)}.pdf`;
             doc.save(fileName);
         
@@ -443,21 +603,64 @@ createApp({
               this.markAsRead(msg.id);
             }
             this.selectedMessage = msg;
-          },
+        },
           
-          markAsRead(messageId) {
+        markAsRead(messageId) {
             fetch('functions/mark_message_read.php', {
-              method: 'POST',
-              body: JSON.stringify({ message_id: messageId }),
-              headers: { 'Content-Type': 'application/json' }
+                method: 'POST',
+                body: JSON.stringify({ message_id: messageId }),
+                headers: { 'Content-Type': 'application/json' }
             }).then(() => {
-              // Update local state if needed
+                // Update local state if needed
+                const msg = this.filteredMessages.find(m => m.id === messageId);
+                if (msg) {
+                    msg.is_unread = false;
+                }
             });
-          },
+        },
+
+        openTutorial() {
+            this.showWelcomeModal = true;
+            this.currentWelcomeSlide = 0;
+            
+            // Mark tutorial as viewed in session storage
+            sessionStorage.setItem('tutorial_viewed', 'true');
+        },
+        
+        closeWelcomeModal() {
+            console.log('Closing welcome modal');
+            this.showWelcomeModal = false;
+            
+            // Always mark as shown when user closes the modal
+            localStorage.setItem('welcomeModalShown', 'true');
+            console.log('Set welcomeModalShown to true in localStorage');
+            
+            // If user completed the tutorial (reached the end), mark it as completed
+            if (this.currentWelcomeSlide === this.welcomeSlides.length - 1) {
+                console.log('User completed tutorial, marking as completed');
+                this.markTutorialCompleted();
+            }
+        },
+        async markTutorialCompleted() {
+            try {
+                const response = await fetch('functions/mark_tutorial_completed.php', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    this.showTutorialButton = false;
+                    sessionStorage.setItem('tutorial_completed', 'true');
+                }
+            } catch (error) {
+                console.error('Error marking tutorial as completed:', error);
+            }
+        },
           
-          formatDate(dateString) {
+        formatDate(dateString) {
             return new Date(dateString).toLocaleString();
-          },
+        },
+        
         fetchMessages() {
             fetch('functions/fetch_messages.php')
                 .then(res => res.json())
@@ -474,8 +677,31 @@ createApp({
                     }
                 });
         },
+        
         sendMessage() {
+            if (!this.quill) {
+                this.showError('Editor is not ready. Please try again.');
+                return;
+            }
+            
             this.compose.message = this.quill.root.innerHTML;
+            
+            // Validate inputs
+            if (!this.compose.receiver) {
+                this.showError('Please select a recipient');
+                return;
+            }
+            
+            if (!this.compose.subject.trim()) {
+                this.showError('Please enter a subject');
+                return;
+            }
+            
+            if (!this.compose.message.trim() || this.compose.message === '<p><br></p>') {
+                this.showError('Please enter a message');
+                return;
+            }
+            
             fetch('functions/insert_message.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -489,37 +715,42 @@ createApp({
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    this.showSuccess('Message sent successfully!');
                     this.showCompose = false;
                     this.compose = { role: '', receiver: '', subject: '', message: '' };
                     if (this.quill) this.quill.setContents([]);
                     this.fetchMessages();
                 } else {
-                    if (data.success) {
-                        this.showSuccess('Message sent successfully!');
-                    } else {
-                        this.showError(data.message || 'Failed to send message.');
-                    }
+                    this.showError(data.message || 'Failed to send message.');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.showError('An error occurred while sending the message');
             });
         },
+        
         toggleDarkMode() {
             this.darkMode = !this.darkMode;
         },
+        
         onReceiverChange() {
             const selected = this.allUsers.find(u => u.email === this.compose.receiver);
             if (selected) {
-                // Map backend role to user-friendly label
                 const roleMap = { admin: 'Administrator', employer: 'Employer', alumni: 'Alumni' };
                 this.compose.role = roleMap[selected.user_role] || selected.user_role;
             } else {
                 this.compose.role = '';
             }
         },
+        
         stripHtml(html) {
+            if (!html) return '';
             const div = document.createElement('div');
             div.innerHTML = html;
             return div.textContent || div.innerText || '';
         },
+        
         moveToFolder(msg, folder) {
             fetch('functions/update_message_folder.php', {
                 method: 'POST',
@@ -530,37 +761,29 @@ createApp({
             .then(data => {
                 if (data.success) {
                     this.fetchMessages();
+                    this.showSuccess('Message moved successfully');
                 } else {
-                    if (data.success) {
-                        this.showSuccess('Message sent successfully!');
-                    } else {
-                        this.showError(data.message || 'Failed to send message.');
-                    }
+                    this.showError(data.message || 'Failed to move message');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.showError('An error occurred while moving the message');
             });
         },
+        
         toggleImportant(msg) {
             const newFolder = msg.folder === 'important' ? (this.activeFolder === 'inbox' ? 'inbox' : 'sent') : 'important';
             this.moveToFolder(msg, newFolder);
-            if (data.success) {
-                this.showSuccess('Operation completed successfully');
-                this.fetchMessages();
-            } else {
-                this.showError(data.message || 'Operation failed');
-            }
         },
+        
         moveToTrash(msg) {
             this.moveToFolder(msg, 'trash');
-            if (data.success) {
-                this.showSuccess('Operation completed successfully');
-                this.fetchMessages();
-            } else {
-                this.showError(data.message || 'Operation failed');
-            }
         },
+        
         restoreFromTrash(msg) {
             // Restore to inbox if user is receiver, sent if user is sender
-            const userEmail = this.profile?.email || this.$root.email || '';
+            const userEmail = this.profile?.email || '';
             const newFolder = msg.receiver_email === userEmail ? 'inbox' : 'sent';
             
             fetch('functions/update_message_folder.php', {
@@ -585,6 +808,7 @@ createApp({
                 this.showError('An error occurred while restoring the message');
             });
         },
+        
         toggleSelectAll() {
             if (this.selectAll) {
                 this.selectedMessages = this.filteredMessages.map(m => m.id);
@@ -592,21 +816,27 @@ createApp({
                 this.selectedMessages = [];
             }
         },
+        
         toggleImportantSelected() {
+            if (this.selectedMessages.length === 0) {
+                this.showInfo('Please select messages to mark as important');
+                return;
+            }
+            
             this.selectedMessages.forEach(id => {
                 const msg = this.filteredMessages.find(m => m.id === id);
                 if (msg) this.toggleImportant(msg);
             });
             this.selectedMessages = [];
             this.selectAll = false;
-            if (data.success) {
-                this.showSuccess('Operation completed successfully');
-                this.fetchMessages();
-            } else {
-                this.showError(data.message || 'Operation failed');
-            }
         },
+        
         moveToTrashSelected() {
+            if (this.selectedMessages.length === 0) {
+                this.showInfo('Please select messages to move to trash');
+                return;
+            }
+            
             this.selectedMessages.forEach(id => {
                 const msg = this.filteredMessages.find(m => m.id === id);
                 if (msg) this.moveToTrash(msg);
@@ -614,7 +844,13 @@ createApp({
             this.selectedMessages = [];
             this.selectAll = false;
         },
+        
         restoreFromTrashSelected() {
+            if (this.selectedMessages.length === 0) {
+                this.showInfo('Please select messages to restore');
+                return;
+            }
+            
             this.selectedMessages.forEach(id => {
                 const msg = this.filteredMessages.find(m => m.id === id);
                 if (msg) this.restoreFromTrash(msg);
@@ -622,11 +858,11 @@ createApp({
             this.selectedMessages = [];
             this.selectAll = false;
         },
-        confirmLogout: function() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = 'logout.php';
-            }
+        
+        confirmLogout() {
+            this.showLogoutModal = true;
         },
+        
         logout() {
             window.location.href = 'logout.php';
         }

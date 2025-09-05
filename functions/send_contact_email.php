@@ -57,14 +57,14 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com'; // Gmail SMTP server
     $mail->SMTPAuth = true;
-    $mail->Username = 'allencristal12@gmail.com';
-        $mail->Password = 'ugwb vksz wjto zbwf';
+    $mail->Username = 'lspueis@gmail.com';
+        $mail->Password = 'afbp fcwf oujr yqzr';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
     // Recipients
-    $mail->setFrom('allencristal12@gmail.com', 'LSPU-EIS Contact Form');
-    $mail->addAddress('allencristal12@gmail.com', 'Allen Cristal');
+    $mail->setFrom('lspueis@gmail.com', 'LSPU-EIS Contact Form');
+    $mail->addAddress('lspueis@gmail.com', 'Allen Cristal');
     $mail->addReplyTo($email, $name);
 
     // Content

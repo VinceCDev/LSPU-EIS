@@ -49,6 +49,183 @@ $_SESSION['user_id'] = $user_id;
     </script>
 </head>
 <body id="app" v-cloak :class="[darkMode ? 'dark bg-gmailgray' : 'bg-gray-100']" class="h-full">
+    <!-- Add this modal code right after the opening <body> tag -->
+    <div v-if="showWelcomeModal" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="bg-blue-600 text-white p-5 flex justify-between items-center">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-graduation-cap mr-3"></i> Welcome to LSPU Alumni Portal!
+                </h2>
+                <button @click="closeWelcomeModal" class="text-white hover:text-blue-200 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Content with carousel -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- Carousel indicators -->
+                <div class="flex justify-center mb-6">
+                    <div v-for="(slide, index) in welcomeSlides" :key="index" 
+                        :class="['w-3 h-3 rounded-full mx-1 cursor-pointer', 
+                                currentWelcomeSlide === index ? 'bg-blue-600' : 'bg-gray-300']"
+                        @click="currentWelcomeSlide = index">
+                    </div>
+                </div>
+                
+                <!-- Slide 1: Introduction -->
+                <div v-if="currentWelcomeSlide === 0" class="text-center">
+                    <div class="text-blue-500 text-6xl mb-6">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Welcome, Alumni!</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        We're excited to have you here. This portal connects you with job opportunities, 
+                        fellow alumni, and valuable resources from LSPU.
+                    </p>
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg text-left">
+                        <p class="text-blue-700 dark:text-blue-300 flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                            <span>Take a quick tour to learn how to make the most of your alumni portal.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Slide 2: Navigation -->
+                <div v-if="currentWelcomeSlide === 1" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-compass text-blue-500 mr-2"></i> Navigation Guide
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Home</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Browse and search for job opportunities.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">My Applications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Track your job applications status.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Notifications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Get updates on applications and messages.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Profile</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Manage your personal information.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 3: Job Search -->
+                <div v-if="currentWelcomeSlide === 2" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-search text-blue-500 mr-2"></i> Finding Jobs
+                    </h3>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-search text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Search & Filter</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Use the search bar and filters to find jobs that match your skills and preferences.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-bookmark text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Save Jobs</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Click the bookmark icon to save interesting jobs for later.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-paper-plane text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Apply Easily</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Use your pre-filled profile information to apply quickly to jobs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 4: Profile -->
+                <div v-if="currentWelcomeSlide === 3" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-user-edit text-blue-500 mr-2"></i> Complete Your Profile
+                    </h3>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                            <p class="text-blue-700 dark:text-blue-300">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                A complete profile increases your chances of getting hired by 70%!
+                            </p>
+                        </div>
+                        <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Add your education history
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                List your skills and certifications
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Include work experience
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Upload your resume
+                            </li>
+                        </ul>
+                        <div class="mt-4">
+                            <a href="my_profile" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-user-edit mr-2"></i> Complete My Profile Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer with navigation -->
+            <div class="border-t border-gray-200 dark:border-gray-700 p-4 flex justify-between">
+                <button v-if="currentWelcomeSlide > 0" 
+                        @click="currentWelcomeSlide--" 
+                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                </button>
+                <div v-else></div>
+                
+                <button v-if="currentWelcomeSlide < welcomeSlides.length - 1" 
+                        @click="currentWelcomeSlide++" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Next <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                
+                <button v-else 
+                        @click="closeWelcomeModal" 
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Finish <i class="fas fa-check ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Notification Area -->
     <div class="fixed top-4 right-4 z-[100] space-y-3 w-full max-w-xs" aria-live="polite">
@@ -143,6 +320,9 @@ $_SESSION['user_id'] = $user_id;
                         <a href="forgot_password" class="block px-4 py-2 text-gray-700 dark:text-gray-200  hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
                             <i class="fas fa-key mr-2"></i> Forgot Password
                         </a>
+                        <a href="#" @click.prevent="openTutorial" class="block px-4 py-2 text-gray-700 dark:text-gray-200  hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
+                            <i class="fas fa-graduation-cap mr-2"></i> Show Tutorial
+                        </a>
                         <a href="employer_login" class="block px-4 py-2 text-gray-700 dark:text-gray-200  hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
                             <i class="fas fa-briefcase mr-2"></i> Employer Site
                         </a>
@@ -197,6 +377,9 @@ $_SESSION['user_id'] = $user_id;
                             <a href="forgot_password" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 dark:hover:text-white transition-colors duration-200">
                                 <i class="fas fa-key mr-2"></i> Forgot Password
                             </a>
+                            <a href="#" @click.prevent="openTutorial" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
+                                <i class="fas fa-graduation-cap mr-2"></i> Show Tutorial
+                            </a>
                             <a href="employer_login" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 dark:hover:text-white transition-colors duration-200">
                                 <i class="fas fa-briefcase mr-2"></i> Employer Site
                             </a>
@@ -244,19 +427,19 @@ $_SESSION['user_id'] = $user_id;
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-blue-100 dark:bg-blue-900">
                                 <tr>
-                                    <th v-if="filteredMessages.length > 0" scope="col" class="px-3 py-2 text-center w-8">
+                                    <th v-if="filteredMessages.length > 0" scope="col" class="px-3 py-2 text-center w-8 pl-8">
                                         <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" class="h-4 w-4">
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider pl-8">
                                         Sender/Receiver
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider pl-8">
                                         Subject
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider pl-8">
                                         Message
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs sm:text-sm md:text-md font-medium text-blue-700 dark:text-blue-300 tracking-wider pl-8">
                                         Time
                                     </th>
                                 </tr>
@@ -265,19 +448,19 @@ $_SESSION['user_id'] = $user_id;
                                 <tr v-for="(msg, idx) in filteredMessages" :key="msg.id" 
                                     @click="openMessage(msg)"
                                     class="hover:bg-blue-50 dark:hover:bg-blue-800 cursor-pointer transition-colors duration-150">
-                                    <td class="px-3 py-2 whitespace-nowrap">
+                                    <td class="px-3 py-2 whitespace-nowrap pl-8">
                                         <input type="checkbox" :value="msg.id" v-model="selectedMessages" @click.stop class="h-4 w-4">
                                     </td>
-                                    <td class="px-3 py-2 whitespace-nowrap text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300">
+                                    <td class="px-3 py-2 whitespace-nowrap text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300 pl-8">
                                         {{ msg.sender }}
                                     </td>
-                                    <td class="px-3 py-2 text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300 max-w-[120px] sm:max-w-[180px] md:max-w-[240px] truncate">
+                                    <td class="px-3 py-2 text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300 max-w-[120px] sm:max-w-[180px] md:max-w-[240px] truncate pl-8">
                                         {{ msg.subject }}
                                     </td>
-                                    <td class="px-3 py-2 text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300 max-w-[180px] sm:max-w-[280px] md:max-w-[360px] truncate">
+                                    <td class="px-3 py-2 text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300 max-w-[180px] sm:max-w-[280px] md:max-w-[360px] truncate pl-8">
                                         {{ stripHtml(msg.message) }}
                                     </td>
-                                    <td class="px-3 py-2 whitespace-nowrap text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300">
+                                    <td class="px-3 py-2 whitespace-nowrap text-xs sm:text-sm md:text-md text-gray-700 dark:text-gray-300 pl-8">
                                         {{ msg.time }}
                                     </td>
                                 </tr>
@@ -286,51 +469,57 @@ $_SESSION['user_id'] = $user_id;
                     </div>
                 </div>
             </main>
-        <!-- Compose Modal (floating) -->
-        <div v-if="showCompose" class="compose-float flex items-end justify-end">
-            <div class="compose-modal bg-white rounded-2xl shadow-2xl border border-gray-200 p-0 relative overflow-hidden pointer-events-auto">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-blue-50 dark:bg-blue-900">
-                    <span class="font-semibold text-gray-800 dark:text-gray-100">New Message</span>
-                    <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" @click="showCompose = false"><i class="fas fa-times"></i></button>
+            
+            <!-- Compose Modal (floating) -->
+            <div v-if="showCompose" class="fixed inset-0 z-[100] flex items-end justify-end p-4 bg-black bg-opacity-50 dark:bg-opacity-70">
+                <div class="compose-modal bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-0 relative overflow-hidden pointer-events-auto w-full max-w-md">
+                    <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/30">
+                        <span class="font-semibold text-gray-800 dark:text-gray-100">New Message</span>
+                        <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" @click="showCompose = false">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
+                    </div>
+                    <form @submit.prevent="sendMessage" class="px-5 py-4 space-y-4">
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Receiver <span class="text-red-500">*</span></label>
+                            <select v-model="compose.receiver" required @change="onReceiverChange" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                                <option value="">Select recipient</option>
+                                <option v-for="user in allUsers" :key="user.email" :value="user.email">
+                                    {{ user.name }} ({{ user.email }})
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Role</label>
+                            <input type="text" v-model="compose.role" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-not-allowed" readonly disabled>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Subject <span class="text-red-500">*</span></label>
+                            <input v-model="compose.subject" required type="text" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="Enter subject">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Message <span class="text-red-500">*</span></label>
+                            <div id="editor" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[120px] p-3 text-gray-900 dark:text-gray-100"></div>
+                        </div>
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="button" class="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" @click="showCompose = false">Cancel</button>
+                            <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors flex items-center gap-2">
+                                <i class="fas fa-paper-plane text-sm"></i>
+                                Send
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <form @submit.prevent="sendMessage" class="px-4 py-4 space-y-3">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Receiver <span class="text-red-500">*</span></label>
-                        <select v-model="compose.receiver" required @change="onReceiverChange" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            <option value="">Select</option>
-                            <option v-for="user in allUsers" :key="user.email" :value="user.email">
-                                {{ user.name }} ({{ user.email }})
-                            </option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Role</label>
-                        <input type="text" v-model="compose.role" class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100" readonly disabled>
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Subject <span class="text-red-500">*</span></label>
-                        <input v-model="compose.subject" required type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">Message <span class="text-red-500">*</span></label>
-                        <div id="editor" class="bg-white border border-gray-300 rounded"></div>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-2">
-                        <button type="button" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" @click="showCompose = false">Cancel</button>
-                        <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700">Send</button>
-                    </div>
-                </form>
             </div>
-        </div>
     </div>
 
     <!-- Message Detail Modal -->
     <transition enter-active-class="ease-out duration-300"
-                enter-from-class="opacity-0"
-                enter-to-class="opacity-100"
-                leave-active-class="ease-in duration-200"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0">
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="ease-in duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0">
         <div v-if="selectedMessage" class="fixed inset-0 z-[100] overflow-y-auto">
             <!-- Overlay -->
             <transition enter-active-class="ease-out duration-300"
@@ -338,67 +527,83 @@ $_SESSION['user_id'] = $user_id;
                     enter-to-class="opacity-100"
                     leave-active-class="ease-in duration-200"
                     leave-from-class="opacity-100"
-                        leave-to-class="opacity-0">
-            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" 
-                @click="selectedMessage = null"></div>
+                    leave-to-class="opacity-0">
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-85 transition-opacity" 
+                    @click="selectedMessage = null"></div>
             </transition>
 
             <!-- Modal Content -->
             <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <transition enter-active-class="ease-out duration-300"
+                <transition enter-active-class="ease-out duration-300"
                         enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         enter-to-class="opacity-100 translate-y-0 sm:scale-100"
                         leave-active-class="ease-in duration-200"
                         leave-from-class="opacity-100 translate-y-0 sm:scale-100"
                         leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
-                <!-- Header -->
-                <div class="px-6 py-4 bg-gray-700 border-b border-gray-600 flex justify-between items-start">
-                    <div>
-                    <h3 class="text-xl font-bold text-gray-100">
-                        {{ selectedMessage.subject || '(No Subject)' }}
-                    </h3>
-                    <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
-                        <span class="text-gray-300">
-                        <span class="font-medium">{{ activeFolder === 'inbox' ? 'From:' : 'To:' }}</span>
-                        {{ activeFolder === 'inbox' ? selectedMessage.sender_email : selectedMessage.receiver_email }}
-                        </span>
-                        <span class="text-gray-400">•</span>
-                        <span class="text-gray-400">{{ formatDate(selectedMessage.created_at) }}</span>
-                    </div>
-                    </div>
-                    <button @click="selectedMessage = null" 
-                            class="text-gray-300 hover:text-white p-1 rounded-full hover:bg-gray-600">
-                    <i class="fas fa-times text-lg"></i>
-                    </button>
-                </div>
+                    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
+                        <!-- Header -->
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex justify-between items-start">
+                            <div class="pr-4">
+                                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+                                    {{ selectedMessage.subject || '(No Subject)' }}
+                                </h3>
+                                <div class="mt-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm">
+                                    <span class="text-gray-600 dark:text-gray-300 flex items-center">
+                                        <span class="font-medium mr-1">{{ activeFolder === 'inbox' ? 'From:' : 'To:' }}</span>
+                                        {{ activeFolder === 'inbox' ? selectedMessage.sender_email : selectedMessage.receiver_email }}
+                                    </span>
+                                    <span class="hidden sm:inline text-gray-400 dark:text-gray-500">•</span>
+                                    <span class="text-gray-500 dark:text-gray-400 flex items-center">
+                                        <i class="far fa-clock mr-1.5"></i>
+                                        {{ formatDate(selectedMessage.created_at) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <button @click="selectedMessage = null" 
+                                    class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                <i class="fas fa-times text-lg"></i>
+                            </button>
+                        </div>
 
-                <!-- Message Body -->
-                <div class="px-6 py-4 bg-gray-800 max-h-[70vh] overflow-y-auto">
-                    <div class="prose prose-invert max-w-none text-gray-200" v-html="selectedMessage.message"></div>
-                </div>
+                        <!-- Message Body -->
+                        <div class="px-6 py-5 bg-white dark:bg-gray-800 max-h-[70vh] overflow-y-auto">
+                            <div class="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-gray-200" v-html="selectedMessage.message"></div>
+                        </div>
 
-                <!-- Footer Actions -->
-                <div class="px-6 py-4 bg-gray-700 border-t border-gray-600 flex justify-between">
-                    <div class="flex space-x-2">
-                    <button @click="toggleImportant(selectedMessage)"
-                            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition"
-                            :class="selectedMessage.is_important ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'">
-                        <i class="fas fa-star mr-2"></i>
-                        {{ selectedMessage.is_important ? 'Unmark Important' : 'Mark Important' }}
-                    </button>
-                    <button @click="moveToTrash(selectedMessage)"
-                            class="inline-flex items-center px-3 py-2 bg-gray-600 text-gray-300 hover:bg-gray-500 rounded-md text-sm font-medium transition">
-                        <i class="fas fa-trash mr-2"></i> Move to Trash
-                    </button>
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <!-- Reply Button -->
+                                <button @click="replyToMessage(selectedMessage)"
+                                        class="inline-flex items-center justify-center px-3.5 py-2 bg-blue-100 dark:bg-blue-600 text-blue-700 dark:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-500 rounded-md text-sm font-medium transition-colors w-full">
+                                    <i class="fas fa-reply mr-2 text-xs"></i> Reply
+                                </button>
+                                
+                                <!-- Forward Button -->
+                                <button @click="forwardMessage(selectedMessage)"
+                                        class="inline-flex items-center justify-center px-3.5 py-2 bg-violet-100 dark:bg-violet-600 text-violet-700 dark:text-violet-100 hover:bg-violet-200 dark:hover:bg-violet-500 rounded-md text-sm font-medium transition-colors w-full">
+                                    <i class="fas fa-share mr-2 text-xs"></i> Forward
+                                </button>
+                                
+                                <!-- Important Button -->
+                                <button @click="toggleImportant(selectedMessage)"
+                                        :class="selectedMessage.is_important ? 
+                                            'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-500/30' : 
+                                            'bg-yellow-100 dark:bg-yellow-600 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-500'"
+                                            
+                                        class="inline-flex items-center justify-center px-3.5 py-2 bg-blue-100 dark:bg-blue-600 text-blue-700 dark:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-500 rounded-md text-sm font-medium transition-colors w-full">
+                                    <i class="fas fa-star mr-2 text-xs"></i>
+                                    {{ selectedMessage.is_important ? 'Unmark' : 'Mark' }}
+                                </button>
+                                
+                                <!-- Trash Button -->
+                                <button @click="moveToTrash(selectedMessage)"
+                                        class="inline-flex items-center justify-center px-3.5 py-2 bg-red-100 dark:bg-red-600 text-red-700 dark:text-red-100 hover:bg-red-200 dark:hover:bg-red-500 rounded-md text-sm font-medium transition-colors w-full">
+                                    <i class="fas fa-trash mr-2 text-xs"></i> Trash
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <button @click="selectedMessage = null"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition">
-                    Close
-                    </button>
-                </div>
-                </div>
-            </transition>
+                </transition>
             </div>
         </div>
     </transition>

@@ -17,7 +17,7 @@ const { createApp } = Vue;
                 selectedIds: [],
                 notifications:[],
                 compose: {
-                    role: '',
+                    role: 'Employer',
                     receiver: '',
                     subject: '',
                     message: ''
@@ -54,6 +54,7 @@ const { createApp } = Vue;
         },
             mounted() {
             this.applyDarkMode();
+            this.checkUrlParameters();
             this.fetchEmployerProfile();
             // Fetch all users for receiver dropdown (admins and alumni only for employers)
             fetch('functions/fetch_employer_contacts.php')
@@ -175,6 +176,27 @@ const { createApp } = Vue;
             
             showError(message) {
                 this.addNotification('error', message);
+            },
+
+            checkUrlParameters() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const composeParam = urlParams.get('compose');
+                const toParam = urlParams.get('to');
+                
+                if (composeParam === 'true') {
+                    this.showCompose = true;
+                    
+                    if (toParam) {
+                        // Set the receiver email if provided
+                        this.compose.receiver = decodeURIComponent(toParam);
+                        
+                        // Try to find the user in allUsers to set the role
+                        const user = this.allUsers.find(u => u.email === this.compose.receiver);
+                        if (user) {
+                            this.compose.role = user.role;
+                        }
+                    }
+                }
             },
             
             showInfo(message) {

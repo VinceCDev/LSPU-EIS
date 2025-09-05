@@ -35,6 +35,184 @@ $_SESSION['user_id'] = $user_id;
     </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 dark:text-gray-200 font-sans transition-colors duration-200" id="app" v-cloak>
+    <!-- Add this modal code right after the opening <body> tag -->
+    <div v-if="showWelcomeModal" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="bg-blue-600 text-white p-5 flex justify-between items-center">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-graduation-cap mr-3"></i> Welcome to LSPU Alumni Portal!
+                </h2>
+                <button @click="closeWelcomeModal" class="text-white hover:text-blue-200 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Content with carousel -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- Carousel indicators -->
+                <div class="flex justify-center mb-6">
+                    <div v-for="(slide, index) in welcomeSlides" :key="index" 
+                        :class="['w-3 h-3 rounded-full mx-1 cursor-pointer', 
+                                currentWelcomeSlide === index ? 'bg-blue-600' : 'bg-gray-300']"
+                        @click="currentWelcomeSlide = index">
+                    </div>
+                </div>
+                
+                <!-- Slide 1: Introduction -->
+                <div v-if="currentWelcomeSlide === 0" class="text-center">
+                    <div class="text-blue-500 text-6xl mb-6">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Welcome, Alumni!</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        We're excited to have you here. This portal connects you with job opportunities, 
+                        fellow alumni, and valuable resources from LSPU.
+                    </p>
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg text-left">
+                        <p class="text-blue-700 dark:text-blue-300 flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                            <span>Take a quick tour to learn how to make the most of your alumni portal.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Slide 2: Navigation -->
+                <div v-if="currentWelcomeSlide === 1" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-compass text-blue-500 mr-2"></i> Navigation Guide
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Home</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Browse and search for job opportunities.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">My Applications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Track your job applications status.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Notifications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Get updates on applications and messages.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Profile</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Manage your personal information.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 3: Job Search -->
+                <div v-if="currentWelcomeSlide === 2" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-search text-blue-500 mr-2"></i> Finding Jobs
+                    </h3>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-search text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Search & Filter</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Use the search bar and filters to find jobs that match your skills and preferences.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-bookmark text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Save Jobs</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Click the bookmark icon to save interesting jobs for later.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-paper-plane text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Apply Easily</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Use your pre-filled profile information to apply quickly to jobs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 4: Profile -->
+                <div v-if="currentWelcomeSlide === 3" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-user-edit text-blue-500 mr-2"></i> Complete Your Profile
+                    </h3>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                            <p class="text-blue-700 dark:text-blue-300">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                A complete profile increases your chances of getting hired by 70%!
+                            </p>
+                        </div>
+                        <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Add your education history
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                List your skills and certifications
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Include work experience
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Upload your resume
+                            </li>
+                        </ul>
+                        <div class="mt-4">
+                            <a href="my_profile" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-user-edit mr-2"></i> Complete My Profile Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer with navigation -->
+            <div class="border-t border-gray-200 dark:border-gray-700 p-4 flex justify-between">
+                <button v-if="currentWelcomeSlide > 0" 
+                        @click="currentWelcomeSlide--" 
+                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                </button>
+                <div v-else></div>
+                
+                <button v-if="currentWelcomeSlide < welcomeSlides.length - 1" 
+                        @click="currentWelcomeSlide++" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Next <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                
+                <button v-else 
+                        @click="closeWelcomeModal" 
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Finish <i class="fas fa-check ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div >
         <!-- Loading Spinner Overlay -->
         <div v-if="loading" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-[9999]">
@@ -123,7 +301,7 @@ $_SESSION['user_id'] = $user_id;
                                     <div class="px-4"><div class="border-t border-gray-200 dark:border-gray-600"></div></div>
                                     
                                     <!-- Menu items -->
-                                    <a href="my_profile" class="block px-4 py-2 bg-blue-100 text-blue-700 dark:text-blue-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
+                                    <a href="my_profile" class="block px-4 py-2 bg-blue-100 text-blue-700 dark:text-white hover:bg-blue-100 hover:text-blue-300 dark:bg-blue-500 dark:hover:bg-blue-500 transition-colors duration-200">
                                         <i class="fas fa-user mr-2"></i> View Profile
                                     </a>
                                     <a href="message" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
@@ -196,6 +374,9 @@ $_SESSION['user_id'] = $user_id;
                             </a>
                             <a href="forgot_password" class="block py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-blue-300">
                                 <i class="fas fa-key mr-2"></i> Forgot Password
+                            </a>
+                            <a href="#" @click.prevent="openTutorial" class="block py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-blue-300">
+                                <i class="fas fa-graduation-cap mr-2"></i> Show Tutorial
                             </a>
                             <a href="employer_login" class="block py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-blue-300">
                                 <i class="fas fa-briefcase mr-2"></i> Employer Site
@@ -377,52 +558,164 @@ $_SESSION['user_id'] = $user_id;
                 </div>
             </section>
 
-    <!-- Work Experience Section -->
-    <section class="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mb-6">
-        <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 uppercase">Work Experience</h2>
-            <button @click="showExperienceModal = true" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors w-auto">
-                <i class="fas fa-plus mr-1"></i>Add
-                    </button>
-                </div>
-        <div v-if="profile.experiences.length > 0" class="space-y-4 sm:space-y-6">
-            <div v-for="(exp, index) in profile.experiences" :key="index" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 sm:p-6">
-                <!-- Invisible experience_id for internal use -->
-                <input type="hidden" :value="exp.experience_id" />
-                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                    <div class="flex-1">
-                        <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 uppercase mb-1">{{ exp.title }}</h3>
-                        <p class="text-base sm:text-lg text-blue-600 dark:text-blue-400 uppercase mb-1">{{ exp.company }}</p>
-                        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300">
-                            {{ formatDate(exp.start_date) }} - {{ exp.current ? 'Present' : formatDate(exp.end_date) }}
-                        </p>
-                        <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">
-                            <span class="font-semibold">Location of Work:</span> {{ exp.location_of_work || 'Not specified' }}
-                        </p>
-                        <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">
-                            <span class="font-semibold">Employment Status:</span> {{ exp.employment_status || 'Not specified' }}
-                        </p>
-                        <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">
-                            <span class="font-semibold">Employment Sector:</span> {{ exp.employment_sector || 'Not specified' }}
-                        </p>
-                        </div>
-                    <div class="flex gap-2 flex-shrink-0">
-                        <button @click="editExperience(index)" class="bg-blue-600 text-white px-3 py-1.5 sm:px-3 sm:py-1 rounded hover:bg-blue-700 transition-colors text-sm">
-                            <i class="fas fa-edit mr-1"></i> Edit
-                            </button>
-                        <button @click="deleteExperience(index)" class="bg-red-600 text-white px-3 py-1.5 sm:px-3 sm:py-1 rounded hover:bg-red-700 transition-colors text-sm">
-                            <i class="fas fa-trash mr-1"></i> Delete
+            <!-- Work Experience Section -->
+            <section class="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 uppercase">Work Experience</h2>
+                    <button @click="showExperienceModal = true" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors w-auto">
+                        <i class="fas fa-plus mr-1"></i>Add
                             </button>
                         </div>
-                    </div>
-                <p class="text-sm sm:text-base text-gray-700 dark:text-gray-200 leading-relaxed">{{ exp.description }}</p>
+                <div v-if="profile.experiences.length > 0" class="space-y-4 sm:space-y-6">
+                    <div v-for="(exp, index) in profile.experiences" :key="index" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 sm:p-6">
+                        <!-- Invisible experience_id for internal use -->
+                        <input type="hidden" :value="exp.experience_id" />
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 uppercase mb-1">{{ exp.title }}</h3>
+                                <p class="text-base sm:text-lg text-blue-600 dark:text-blue-400 uppercase mb-1">{{ exp.company }}</p>
+                                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                                    {{ formatDate(exp.start_date) }} - {{ exp.current ? 'Present' : formatDate(exp.end_date) }}
+                                </p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">
+                                    <span class="font-semibold">Location of Work:</span> {{ exp.location_of_work || 'Not specified' }}
+                                </p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">
+                                    <span class="font-semibold">Employment Status:</span> {{ exp.employment_status || 'Not specified' }}
+                                </p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">
+                                    <span class="font-semibold">Employment Sector:</span> {{ exp.employment_sector || 'Not specified' }}
+                                </p>
+                                </div>
+                            <div class="flex gap-2 flex-shrink-0">
+                                <button @click="editExperience(index)" class="bg-blue-600 text-white px-3 py-1.5 sm:px-3 sm:py-1 rounded hover:bg-blue-700 transition-colors text-sm">
+                                    <i class="fas fa-edit mr-1"></i> Edit
+                                    </button>
+                                <button @click="deleteExperience(index)" class="bg-red-600 text-white px-3 py-1.5 sm:px-3 sm:py-1 rounded hover:bg-red-700 transition-colors text-sm">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        <p class="text-sm sm:text-base text-gray-700 dark:text-gray-200 leading-relaxed">{{ exp.description }}</p>
+                        </div>
                 </div>
-        </div>
-        <div v-else class="text-center py-8 sm:py-12">
-            <i class="fas fa-briefcase text-3xl sm:text-4xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500 dark:text-gray-400 text-sm sm:text-base">No work experience added yet</p>
+                <div v-else class="text-center py-8 sm:py-12">
+                    <i class="fas fa-briefcase text-3xl sm:text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm sm:text-base">No work experience added yet</p>
                 </div>
             </section>
+
+            <!-- Success Stories Section -->
+            <section class="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mb-6">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 uppercase">Success Stories
+            </h2>
+        </div>
+        <button @click="showSuccessStoryModal = true" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center">
+            <i class="fas fa-plus mr-2 text-sm"></i>Share Story
+        </button>
+    </div>
+    <div v-if="successStories.length > 0" class="space-y-6">
+        <div v-for="(story, index) in successStories" :key="index" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 sm:p-6">
+            <div class="flex items-start justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+                    <i class="fas fa-trophy text-yellow-500 mr-3 text-sm"></i>
+                    {{ story.title }}
+                </h3>
+                <div class="flex gap-2">
+                    <button @click="editSuccessStory(index)" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1.5 rounded-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-sm shadow-sm flex items-center">
+                        <i class="fas fa-edit mr-1.5 text-xs"></i> Edit
+                    </button>
+                    <button @click="deleteSuccessStory(index)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1.5 rounded-md hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm shadow-sm flex items-center">
+                        <i class="fas fa-trash mr-1.5 text-xs"></i> Delete
+                    </button>
+                </div>
+            </div>
+            <p class="text-gray-700 dark:text-gray-200 mb-4 leading-relaxed italic">{{ story.content }}</p>
+            <div class="text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-500 flex flex-wrap items-center">
+                <span class="flex items-center mr-4">
+                    <i class="far fa-calendar mr-1.5"></i> Posted on: {{ formatDate(story.created_at) }}
+                </span>
+                <span class="flex items-center">
+                    <i class="far fa-flag mr-1.5"></i> Status: 
+                    <span :class="{
+                        'text-yellow-600 dark:text-yellow-400': story.status === 'draft',
+                        'text-green-600 dark:text-green-400': story.status === 'published',
+                        'text-gray-600 dark:text-gray-400': story.status === 'archived'
+                    }" class="font-semibold capitalize ml-1.5 px-2 py-0.5 rounded-full text-xs bg-opacity-10" :class="{
+                        'bg-yellow-500': story.status === 'draft',
+                        'bg-green-500': story.status === 'published',
+                        'bg-gray-500': story.status === 'archived'
+                    }">
+                        {{ story.status }}
+                    </span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div v-else class="text-center py-12 px-4">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-5">
+            <i class="fas fa-trophy text-3xl text-green-500 dark:text-green-400"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No success stories yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">Be the first to share your achievement and inspire others!</p>
+        <button @click="showSuccessStoryModal = true" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+            Share Your First Success Story
+        </button>
+    </div>
+</section>
+
+            <!-- Success Story Modal -->
+            <transition 
+                enter-active-class="modal-enter-active"
+                enter-from-class="modal-enter-from"
+                enter-to-class="modal-enter-to"
+                leave-active-class="modal-leave-active"
+                leave-from-class="modal-leave-from"
+                leave-to-class="modal-leave-to"
+            >
+                <div v-if="showSuccessStoryModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl mx-2 p-6 relative max-h-[90vh] overflow-y-auto">
+                        <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeSuccessStoryModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ editingSuccessStoryIndex === null ? 'Share' : 'Edit' }} Success Story</h3>
+                        <form @submit.prevent="saveSuccessStory">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title*</label>
+                                    <input type="text" v-model="editSuccessStoryData.title" placeholder="Enter a title for your story" required
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Story*</label>
+                                    <textarea v-model="editSuccessStoryData.content" rows="8" placeholder="Share your career success, achievement, or inspiring journey..." required
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-3 mt-6">
+                                <button type="button" @click="closeSuccessStoryModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Story</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Delete Success Story Confirmation Modal -->
+            <transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
+                <div v-if="showDeleteSuccessStoryModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
+                        <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete this success story?</p>
+                        <div class="flex justify-end gap-3">
+                            <button @click="cancelDeleteSuccessStory" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                            <button @click="confirmDeleteSuccessStory" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
 
             <!-- Resume Section -->
             <section class="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mb-6">
@@ -846,117 +1139,130 @@ $_SESSION['user_id'] = $user_id;
 </transition>
 
 <!-- Delete Work Experience Confirmation Modal -->
-<transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
-    <div v-if="showDeleteExperienceModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
-            <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete this work experience?</p>
-            <div class="flex justify-end gap-3">
-                <button @click="cancelDeleteExperience" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button @click="confirmDeleteExperience" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
-                                </div>
-                                    </div>
-                                </div>
-</transition>
+        <transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
+            <div v-if="showDeleteExperienceModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
+                    <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete this work experience?</p>
+                    <div class="flex justify-end gap-3">
+                        <button @click="cancelDeleteExperience" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                        <button @click="confirmDeleteExperience" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                                        </div>
+                                            </div>
+                                        </div>
+        </transition>
 
 
-        <!-- Change Photo Modal -->
-        <transition 
-    enter-active-class="modal-enter-active"
-    enter-from-class="modal-enter-from"
-    enter-to-class="modal-enter-to"
-    leave-active-class="modal-leave-active"
-    leave-from-class="modal-leave-from"
-    leave-to-class="modal-leave-to"
->
-    <div v-if="showPhotoModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
-            <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closePhotoModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Update Profile Photo</h3>
-            <div class="space-y-4">
-                <div class="flex justify-center">
-                    <div class="relative">
-                        <img v-if="newPhotoPreview" :src="newPhotoPreview" alt="New Photo Preview" class="w-32 h-32 rounded-full object-cover border-4 border-blue-500">
-                        <img v-else-if="profilePicData.file_name" :src="'uploads/profile_picture/' + profilePicData.file_name" alt="Current Photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600">
-                        <div v-else class="w-32 h-32 rounded-full border-4 border-gray-200 dark:border-gray-600 bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-4xl text-gray-400 dark:text-gray-300">
-                            <i class="fas fa-user"></i>
+                <!-- Change Photo Modal -->
+                <transition 
+            enter-active-class="modal-enter-active"
+            enter-from-class="modal-enter-from"
+            enter-to-class="modal-enter-to"
+            leave-active-class="modal-leave-active"
+            leave-from-class="modal-leave-from"
+            leave-to-class="modal-leave-to"
+        >
+            <div v-if="showPhotoModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+                    <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closePhotoModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Update Profile Photo</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-center">
+                            <div class="relative">
+                                <img v-if="newPhotoPreview" :src="newPhotoPreview" alt="New Photo Preview" class="w-32 h-32 rounded-full object-cover border-4 border-blue-500">
+                                <img v-else-if="profilePicData.file_name" :src="'uploads/profile_picture/' + profilePicData.file_name" alt="Current Photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600">
+                                <div v-else class="w-32 h-32 rounded-full border-4 border-gray-200 dark:border-gray-600 bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-4xl text-gray-400 dark:text-gray-300">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Choose New Photo</label>
+                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                                <input type="file" ref="photoInput" @change="handlePhotoUpload" accept="image/*" class="hidden">
+                                <div class="cursor-pointer" @click="$refs.photoInput.click()">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-gray-600 dark:text-gray-300">Click to upload or drag and drop</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 5MB</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Choose New Photo</label>
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
-                        <input type="file" ref="photoInput" @change="handlePhotoUpload" accept="image/*" class="hidden">
-                        <div class="cursor-pointer" @click="$refs.photoInput.click()">
-                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-600 dark:text-gray-300">Click to upload or drag and drop</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 5MB</p>
-                        </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button @click="closePhotoModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                        <button v-if="profilePicData.file_name" @click="openDeleteProfilePicModal" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete Photo</button>
+                        <!-- Change Photo button only if a profile picture exists -->
+                        <button v-if="profilePicData.file_name" @click="$refs.photoInput.click()" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Change Photo</button>
+                        <!-- Save button only enabled if a file is selected -->
+                        <button @click="saveProfilePic" :disabled="!newPhotoFile" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">Save Photo</button>
                     </div>
                 </div>
             </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button @click="closePhotoModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button v-if="profilePicData.file_name" @click="openDeleteProfilePicModal" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete Photo</button>
-                <!-- Change Photo button only if a profile picture exists -->
-                <button v-if="profilePicData.file_name" @click="$refs.photoInput.click()" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Change Photo</button>
-                <!-- Save button only enabled if a file is selected -->
-                <button @click="saveProfilePic" :disabled="!newPhotoFile" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">Save Photo</button>
-            </div>
-        </div>
-    </div>
-</transition>
+        </transition>
 
-        <!-- Change Verification Document Modal -->
+                <!-- Change Verification Document Modal -->
         <transition 
-    enter-active-class="modal-enter-active"
-    enter-from-class="modal-enter-from"
-    enter-to-class="modal-enter-to"
-    leave-active-class="modal-leave-active"
-    leave-from-class="modal-leave-from"
-    leave-to-class="modal-leave-to"
->
-    <div v-if="showDocumentModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
-            <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeDocumentModal">
-                <i class="fas fa-times"></i>
-                        </button>
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Change Verification Document</h3>
-            <form @submit.prevent="updateVerificationDocument">
-                <div class="mb-4">
-                    <input type="file" @change="handleDocumentUpload" accept=".pdf,.jpg,.jpeg,.png,.gif" class="block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+            enter-active-class="modal-enter-active"
+            enter-from-class="modal-enter-from"
+            enter-to-class="modal-enter-to"
+            leave-active-class="modal-leave-active"
+            leave-from-class="modal-leave-from"
+            leave-to-class="modal-leave-to"
+        >
+            <div v-if="showDocumentModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+                    <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeDocumentModal">
+                        <i class="fas fa-times"></i>
+                                </button>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Change Verification Document</h3>
+                    <form @submit.prevent="updateVerificationDocument">
+                        <div class="mb-4">
+                            <input type="file" @change="handleDocumentUpload" accept=".pdf,.jpg,.jpeg,.png,.gif" class="block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                            </div>
+                        <div v-if="documentPreview" class="mb-4">
+                            <iframe v-if="documentPreviewType === 'pdf'" :src="documentPreview" style="width:100%;height:300px;" class="border rounded"></iframe>
+                            <img v-else :src="documentPreview" alt="Document Preview" class="max-h-48 rounded border mx-auto" />
+                        </div>
+                        <div class="flex justify-end gap-3">
+                            <button type="button" @click="closeDocumentModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Document</button>
                     </div>
-                <div v-if="documentPreview" class="mb-4">
-                    <iframe v-if="documentPreviewType === 'pdf'" :src="documentPreview" style="width:100%;height:300px;" class="border rounded"></iframe>
-                    <img v-else :src="documentPreview" alt="Document Preview" class="max-h-48 rounded border mx-auto" />
+                    </form>
                 </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" @click="closeDocumentModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Document</button>
             </div>
-            </form>
-        </div>
-    </div>
-</transition>
+        </transition>
 
-<transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
-    <div v-if="showDeleteProfilePicModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
-            <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete your profile photo?</p>
-            <div class="flex justify-end gap-3">
-                <button @click="closeDeleteProfilePicModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button @click="deleteProfilePic" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+        <transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
+            <div v-if="showDeleteProfilePicModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
+                    <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete your profile photo?</p>
+                    <div class="flex justify-end gap-3">
+                        <button @click="closeDeleteProfilePicModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                        <button @click="deleteProfilePic" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</transition>
+        </transition>
 
-        <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-2 transition-colors duration-200">
-            <div class="container mx-auto px-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-                &copy; 2025 LSPU EIS. All rights reserved.
+        <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-3 transition-colors duration-200 shadow-md">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-2 md:space-y-0 md:space-x-4">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">
+                        &copy; 2025 LSPU EIS. All rights reserved.
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-gray-300 dark:text-gray-600 hidden md:inline">|</span>
+                        <a href="alumni_terms" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 font-medium flex items-center md:ml-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Terms & Agreement
+                        </a>
+                    </div>
+                </div>
             </div>
         </footer>
         <!-- Floating Resume Generator Button -->

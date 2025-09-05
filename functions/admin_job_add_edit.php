@@ -49,14 +49,22 @@ function call_gemini_api($prompt) {
     return [];
 }
 
+// Function to extract percentage from Gemini response
+function extract_match_percentage($response) {
+    // Look for pattern like "Match (85%)" or "Not a Match (25%)"
+    if (preg_match('/\((\d+)%\)/', $response, $matches)) {
+        return (int)$matches[1]; // Return the percentage as integer
+    }
+    return 0; // Default to 0% if no percentage found
+}
+
 $db = Database::getInstance()->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
     // Create or Update
     $fields = [
-        'employer_id', 'title', 'type', 'location', 'salary', 'status',
-        'created_at', 'description', 'requirements', 'qualifications', 'employer_question'
+        'employer_id', 'title', 'type', 'location', 'salary', 'status', 'description', 'requirements', 'qualifications'
     ];
     $data = [];
     foreach ($fields as $field) {
@@ -68,15 +76,22 @@ if ($method === 'POST') {
             exit;
         }
     }
+    date_default_timezone_set('Asia/Manila');
+
+    // Generate the created_at timestamp
+    $data['created_at'] = date('Y-m-d H:i:s');
+
     if (isset($_POST['job_id']) && $_POST['job_id'] !== '') {
         // Update
         $job_id = $_POST['job_id'];
-        $stmt = $db->prepare("UPDATE jobs SET employer_id=?, title=?, type=?, location=?, salary=?, status=?, created_at=?, description=?, requirements=?, qualifications=?, employer_question=? WHERE job_id=?");
+        // FIXED: Removed trailing comma before WHERE
+        $stmt = $db->prepare("UPDATE jobs SET employer_id=?, title=?, type=?, location=?, salary=?, status=?, description=?, requirements=?, qualifications=? WHERE job_id=?");
+        // FIXED: Correct parameter count (10 parameters: 9 values + 1 job_id)
         $stmt->bind_param(
-            'issssssssssi',
-            $data['employer_id'], $data['title'], $data['type'], $data['location'], $data['salary'], $data['status'],
-            $data['created_at'], $data['description'], $data['requirements'], $data['qualifications'], $data['employer_question'],
-            $job_id
+            'issssssssi',
+            $data['employer_id'], $data['title'], $data['type'], $data['location'], 
+            $data['salary'], $data['status'], $data['description'], $data['requirements'], 
+            $data['qualifications'], $job_id
         );
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Job updated successfully.']);
@@ -86,18 +101,25 @@ if ($method === 'POST') {
         $stmt->close();
     } else {
         // Create
-        $stmt = $db->prepare("INSERT INTO jobs (employer_id, title, type, location, salary, status, created_at, description, requirements, qualifications, employer_question) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $db->prepare("INSERT INTO jobs (employer_id, title, type, location, salary, status, created_at, description, requirements, qualifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        // FIXED: Correct parameter type string (10 parameters)
         $stmt->bind_param(
-            'issssssssss',
-            $data['employer_id'], $data['title'], $data['type'], $data['location'], $data['salary'], $data['status'],
-            $data['created_at'], $data['description'], $data['requirements'], $data['qualifications'], $data['employer_question']
+            'isssssssss',
+            $data['employer_id'], $data['title'], $data['type'], $data['location'], 
+            $data['salary'], $data['status'], $data['created_at'], $data['description'], 
+            $data['requirements'], $data['qualifications']
         );
-        if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'message' => 'Job created successfully.']);
         
+        if ($stmt->execute()) {
+            // Get the newly inserted job ID
+            $job_id = $stmt->insert_id;
+            error_log("New job created with ID: " . $job_id);
+            
+            echo json_encode(['success' => true, 'message' => 'Job created successfully.']);
+
             // --- Gemini job match notification logic (per alumni, Match/Not a Match) ---
             $alumni = [];
-            $result = $db->query("SELECT a.user_id, a.course, a.alumni_id FROM alumni a");
+            $result = $db->query("SELECT a.user_id, a.course, a.alumni_id, a.first_name, a.last_name FROM alumni a");
             while ($row = $result->fetch_assoc()) {
                 // Get skills for each alumni
                 $skills = [];
@@ -110,39 +132,33 @@ if ($method === 'POST') {
                 }
                 $stmt_skills->close();
                 
-                // Debug output for skills fetching
-                error_log("Fetched skills for alumni_id {$row['alumni_id']}: " . implode(', ', $skills));
-                
                 $alumni[] = [
                     'user_id' => $row['user_id'],
+                    'alumni_id' => $row['alumni_id'],
+                    'first_name' => $row['first_name'],
+                    'last_name' => $row['last_name'],
                     'course' => $row['course'],
-                    'skills' => implode(', ', $skills),
-                    'debug_output' => "Alumni ID: {$row['alumni_id']}, Skills: " . implode(', ', $skills) // Added debug output
+                    'skills' => implode(', ', $skills)
                 ];
             }
-            
-            // Output the skills data for debugging
-            error_log("Alumni skills data: " . print_r($alumni, true));
-            
+
             $job_title = $data['title'];
             $requirements = $data['requirements'];
             $qualifications = $data['qualifications'];
-            
+
             foreach ($alumni as $alum) {
                 $skills_text = !empty($alum['skills']) ? "Skills: {$alum['skills']}" : "";
-                $prompt = "Based on the following information, determine if this is a 'Match' or 'Not a Match' for the job. 
-                          Provide only one of these two phrases as your response, with no additional explanation or text.\n\n
-                          Candidate Background:\n
-                          College Program: \"{$alum['course']}\"\n
-                          Skills: \"{$skills_text}\"\n
-                          Job Details:\n
-                          Title: \"$job_title\"\n
-                          Requirements: \"$requirements\"\n
-                          Qualifications: \"$qualifications\"\n\n
-                          Response:";
-                
-                // Debug output for the prompt being sent to Gemini
-                error_log("Sending to Gemini for user {$alum['user_id']}:\n$prompt");
+                $prompt = "Based on the following information, determine if this is a 'Match' or 'Not a Match' for the job.
+                    Provide only one of these two phrases as your response, followed by the job match percentage in parentheses (e.g., \"Match (85%)\"), with no additional explanation or text.
+
+                    Candidate Background:
+                    College Program: \"{$alum['course']}\"
+                    Skills: \"{$skills_text}\"
+                    Job Details:
+                    Title: \"$job_title\"
+                    Requirements: \"$requirements\"
+                    Qualifications: \"$qualifications\"
+                    Response:";
                 
                 $result = call_gemini_api($prompt);
                 $match = '';
@@ -152,15 +168,37 @@ if ($method === 'POST') {
                     $match = trim($result);
                 }
                 
-                // Debug output for Gemini response
-                error_log("Gemini response for user {$alum['user_id']}: " . $match);
+                // Extract percentage from response
+                $match_percentage = extract_match_percentage($match);
+                
+                // Store ALL matches in leaderboard (using alumni_id)
+                $stmt_leaderboard = $db->prepare('INSERT INTO job_match_leaderboard (alumni_id, job_id, match_percentage, notified) VALUES (?, ?, ?, ?) 
+                                                ON DUPLICATE KEY UPDATE match_percentage = VALUES(match_percentage), notified = VALUES(notified)');
+                
+                if (empty($alum['alumni_id'])) {
+                    error_log("ERROR: alumni_id is empty for user_id: {$alum['user_id']}");
+                    continue;
+                }
+                
+                $notified = (stripos($match, 'match') !== false && stripos($match, 'not a match') === false && $match_percentage >= 50) ? 1 : 0;
+                $stmt_leaderboard->bind_param('iiii', $alum['alumni_id'], $job_id, $match_percentage, $notified);
+                
+                try {
+                    $stmt_leaderboard->execute();
+                    error_log("Successfully inserted leaderboard entry for alumni_id: {$alum['alumni_id']}, job_id: $job_id");
+                } catch (Exception $e) {
+                    error_log("ERROR inserting leaderboard for alumni_id {$alum['alumni_id']}: " . $e->getMessage());
+                }
+                
+                $stmt_leaderboard->close();
                 
                 if (stripos($match, 'match') !== false && stripos($match, 'not a match') === false) {
                     $notif_message = "New job matches your profile!";
-                    $notif_details = "A new job posting for '$job_title' matches your background. Check it out!";
-                    $stmt_notif = $db->prepare('INSERT INTO notifications (user_id, type, message, details) VALUES (?, ?, ?, ?)');
+                    $notif_details = "A new job posting for '$job_title' {$match_percentage}% matches your background. Check it out!";
+                    
+                    $stmt_notif = $db->prepare('INSERT INTO notifications (user_id, type, message, details, job_id) VALUES (?, ?, ?, ?, ?)');
                     $notif_type = 'job_match';
-                    $stmt_notif->bind_param('isss', $alum['user_id'], $notif_type, $notif_message, $notif_details);
+                    $stmt_notif->bind_param('isssi', $alum['user_id'], $notif_type, $notif_message, $notif_message, $job_id);
                     $stmt_notif->execute();
                     $stmt_notif->close();
 
@@ -185,18 +223,18 @@ if ($method === 'POST') {
                     $mail->isSMTP();
                     $mail->Host = 'smtp.gmail.com';
                     $mail->SMTPAuth = true;
-                    $mail->Username = 'allencristal12@gmail.com'; // Change to your email
-                    $mail->Password = 'ugwb vksz wjto zbwf'; // Change to your app password
+                    $mail->Username = 'lspueis@gmail.com'; // Change to your email
+                    $mail->Password = 'afbp fcwf oujr yqzr'; // Change to your app password
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port = 587;
 
                     // Recipients
-                    $mail->setFrom('allencristal12@gmail.com', 'LSPU EIS');
+                    $mail->setFrom('lspueis@gmail.com', 'LSPU EIS');
                     $mail->addAddress($recipient);
 
                     // Content
                     $mail->isHTML(true);
-                    $mail->Subject = "New Job Match: $job_title";
+                    $mail->Subject = "New Job Match: $job_title ({$match_percentage}%)";
                     $mail->Body = "
                         <!DOCTYPE html>
                         <html lang='en'>
@@ -284,6 +322,15 @@ if ($method === 'POST') {
                                     font-weight: bold;
                                     color: #1A1A1A;
                                 }
+                                .percentage-badge {
+                                    background: #00A0E9;
+                                    color: white;
+                                    padding: 8px 16px;
+                                    border-radius: 20px;
+                                    font-weight: bold;
+                                    display: inline-block;
+                                    margin: 10px 0;
+                                }
                             </style>
                         </head>
                         <body>
@@ -300,9 +347,10 @@ if ($method === 'POST') {
                                     
                                     <div class='job-match-card'>
                                         <h3 style='margin-top: 0; color: #00A0E9;'>{$job_title}</h3>
+                                        <div class='percentage-badge'>{$match_percentage}% Match</div>
                                         
                                         <div class='highlight-box'>
-                                            <h4 style='margin-top: 0;'>Job Details:</h4>
+                                            <h4 style'margin-top: 0;'>Job Details:</h4>
                                             <p><strong>Requirements:</strong><br>
                                             {$requirements}</p>
                                             
@@ -341,7 +389,7 @@ if ($method === 'POST') {
                         </html>
                         ";
 
-                        $mail->AltBody = "Hello {$first_name} {$last_name},\n\nWe found a new job posting that matches your profile!\n\nJob Title: {$job_title}\nRequirements: {$requirements}\nQualifications: {$qualifications}\n\nView Job:localhost/lspu-eis/home\n\nBest regards,\nLSPU EIS Team";
+                        $mail->AltBody = "Hello {$first_name} {$last_name},\n\nWe found a new job posting that matches your profile with a {$match_percentage}% match rate!\n\nJob Title: {$job_title}\nMatch Percentage: {$match_percentage}%\nRequirements: {$requirements}\nQualifications: {$qualifications}\n\nView Job: localhost/lspu-eis/home\n\nBest regards,\nLSPU EIS Team";
 
                         $mail->send();
                         error_log("Email sent to {$recipient} for job match");
@@ -368,7 +416,7 @@ if ($method === 'DELETE') {
     $job_id = $input['job_id'] ?? null;
     if (!$job_id) {
         echo json_encode(['success' => false, 'message' => 'Missing job_id']);
-        exit;
+    exit;
     }
     $stmt = $db->prepare("DELETE FROM jobs WHERE job_id=?");
     $stmt->bind_param('i', $job_id);
@@ -381,4 +429,4 @@ if ($method === 'DELETE') {
     exit;
 }
 
-echo json_encode(['success' => false, 'message' => 'Invalid request.']); 
+echo json_encode(['success' => false, 'message' => 'Invalid request.']);

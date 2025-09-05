@@ -28,6 +28,7 @@ $sql = "
 SELECT 
     app.application_id,
     app.applied_at,
+    app.status AS application_status, 
     a.alumni_id,
     a.first_name, a.middle_name, a.last_name, a.birthdate, a.contact, a.gender, a.civil_status, a.city, a.province, a.year_graduated, a.college, a.course,
     u.email, u.secondary_email,

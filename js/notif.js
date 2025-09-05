@@ -3,6 +3,15 @@ const { createApp } = Vue;
             data() {
                 return {
                     loading: true,
+                    showTutorialButton: true, // Start as false, will be updated after check
+                    showWelcomeModal: false, // Start as false
+                    currentWelcomeSlide: 0,
+                    welcomeSlides: [
+                        { title: "Welcome", content: "intro" },
+                        { title: "Navigation", content: "navigation" },
+                        { title: "Job Search", content: "job_search" },
+                        { title: "Profile", content: "profile" }
+                    ],
                     notificationIcons: {
                         application: 'fas fa-briefcase',
                         interview: 'fas fa-calendar-check',
@@ -45,6 +54,43 @@ const { createApp } = Vue;
                         this.loading = false;
                     }
                 },
+                openTutorial() {
+                    this.showWelcomeModal = true;
+                    this.currentWelcomeSlide = 0;
+                    
+                    // Mark tutorial as viewed in session storage
+                    sessionStorage.setItem('tutorial_viewed', 'true');
+                },
+                
+                closeWelcomeModal() {
+                    console.log('Closing welcome modal');
+                    this.showWelcomeModal = false;
+                    
+                    // Always mark as shown when user closes the modal
+                    localStorage.setItem('welcomeModalShown', 'true');
+                    console.log('Set welcomeModalShown to true in localStorage');
+                    
+                    // If user completed the tutorial (reached the end), mark it as completed
+                    if (this.currentWelcomeSlide === this.welcomeSlides.length - 1) {
+                        console.log('User completed tutorial, marking as completed');
+                        this.markTutorialCompleted();
+                    }
+                },
+                async markTutorialCompleted() {
+                    try {
+                        const response = await fetch('functions/mark_tutorial_completed.php', {
+                            method: 'POST'
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showTutorialButton = false;
+                            sessionStorage.setItem('tutorial_completed', 'true');
+                        }
+                    } catch (error) {
+                        console.error('Error marking tutorial as completed:', error);
+                    }
+                },
                 formatTime(date) {
                     const now = new Date();
                     const d = new Date(date);
@@ -66,17 +112,32 @@ const { createApp } = Vue;
                     }
                 },
                 async markNotificationAsRead(notification) {
-                    if (notification.read) return;
-                    // Optimistically mark as read
-                    notification.read = true;
-                    try {
-                        await fetch('functions/update_notif.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `action=mark_one_read&id=${encodeURIComponent(notification.id)}`
-                        });
-                    } catch (e) {
-                        // Optionally handle error, revert if needed
+                    // Remove the early return for read notifications
+                    // if (notification.read) return;
+                    
+                    // Only mark as read if it's not already read
+                    if (!notification.read) {
+                        // Optimistically mark as read
+                        notification.read = true;
+                        
+                        try {
+                            await fetch('functions/update_notif.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: `action=mark_one_read&id=${encodeURIComponent(notification.id)}`
+                            });
+                        } catch (e) {
+                            console.error('Error marking notification as read:', e);
+                            // Revert the read status if there was an error
+                            notification.read = false;
+                        }
+                    }
+                    
+                    // Always handle redirects, regardless of read status
+                    if (notification.type === 'job_match' && notification.job_id) {
+                        window.location.href = `home.php?job_id=${notification.job_id}&from_notification=job_match`;
+                    } else if (notification.type === 'application' && notification.job_id) {
+                        window.location.href = `my_application.php?job_id=${notification.job_id}&from_notification=application`;
                     }
                 },
                 async fetchUnreadNotifications() {

@@ -86,12 +86,12 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com'; // Change as needed
     $mail->SMTPAuth = true;
-    $mail->Username = 'allencristal12@gmail.com'; // Change to your email
-    $mail->Password = 'ugwb vksz wjto zbwf'; // Change to your email password or app password
+    $mail->Username = 'lspueis@gmail.com'; // Change to your email
+    $mail->Password = 'afbp fcwf oujr yqzr'; // Change to your email password or app password
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
-    $mail->setFrom('allencristal12@gmail.com', 'LSPU EIS');
+    $mail->setFrom('lspueis@gmail.com', 'LSPU EIS');
     $mail->addAddress($email, $first_name . ' ' . $last_name);
     if ($secondary_email) {
         $mail->addAddress($secondary_email, $first_name . ' ' . $last_name);

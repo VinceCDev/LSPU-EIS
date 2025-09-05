@@ -62,9 +62,9 @@ if ($stmt->execute()) {
         $stmt_job->close();
         $notif_message = 'You successfully applied for a job.';
         $notif_details = 'You have applied for the position of ' . ($job_title ?: 'the job') . '. Please wait for further announcement.';
-        $stmt_notif = $db->prepare('INSERT INTO notifications (user_id, type, message, details) VALUES (?, ?, ?, ?)');
+        $stmt_notif = $db->prepare('INSERT INTO notifications (user_id, type, message, details, job_id) VALUES (?, ?, ?, ?, ?)');
         $notif_type = 'application';
-        $stmt_notif->bind_param('isss', $user_id, $notif_type, $notif_message, $notif_details);
+        $stmt_notif->bind_param('isssi', $user_id, $notif_type, $notif_message, $notif_details, $job_id);
         $stmt_notif->execute();
         $stmt_notif->close();
     }

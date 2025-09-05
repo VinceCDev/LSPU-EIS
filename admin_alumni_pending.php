@@ -35,19 +35,19 @@ $_SESSION['user_id'] = $user_id;
     </script>
 </head>
 <body :class="[darkMode ? 'dark' : '', 'font-sans bg-gray-50 dark:bg-gray-800 min-h-screen']" id="app" v-cloak>
-    <div v-if="showLogoutModal" class="fixed inset-0 flex items-start justify-center z-[100]">
+    <div v-if="showLogoutModal" class="fixed inset-0 z-[100] flex items-center justify-center md:items-start md:justify-center bg-black bg-opacity-50">
         <div class="fixed inset-0 bg-black bg-opacity-50" @click="showLogoutModal = false"></div>
-        <div class="absolute top-8 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-700 rounded-lg shadow-xl p-6 w-full max-w-md mx-1">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4 md:mt-8">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Confirm Logout</h3>
-                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Confirm Logout</h3>
+                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to logout?</p>
-            <div class="flex justify-end space-x-3">
-                <button @click="showLogoutModal = false" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-                <button @click="logout" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">Logout</button>
+            <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to logout?</p>
+            <div class="flex justify-end gap-3">
+                <button @click="showLogoutModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                <button @click="logout" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Logout</button>
             </div>
         </div>
     </div>
@@ -208,6 +208,10 @@ $_SESSION['user_id'] = $user_id;
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_reminder_settings">
                                 <i class="fas fa-bell mr-3"></i> Reminder Settings
                         </a>
+                        <a href="admin_success_stories"  class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500">
+                            <i class="fas fa-book-open mr-3"></i>
+                            <span class="font-medium">Success Stories</span>
+                        </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="forgot_password">
                                 <i class="fas fa-key mr-3"></i> Forgot Password
                         </a>
@@ -249,7 +253,6 @@ $_SESSION['user_id'] = $user_id;
                             </select>
                             <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-[150px] md:w-[180px] lg:w-[230px]" v-model="filters.status">
                                 <option value="">All Status</option>
-                                <option value="Active">Active</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
@@ -290,8 +293,8 @@ $_SESSION['user_id'] = $user_id;
                                     <div class="relative inline-block text-left">
                                     <button @click="toggleActionDropdown(alumni.alumni_id)" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-600 dark:text-gray-300">
                                                 <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                    <div v-if="actionDropdown === alumni.alumni_id" class="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-[9999]">
+                                    </button>
+                                    <div v-if="actionDropdown === alumni.alumni_id" class="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
                                             <div class="py-1">
                                                 <a href="#" class="block px-4 py-2 text-sm text-green-600 hover:bg-green-100 dark:hover:bg-green-800" @click.prevent="approveAlumni(alumni)"><i class="fas fa-check-circle mr-2"></i>Approve</a>
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" @click.prevent="viewAlumniDetails(alumni)"><i class="fas fa-eye mr-2"></i>View Profile</a>
@@ -302,7 +305,7 @@ $_SESSION['user_id'] = $user_id;
                                     </td>
                                 </tr>
                                 <tr v-if="filteredAlumni.length === 0">
-                            <td colspan="10" class="text-center py-12">
+                                    <td colspan="10" class="text-center py-12">
                                     <div class="flex flex-col items-center justify-center">
                                     <i class="fas fa-user-graduate text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
                                     <p class="text-gray-500 dark:text-gray-300 text-lg font-medium">No pending alumni found</p>
@@ -313,91 +316,139 @@ $_SESSION['user_id'] = $user_id;
                             </tbody>
                         </table>
                     </div>
-            <!-- Pagination -->
-            <div class="bg-white dark:bg-gray-700 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1 flex justify-between sm:hidden">
-                        <button @click="prevPage" :disabled="currentPage === 1" class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Previous
-                        </button>
-                        <button @click="nextPage" :disabled="currentPage === totalPages" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Next
-                        </button>
+                <!-- Pagination -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mt-4 gap-2">
+                    <div class="text-gray-600 dark:text-gray-300 text-sm text-center md:text-left">
+                        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredAlumni.length) }} of {{ filteredAlumni.length }} entries
                     </div>
-                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-sm text-gray-700 dark:text-gray-300">
-                                Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredAlumni.length) }}</span> of <span class="font-medium">{{ filteredAlumni.length }}</span> results
-                            </p>
-                        </div>
-                        <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                <button @click="prevPage" :disabled="currentPage === 1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <span class="sr-only">Previous</span>
-                                        <i class="fas fa-chevron-left"></i>
+                    <div class="flex gap-1 justify-center">
+                        <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === 1" @click="prevPage">
+                            <i class="fas fa-chevron-left"></i>
                         </button>
-                                <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" :class="['relative inline-flex items-center px-4 py-2 border text-sm font-medium', page === currentPage ? 'z-10 bg-blue-50 dark:bg-blue-900 border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-300' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700']">
-                                    {{ page }}
-                                </button>
-                                <button @click="nextPage" :disabled="currentPage === totalPages" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <span class="sr-only">Next</span>
-                                        <i class="fas fa-chevron-right"></i>
+                        <button v-for="page in totalPages" :key="page" class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900" :class="{'bg-blue-600 text-white dark:bg-blue-500 dark:text-white': page === currentPage}" @click="goToPage(page)">{{ page }}</button>
+                        <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === totalPages" @click="nextPage">
+                            <i class="fas fa-chevron-right"></i>
                         </button>
-                            </nav>
-                        </div>
-                    </div>
                     </div>
                 </div>
             </div>
-                </div>
         </main>
-    <!-- View Alumni Modal -->
-    <div v-if="showViewModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true" data-modal="view-modal">
-  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-xl mx-2 p-0 relative max-h-[95vh] overflow-y-auto">
-    <button class="absolute top-2 right-2 flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition text-base font-semibold z-20" @click="closeViewModal" aria-label="Close">
-      <i class="fas fa-times"></i> <span>Close</span>
-    </button>
-    <div class="rounded-t-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 dark:from-blue-900 dark:via-blue-800 dark:to-blue-700 px-0 pt-6 pb-8 flex flex-col items-center relative">
-      <div class="absolute top-4 left-4 bg-white dark:bg-gray-700 rounded-full p-2 shadow-lg">
-        <i class="fas fa-user-graduate text-blue-600 dark:text-blue-300 text-2xl"></i>
-      </div>
-      <img v-if="viewAlumniData.profile_picture" :src="viewAlumniData.profile_picture" alt="Alumni Photo" class="w-28 h-28 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-xl mb-2 mt-2">
-      <div v-else class="w-28 h-28 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center border-4 border-white dark:border-gray-700 shadow-xl mb-2 mt-2">
-        <i class="fas fa-user-graduate text-4xl text-gray-400"></i>
-      </div>
-      <h3 class="text-3xl font-extrabold text-white drop-shadow-lg mb-1 text-center">{{ viewAlumniData.first_name }} {{ viewAlumniData.middle_name }} {{ viewAlumniData.last_name }}</h3>
-      <span :class="['inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold shadow', viewAlumniData.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200' : viewAlumniData.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-200' : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200']">{{ viewAlumniData.status }}</span>
-    </div>
-    <div class="px-6 py-6">
-      <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-info-circle text-blue-500 dark:text-blue-300"></i> <span>Personal Details</span></h4>
-      <div class="grid grid-cols-1 gap-3 bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-        <div class="flex items-center gap-3"><i class="fas fa-envelope text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Email:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.email }}</span></div>
-        <div class="flex items-center gap-3"><i class="fas fa-venus-mars text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Gender:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.gender }}</span></div>
-        <div class="flex items-center gap-3"><i class="fas fa-calendar-alt text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Year Graduated:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.year_graduated }}</span></div>
-        <div class="flex items-center gap-3"><i class="fas fa-university text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">College:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.college }}</span></div>
-        <div class="flex items-center gap-3"><i class="fas fa-book text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Course:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.course }}</span></div>
-        <div class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">Province:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.province }}</span></div>
-        <div class="flex items-center gap-3"><i class="fas fa-city text-blue-500 dark:text-blue-300"></i><span class="font-semibold text-gray-700 dark:text-gray-200">City/Municipality:</span> <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.city }}</span></div>
-      </div>
-      <div class="my-6 border-t border-gray-200 dark:border-gray-700"></div>
-      <!-- Skills Section -->
-      <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-lightbulb text-blue-500 dark:text-blue-300"></i> <span>Skills</span></h4>
-      <div v-if="viewAlumniData.skills && viewAlumniData.skills.length" class="flex flex-wrap gap-2 mb-4">
-        <span v-for="skill in viewAlumniData.skills" :key="skill" class="inline-block bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold shadow">{{ skill }}</span>
-      </div>
-      <div v-else class="text-gray-500 dark:text-gray-400 mb-4">No skills listed.</div>
-      <div class="my-6 border-t border-gray-200 dark:border-gray-700"></div>
-      <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-file-alt text-blue-500 dark:text-blue-300"></i> <span>Documents Submitted</span></h4>
-      <ul v-if="viewAlumniData.documents && viewAlumniData.documents.length > 0" class="list-disc pl-6">
-        <li v-for="doc in viewAlumniData.documents" :key="doc.name" class="mb-1 flex items-center">
-          <span class="mr-2">{{ doc.name }}</span>
-          <a :href="doc.url" target="_blank" class="text-blue-600 hover:underline ml-2 flex items-center"><i class="fas fa-eye mr-1"></i>View</a>
-        </li>
-      </ul>
-      <div v-else class="text-gray-500 dark:text-gray-400">No documents submitted.</div>
-    </div>
-  </div>
-</div>
+        <!-- View Alumni Details Modal -->
+        <div v-if="showViewModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true" data-modal="view-modal">
+            <div v-if="isLoading" class="text-center py-4 text-white">Loading alumni details...</div>
+            <div v-else class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-xl mx-2 p-0 relative max-h-[95vh] overflow-y-auto">
+                <button class="absolute top-2 right-2 flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition text-base font-semibold z-20" @click="closeViewModal" aria-label="Close">
+                    <i class="fas fa-times"></i> <span>Close</span>
+                </button>
+                <div class="rounded-t-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 dark:from-blue-900 dark:via-blue-800 dark:to-blue-700 px-0 pt-6 pb-8 flex flex-col items-center relative">
+                    <div class="absolute top-4 left-4 bg-white dark:bg-gray-700 rounded-full p-2 shadow-lg">
+                        <i class="fas fa-user-graduate text-blue-600 dark:text-blue-300 text-2xl"></i>
+                    </div>
+                    <img v-if="viewAlumniData.profile_picture" :src="viewAlumniData.profile_picture" alt="Alumni Photo" class="w-28 h-28 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-xl mb-2 mt-2">
+                    <div v-else class="w-28 h-28 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center border-4 border-white dark:border-gray-700 shadow-xl mb-2 mt-2">
+                        <i class="fas fa-user-graduate text-4xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-3xl font-extrabold text-white drop-shadow-lg mb-1 text-center">{{ viewAlumniData.first_name }} {{ viewAlumniData.middle_name }} {{ viewAlumniData.last_name }}</h3>
+                    <span :class="['inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold shadow', viewAlumniData.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200' : viewAlumniData.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-200' : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200']">{{ viewAlumniData.status }}</span>
+                </div>
+                <div class="px-6 py-6">
+                    <!-- Personal Details -->
+                    <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-500 dark:text-blue-300"></i> <span>Personal Details</span>
+                    </h4>
+                    <div class="grid grid-cols-1 gap-3 bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Email:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.email || 'N/A' }}</span>
+                        </div>
+                        <div v-if="viewAlumniData.secondary_email" class="flex items-center gap-3">
+                            <i class="fas fa-envelope-open text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Secondary Email:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.secondary_email }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-venus-mars text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Gender:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.gender || 'N/A' }}</span>
+                        </div>
+                        <div v-if="viewAlumniData.birthdate" class="flex items-center gap-3">
+                            <i class="fas fa-birthday-cake text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Birthdate:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ formatDate(viewAlumniData.birthdate) }}</span>
+                        </div>
+                        <div v-if="viewAlumniData.contact" class="flex items-center gap-3">
+                            <i class="fas fa-phone text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Contact:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.contact }}</span>
+                        </div>
+                        <div v-if="viewAlumniData.civil_status" class="flex items-center gap-3">
+                            <i class="fas fa-ring text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Civil Status:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.civil_status }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-calendar-alt text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Year Graduated:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.year_graduated || 'N/A' }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-university text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">College:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.college || 'N/A' }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-book text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Course:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.course || 'N/A' }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-map-marker-alt text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Province:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.province || 'N/A' }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-city text-blue-500 dark:text-blue-300"></i>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">City/Municipality:</span>
+                            <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.city || 'N/A' }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Documents Section -->
+                    <div class="my-6 border-t border-gray-200 dark:border-gray-700"></div>
+                    <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        <i class="fas fa-file-alt text-blue-500 dark:text-blue-300"></i> <span>Documents Submitted</span>
+                    </h4>
+                    <div v-if="viewAlumniData.verification_document" class="space-y-3 mb-4">
+                        <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                            <div class="flex items-center gap-2">
+                                <i :class="getFileIcon(viewAlumniData.verification_document)"></i>
+                                <span class="font-medium text-gray-700 dark:text-gray-200">Verification Document</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <a :href="'uploads/documents/' + viewAlumniData.verification_document" target="_blank" 
+                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 flex items-center gap-1">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a :href="'uploads/documents/' + viewAlumniData.verification_document" download 
+                                    class="text-green-600 hover:text-green-800 dark:text-green-300 dark:hover:text-green-200 flex items-center gap-1">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="text-gray-500 dark:text-gray-400 mb-4">No documents submitted.</div>
+                    
+                    <!-- Contact Button -->
+                    <div class="flex flex-col md:flex-row gap-3 mt-6 w-full">
+                        <button @click="contactAlumni(viewAlumniData)" 
+                                class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 text-sm sm:text-base">
+                            <i class="fas fa-envelope"></i> Contact
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">

@@ -64,11 +64,11 @@ if ($method === 'POST') {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'allencristal12@gmail.com';
-        $mail->Password = 'ugwb vksz wjto zbwf';
+        $mail->Username = 'lspueis@gmail.com';
+        $mail->Password = 'afbp fcwf oujr yqzr';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        $mail->setFrom('allencristal12@gmail.com', 'LSPU EIS System');
+        $mail->setFrom('lspueis@gmail.com', 'LSPU EIS System');
         $mail->addAddress($email, $first_name . ' ' . $last_name);
         if ($secondary_email) {
             $mail->addAddress($secondary_email, $first_name . ' ' . $last_name);

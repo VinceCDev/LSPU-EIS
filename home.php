@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (isset($_GET['job_id']) && is_numeric($_GET['job_id'])) {
+    $_SESSION['highlight_job_id'] = $_GET['job_id'];
+}
+
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'alumni') {
     header('Location: login.php');
     exit();
@@ -24,6 +28,7 @@ $_SESSION['user_id'] = $user_id;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home | LSPU - EIS</title>
     <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <link rel="stylesheet" href="css/home.css">
@@ -36,6 +41,184 @@ $_SESSION['user_id'] = $user_id;
     </script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-segoe pt-[70px] transition-colors duration-200" id="app" v-cloak>
+    <!-- Add this modal code right after the opening <body> tag -->
+    <div v-if="showWelcomeModal" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="bg-blue-600 text-white p-5 flex justify-between items-center">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-graduation-cap mr-3"></i> Welcome to LSPU Alumni Portal!
+                </h2>
+                <button @click="closeWelcomeModal" class="text-white hover:text-blue-200 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Content with carousel -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- Carousel indicators -->
+                <div class="flex justify-center mb-6">
+                    <div v-for="(slide, index) in welcomeSlides" :key="index" 
+                        :class="['w-3 h-3 rounded-full mx-1 cursor-pointer', 
+                                currentWelcomeSlide === index ? 'bg-blue-600' : 'bg-gray-300']"
+                        @click="currentWelcomeSlide = index">
+                    </div>
+                </div>
+                
+                <!-- Slide 1: Introduction -->
+                <div v-if="currentWelcomeSlide === 0" class="text-center">
+                    <div class="text-blue-500 text-6xl mb-6">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Welcome, Alumni!</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        We're excited to have you here. This portal connects you with job opportunities, 
+                        fellow alumni, and valuable resources from LSPU.
+                    </p>
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg text-left">
+                        <p class="text-blue-700 dark:text-blue-300 flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                            <span>Take a quick tour to learn how to make the most of your alumni portal.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Slide 2: Navigation -->
+                <div v-if="currentWelcomeSlide === 1" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-compass text-blue-500 mr-2"></i> Navigation Guide
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Home</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Browse and search for job opportunities.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">My Applications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Track your job applications status.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Notifications</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Get updates on applications and messages.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div class="text-blue-500 text-2xl mb-2">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Profile</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Manage your personal information.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 3: Job Search -->
+                <div v-if="currentWelcomeSlide === 2" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-search text-blue-500 mr-2"></i> Finding Jobs
+                    </h3>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-search text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Search & Filter</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Use the search bar and filters to find jobs that match your skills and preferences.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-bookmark text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Save Jobs</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Click the bookmark icon to save interesting jobs for later.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-full mr-3">
+                                <i class="fas fa-paper-plane text-blue-600 dark:text-blue-300"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">Apply Easily</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Use your pre-filled profile information to apply quickly to jobs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Slide 4: Profile -->
+                <div v-if="currentWelcomeSlide === 3" class="">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-user-edit text-blue-500 mr-2"></i> Complete Your Profile
+                    </h3>
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+                            <p class="text-blue-700 dark:text-blue-300">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                A complete profile increases your chances of getting hired by 70%!
+                            </p>
+                        </div>
+                        <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Add your education history
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                List your skills and certifications
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Include work experience
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Upload your resume
+                            </li>
+                        </ul>
+                        <div class="mt-4">
+                            <a href="my_profile" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-user-edit mr-2"></i> Complete My Profile Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer with navigation -->
+            <div class="border-t border-gray-200 dark:border-gray-700 p-4 flex justify-between">
+                <button v-if="currentWelcomeSlide > 0" 
+                        @click="currentWelcomeSlide--" 
+                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                </button>
+                <div v-else></div>
+                
+                <button v-if="currentWelcomeSlide < welcomeSlides.length - 1" 
+                        @click="currentWelcomeSlide++" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Next <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                
+                <button v-else 
+                        @click="closeWelcomeModal" 
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Get Started <i class="fas fa-check ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div>
         <!-- Loading Spinner Overlay -->
         <div v-if="loading" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-[9999]">
@@ -272,6 +455,9 @@ $_SESSION['user_id'] = $user_id;
                                 <a href="forgot_password" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
                                     <i class="fas fa-key mr-2"></i> Forgot Password
                                 </a>
+                                <a href="#" @click.prevent="openTutorial" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
+                                    <i class="fas fa-graduation-cap mr-2"></i> Show Tutorial
+                                </a>
                                 <a href="employer_login" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
                                     <i class="fas fa-briefcase mr-2"></i> Employer Site
                                 </a>
@@ -330,9 +516,13 @@ $_SESSION['user_id'] = $user_id;
                             <a href="forgot_password" class="block py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-blue-300">
                                 <i class="fas fa-key mr-2"></i> Forgot Password
                             </a>
+                            <a href="#" @click.prevent="openTutorial" class="block py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-blue-300">
+                                    <i class="fas fa-graduation-cap mr-2"></i> Show Tutorial
+                            </a>
                             <a href="employer_login" class="block py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-blue-300">
                                 <i class="fas fa-briefcase mr-2"></i> Employer Site
                             </a>
+                            <!-- Add this after the Dark Mode toggle section -->
                             <div class="py-2 flex items-center justify-between">
                                 <div class="flex items-center text-gray-600 dark:text-gray-300 mr-3">
                                     <i class="fas fa-moon mr-2"></i>
@@ -351,236 +541,305 @@ $_SESSION['user_id'] = $user_id;
                 </div>
             </div>
         </header>
-
-    <!-- Search Section -->
-    <section class="bg-gray-100 dark:bg-gray-900 py-6 transition-colors duration-200">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1 relative">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
+    <main class="container mx-auto min-h-[calc(100vh-80px)] pb-24 bg-gray-100 dark:bg-gray-900 shadow-lg mb-8 transition-colors duration-200">
+        <!-- Search Section -->
+        <section class="bg-gray-100 dark:bg-gray-900 py-6 transition-colors duration-200">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" 
+                                class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white transition-all duration-200 shadow-sm" 
+                                placeholder="Search for jobs..." 
+                                v-model="searchQuery">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <button class="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                    <i class="fas fa-sliders-h"></i>
+                                </button>
+                            </div>
                         </div>
-                        <input type="text" 
-                               class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white transition-all duration-200 shadow-sm" 
-                               placeholder="Search for jobs..." 
-                               v-model="searchQuery">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                            <button class="p-1 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                                <i class="fas fa-sliders-h"></i>
+                    </div>
+                    <button class="w-full md:w-auto px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 focus:outline-none transition-colors duration-200 flex items-center justify-center" @click="filtersOpen = !filtersOpen">
+                        <i class="fas fa-sliders-h mr-2"></i> Filters
+                    </button>
+                </div>
+                <!-- Advanced Filters -->
+                <div v-show="filtersOpen" class="mt-4 bg-white dark:bg-gray-700 rounded-lg shadow p-4 transition-all duration-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- In your filters section -->
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                            <div class="relative">
+                                <input type="text" 
+                                    v-model="locationQuery" 
+                                    @input="fetchLocationSuggestions" 
+                                    @focus="showLocationDropdown = true" 
+                                    @blur="hideLocationDropdown"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white text-sm sm:text-base pr-10" 
+                                    placeholder="Enter location (e.g., Manila, Nueva Ecija)" 
+                                    aria-label="Search for location">
+                                <button v-if="locationQuery" @click="clearLocation" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div v-if="showLocationDropdown && (locationSuggestions.length || defaultLocations.length)" 
+                                class="autocomplete-dropdown absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                                <div v-for="location in locationSuggestions" 
+                                    :key="location.place_id" 
+                                    class="autocomplete-item px-4 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800" 
+                                    @mousedown.prevent="selectLocation(location)">
+                                    {{ location.display_name }}
+                                </div>
+                                <div v-for="location in defaultLocations" 
+                                    :key="location" 
+                                    class="autocomplete-item px-4 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800" 
+                                    @mousedown.prevent="selectLocation({display_name: location})">
+                                    {{ location }}
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Type</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white" v-model="selectedJobType">
+                                <option value="">All Types</option>
+                                <option v-for="type in jobTypes" :value="type">{{ type }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Salary Range</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white" v-model="selectedSalary">
+                                <option value="">Any Salary</option>
+                                <option v-for="salary in salaryRanges" :value="salary.value">{{ salary.label }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Job Listings -->
+        <section class="min-h-[calc(100vh-180px)] bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+        <!-- Added pb-20 for footer space and dark mode bg -->
+            <div class="container mx-auto px-4">
+                <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-400 mb-6 tracking-wide">Available Jobs</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-black-100 shadow-md hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer group relative overflow-hidden" 
+                        v-for="(job, index) in filteredJobs" 
+                        :key="job.id" 
+                        @click="showJobDetails(job)" 
+                        :data-job-id="job.job_id || job.id"
+                        :class="{'highlight-pulse': shouldHighlightJob(job)}">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-300 dark:from-blue-900 dark:via-blue-800 dark:to-blue-700 opacity-80"></div>
+                        <div class="p-5 h-full flex flex-col">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex items-center">
+                                <img 
+                                    :src="job.logoUrl || job.companyDetails.logoUrl || 'images/logo.png'" 
+                                    :alt="job.company + ' logo'"
+                                    class="w-12 h-12 min-w-[48px] object-cover border border-gray-200 dark:border-gray-600 rounded-full mr-3
+                                        bg-white dark:bg-gray-700 p-1 shadow-sm"
+                                    loading="lazy"
+                                    @error="handleLogoError"
+                                >
+                                    <div>
+                                        <h3 class="font-bold text-lg text-blue-700 dark:text-blue-300 group-hover:underline">{{ job.title }}</h3>
+                                        <p class="text-sm text-blue-500 dark:text-blue-200 font-semibold">{{ job.company }}</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-bookmark text-gray-400 hover:text-red-500 dark:hover:text-red-400" :class="{ 'text-red-500 dark:text-red-400': job.saved }" @click.stop="toggleSave(job)"></i>
+                            </div>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-blue-900 rounded-full text-sm text-blue-700 dark:text-blue-200">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> {{ job.location }}
+                                </span>
+                                <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-briefcase mr-1"></i> {{ job.type }}
+                                </span>
+                                <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-money-bill-wave mr-1"></i> {{ job.salary }}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 flex-grow">{{ job.description }}</p>
+                            <div class="mt-4 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ postedDays(job.created_at) }}</span>
+                                <span class="inline-block px-2 py-1 rounded text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200">View Details</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="filteredJobs.length === 0" class="text-center py-12">
+                    <i class="fas fa-briefcase text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <h4 class="text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">No jobs found</h4>
+                    <p class="text-gray-500 dark:text-gray-500">Try adjusting your filters to find more opportunities.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Job Details Sidebar -->
+        <div :class="['fixed inset-0 z-40 transition-opacity duration-200', showDetails ? 'bg-black bg-opacity-50' : 'pointer-events-none opacity-0']" @click="hideJobDetails" id="overlay"></div>
+        <div :class="['fixed top-0 right-0 h-full w-full max-w-[600px] z-50 transform transition-transform duration-500 overflow-y-auto', showDetails ? 'translate-x-0' : 'translate-x-full', 'backdrop-blur', darkMode ? 'bg-gray-900 bg-opacity-90' : 'bg-white bg-opacity-85']" id="jobDetailsSidebar">
+            <div class="relative p-6 min-h-full flex flex-col">
+                <button class="absolute top-4 right-4 text-gray-500 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 text-2xl z-10" @click="hideJobDetails">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex items-center">
+                        <img 
+                        :src="selectedJob.logoUrl || selectedJob.companyDetails?.logoUrl || 'images/logo.png'"
+                        :alt="selectedJob.company + ' logo'"
+                        class="w-12 h-12 min-w-[48px] object-contain border border-gray-200 dark:border-gray-600 rounded-full mr-4
+                                bg-white dark:bg-gray-700 p-1 shadow-sm"
+                        loading="lazy"
+                        @error="handleLogoError"
+                        >
+                        <div>
+                            <h3 class="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-1">{{ selectedJob.title }}</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg">{{ selectedJob.company }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-blue-900 rounded-full text-sm text-blue-700 dark:text-blue-200">
+                        <i class="fas fa-map-marker-alt mr-1"></i> {{ selectedJob.location }}
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-briefcase mr-1"></i> {{ selectedJob.type }}
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-money-bill-wave mr-1"></i> {{ selectedJob.salary }}
+                    </span>
+                </div>
+                <!-- Leaflet Map -->
+                <div class="mb-6 rounded-lg overflow-hidden shadow" style="height: 220px;">
+                    <div id="job-map" style="height: 220px; width: 100%;"></div>
+                </div>
+                <div class="flex gap-3 mb-6">
+                    <button class="flex-1 bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-600 text-white py-2.5 rounded-lg font-semibold transition flex items-center justify-center text-lg shadow"
+                        @click="openApplicationModal(selectedJob.id)">
+                        <i class="fas fa-paper-plane mr-2"></i> Apply Now
+                    </button>
+                </div>
+                <div class="mb-6">
+                    <h5 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">Job Description</h5>
+                    <p class="text-gray-700 dark:text-gray-200">{{ selectedJob.description }}</p>
+                </div>
+                <div class="mb-6">
+                    <h5 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">Job Requirements</h5>
+                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-200">
+                        <li>{{ selectedJob.requirements }}</li>
+                    </ul>
+                </div>
+                <div class="mb-6">
+                    <h5 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">Qualifications</h5>
+                    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-200">
+                        <li v-for="(qualification, qIndex) in selectedJob.qualifications" :key="qIndex">
+                            {{ qualification }}
+                        </li>
+                    </ul>
+                </div>
+                <!-- Company Details Section -->
+                <div v-if="selectedJob.companyDetails" class="mb-6 border border-blue-200 dark:border-blue-700 rounded-lg bg-blue-50 dark:bg-blue-900/30 p-4">
+                    <div class="flex items-center mb-3">
+                        <img v-if="selectedJob.companyDetails.company_logo" :src="'uploads/logos/' + selectedJob.companyDetails.company_logo" alt="Logo" class="w-14 h-14 rounded-full object-cover border-2 border-blue-300 dark:border-blue-700 mr-3">
+                        <div>
+                            <h5 class="text-xl font-bold text-blue-700 dark:text-blue-300 mb-1">{{ selectedJob.companyDetails.company_name }}</h5>
+                            <div class="text-sm text-gray-700 dark:text-gray-200">{{ selectedJob.companyDetails.nature_of_business }}</div>
+                        </div>
+                    </div>
+                    <div class="space-y-2 mt-2">
+                        <div v-if="selectedJob.companyDetails.contact_email">
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Email:</span>
+                            <a 
+                                :href="'https://mail.google.com/mail/?view=cm&fs=1&to=' + selectedJob.companyDetails.contact_email + '&su=Job%20Application&body=Hello,'" 
+                                target="_blank"
+                                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 hover:underline transition-colors duration-200 inline-flex items-center ml-1 px-3 py-1.5"
+                            >
+                                <i class="fas fa-envelope mr-2 text-blue-500 dark:text-blue-300"></i>
+                                <span class="font-medium">{{ selectedJob.companyDetails.contact_email }}</span>
+                            </a>
+                        </div>
+                        <div v-if="selectedJob.companyDetails.contact_number">
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Contact:</span>
+                            <a :href="'tel:' + selectedJob.companyDetails.contact_number" class="text-blue-700 dark:text-blue-300 hover:underline inline-flex items-center ml-1">
+                                <i class="fas fa-phone mr-1"></i>{{ selectedJob.companyDetails.contact_number }}
+                            </a>
+                        </div>
+                        <div v-if="selectedJob.companyDetails.company_location">
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Address:</span>
+                            <span class="text-gray-800 dark:text-gray-100 ml-1">{{ selectedJob.companyDetails.company_location }}</span>
+                        </div>
+                        <div v-if="selectedJob.companyDetails.industry_type">
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Industry:</span>
+                            <span class="text-gray-800 dark:text-gray-100 ml-1">{{ selectedJob.companyDetails.industry_type }}</span>
+                        </div>
+                        <div v-if="selectedJob.companyDetails.accreditation_status">
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Accreditation:</span>
+                            <span class="text-gray-800 dark:text-gray-100 ml-1">{{ selectedJob.companyDetails.accreditation_status }}</span>
+                        </div>
+
+                        <div class="pt-3">
+                            <button @click="messageEmployer(selectedJob.companyDetails.contact_email)" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="fas fa-envelope mr-2"></i> Message Employer
                             </button>
                         </div>
                     </div>
                 </div>
-                <button class="w-full md:w-auto px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-lspu-blue hover:text-white dark:hover:bg-blue-600 focus:outline-none transition-colors duration-200 flex items-center justify-center" @click="filtersOpen = !filtersOpen">
-                    <i class="fas fa-sliders-h mr-2"></i> Filters
-                </button>
-            </div>
-            <!-- Advanced Filters -->
-            <div v-show="filtersOpen" class="mt-4 bg-white dark:bg-gray-700 rounded-lg shadow p-4 transition-all duration-200">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white" v-model="selectedLocation">
-                            <option value="">All Locations</option>
-                            <option v-for="location in locations" :value="location">{{ location }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Type</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white" v-model="selectedJobType">
-                            <option value="">All Types</option>
-                            <option v-for="type in jobTypes" :value="type">{{ type }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Salary Range</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-lspu-blue focus:border-lspu-blue dark:focus:ring-blue-300 dark:focus:border-blue-300 bg-white dark:bg-gray-700 dark:text-white" v-model="selectedSalary">
-                            <option value="">Any Salary</option>
-                            <option v-for="salary in salaryRanges" :value="salary.value">{{ salary.label }}</option>
-                        </select>
-                    </div>
-                </div>
             </div>
         </div>
-    </section>
-
-    <!-- Job Listings -->
-    <section class="min-h-[calc(100vh-180px)] bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-    <!-- Added pb-20 for footer space and dark mode bg -->
-        <div class="container mx-auto px-4">
-            <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-400 mb-6 tracking-wide">Available Jobs</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-black-100 shadow-md hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer group relative overflow-hidden" v-for="(job, index) in filteredJobs" :key="job.id" @click="showJobDetails(job)">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-300 dark:from-blue-900 dark:via-blue-800 dark:to-blue-700 opacity-80"></div>
-                    <div class="p-5 h-full flex flex-col">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center">
-                            <img 
-                                :src="job.logoUrl || job.companyDetails.logoUrl || 'images/logo.png'" 
-                                :alt="job.company + ' logo'"
-                                class="w-12 h-12 min-w-[48px] object-cover border border-gray-200 dark:border-gray-600 rounded-full mr-3
-                                    bg-white dark:bg-gray-700 p-1 shadow-sm"
-                                loading="lazy"
-                                @error="handleLogoError"
-                            >
-                                <div>
-                                    <h3 class="font-bold text-lg text-blue-700 dark:text-blue-300 group-hover:underline">{{ job.title }}</h3>
-                                    <p class="text-sm text-blue-500 dark:text-blue-200 font-semibold">{{ job.company }}</p>
-                                </div>
-                            </div>
-                            <i class="fas fa-bookmark text-gray-400 hover:text-red-500 dark:hover:text-red-400" :class="{ 'text-red-500 dark:text-red-400': job.saved }" @click.stop="toggleSave(job)"></i>
-                        </div>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-blue-900 rounded-full text-sm text-blue-700 dark:text-blue-200">
-                                <i class="fas fa-map-marker-alt mr-1"></i> {{ job.location }}
-                            </span>
-                            <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
-                                <i class="fas fa-briefcase mr-1"></i> {{ job.type }}
-                            </span>
-                            <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
-                                <i class="fas fa-money-bill-wave mr-1"></i> {{ job.salary }}
-                            </span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 flex-grow">{{ job.description }}</p>
-                        <div class="mt-4 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ postedDays(job.created_at) }}</span>
-                            <span class="inline-block px-2 py-1 rounded text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200">View Details</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="filteredJobs.length === 0" class="text-center py-12">
-                <i class="fas fa-briefcase text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
-                <h4 class="text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">No jobs found</h4>
-                <p class="text-gray-500 dark:text-gray-500">Try adjusting your filters to find more opportunities.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Job Details Sidebar -->
-    <div :class="['fixed inset-0 z-40 transition-opacity duration-200', showDetails ? 'bg-black bg-opacity-50' : 'pointer-events-none opacity-0']" @click="hideJobDetails" id="overlay"></div>
-    <div :class="['fixed top-0 right-0 h-full w-full max-w-[600px] z-50 transform transition-transform duration-500 overflow-y-auto', showDetails ? 'translate-x-0' : 'translate-x-full', 'backdrop-blur', darkMode ? 'bg-gray-900 bg-opacity-90' : 'bg-white bg-opacity-85']" id="jobDetailsSidebar">
-        <div class="relative p-6 min-h-full flex flex-col">
-            <button class="absolute top-4 right-4 text-gray-500 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 text-2xl z-10" @click="hideJobDetails">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="flex justify-between items-start mb-6">
-                <div class="flex items-center">
-                    <img 
-                    :src="selectedJob.logoUrl || selectedJob.companyDetails?.logoUrl || 'images/logo.png'"
-                    :alt="selectedJob.company + ' logo'"
-                    class="w-12 h-12 min-w-[48px] object-contain border border-gray-200 dark:border-gray-600 rounded-full mr-4
-                            bg-white dark:bg-gray-700 p-1 shadow-sm"
-                    loading="lazy"
-                    @error="handleLogoError"
-                    >
-                    <div>
-                        <h3 class="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-1">{{ selectedJob.title }}</h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-lg">{{ selectedJob.company }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-2 mb-6">
-                <span class="inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-blue-900 rounded-full text-sm text-blue-700 dark:text-blue-200">
-                    <i class="fas fa-map-marker-alt mr-1"></i> {{ selectedJob.location }}
-                </span>
-                <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
-                    <i class="fas fa-briefcase mr-1"></i> {{ selectedJob.type }}
-                </span>
-                <span class="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
-                    <i class="fas fa-money-bill-wave mr-1"></i> {{ selectedJob.salary }}
-                </span>
-            </div>
-            <!-- Leaflet Map -->
-            <div class="mb-6 rounded-lg overflow-hidden shadow" style="height: 220px;">
-                <div id="job-map" style="height: 220px; width: 100%;"></div>
-            </div>
-            <div class="flex gap-3 mb-6">
-                <button class="flex-1 bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-600 text-white py-2.5 rounded-lg font-semibold transition flex items-center justify-center text-lg shadow"
-                    @click="openApplicationModal(selectedJob.id)">
-                    <i class="fas fa-paper-plane mr-2"></i> Apply Now
-                </button>
-            </div>
-            <div class="mb-6">
-                <h5 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">Job Description</h5>
-                <p class="text-gray-700 dark:text-gray-200">{{ selectedJob.description }}</p>
-            </div>
-            <div class="mb-6">
-                <h5 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">Job Requirements</h5>
-                <ul class="list-disc pl-5 text-gray-700 dark:text-gray-200">
-                    <li>{{ selectedJob.requirements }}</li>
-                </ul>
-            </div>
-            <div class="mb-6">
-                <h5 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">Qualifications</h5>
-                <ul class="list-disc pl-5 text-gray-700 dark:text-gray-200">
-                    <li v-for="(qualification, qIndex) in selectedJob.qualifications" :key="qIndex">
-                        {{ qualification }}
-                    </li>
-                </ul>
-            </div>
-            <div v-if="selectedJob.questions && selectedJob.questions.length" class="mb-6">
-                <h5 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-3">Employer Questions</h5>
-                <div class="space-y-3" id="employerQuestions">
-                    <div class="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden" v-for="(question, eqIndex) in selectedJob.questions" :key="eqIndex">
-                        <div class="w-full px-4 py-3 text-left bg-gray-50 dark:bg-gray-700 flex justify-between items-center transition-colors duration-200">
-                            <span class="text-gray-800 dark:text-gray-300">{{ question.text }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Company Details Section -->
-            <div v-if="selectedJob.companyDetails" class="mb-6 border border-blue-200 dark:border-blue-700 rounded-lg bg-blue-50 dark:bg-blue-900/30 p-4">
-                <div class="flex items-center mb-3">
-                    <img v-if="selectedJob.companyDetails.company_logo" :src="'uploads/logos/' + selectedJob.companyDetails.company_logo" alt="Logo" class="w-14 h-14 rounded-full object-cover border-2 border-blue-300 dark:border-blue-700 mr-3">
-                    <div>
-                        <h5 class="text-xl font-bold text-blue-700 dark:text-blue-300 mb-1">{{ selectedJob.companyDetails.company_name }}</h5>
-                        <div class="text-sm text-gray-700 dark:text-gray-200">{{ selectedJob.companyDetails.nature_of_business }}</div>
-                    </div>
-                </div>
-                <div class="space-y-2 mt-2">
-                    <div v-if="selectedJob.companyDetails.contact_email">
-                        <span class="font-semibold text-gray-700 dark:text-gray-200">Email:</span>
-                        <a :href="'mailto:' + selectedJob.companyDetails.contact_email" class="text-blue-700 dark:text-blue-300 hover:underline inline-flex items-center ml-1">
-                            <i class="fas fa-envelope mr-1"></i>{{ selectedJob.companyDetails.contact_email }}
-                        </a>
-                    </div>
-                    <div v-if="selectedJob.companyDetails.contact_number">
-                        <span class="font-semibold text-gray-700 dark:text-gray-200">Contact:</span>
-                        <a :href="'tel:' + selectedJob.companyDetails.contact_number" class="text-blue-700 dark:text-blue-300 hover:underline inline-flex items-center ml-1">
-                            <i class="fas fa-phone mr-1"></i>{{ selectedJob.companyDetails.contact_number }}
-                        </a>
-                    </div>
-                    <div v-if="selectedJob.companyDetails.company_location">
-                        <span class="font-semibold text-gray-700 dark:text-gray-200">Address:</span>
-                        <span class="text-gray-800 dark:text-gray-100 ml-1">{{ selectedJob.companyDetails.company_location }}</span>
-                    </div>
-                    <div v-if="selectedJob.companyDetails.industry_type">
-                        <span class="font-semibold text-gray-700 dark:text-gray-200">Industry:</span>
-                        <span class="text-gray-800 dark:text-gray-100 ml-1">{{ selectedJob.companyDetails.industry_type }}</span>
-                    </div>
-                    <div v-if="selectedJob.companyDetails.accreditation_status">
-                        <span class="font-semibold text-gray-700 dark:text-gray-200">Accreditation:</span>
-                        <span class="text-gray-800 dark:text-gray-100 ml-1">{{ selectedJob.companyDetails.accreditation_status }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <main>
     <!-- Leaflet CSS/JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
     </div> <!-- Close #app div -->
 
     <!-- Footer -->
-        <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-2 transition-colors duration-200">
-        <div class="container mx-auto px-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-            &copy; 2025 LSPU EIS. All rights reserved.
+    <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-3 transition-colors duration-200 shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-2 md:space-y-0 md:space-x-4">
+                <div class="text-gray-500 dark:text-gray-400 text-sm">
+                    &copy; 2025 LSPU EIS. All rights reserved.
+                </div>
+                <div class="flex items-center">
+                    <span class="text-gray-300 dark:text-gray-600 hidden md:inline">|</span>
+                    <a href="alumni_terms" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 font-medium flex items-center md:ml-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Terms & Agreement
+                    </a>
+                </div>
+            </div>
         </div>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const highlightJobId = " . (isset($_SESSION['highlight_job_id']) ? $_SESSION['highlight_job_id'] : 'null') . ";
+            
+            if (highlightJobId) {
+                // Scroll to the job card and highlight it
+                const jobCard = document.querySelector('[data-job-id=\"' + highlightJobId + '\"]');
+                if (jobCard) {
+                    jobCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    jobCard.classList.add('highlight-job');
+                    
+                    // Remove highlight after 5 seconds
+                    setTimeout(() => {
+                        jobCard.classList.remove('highlight-job');
+                    }, 5000);
+                }
+                
+                // Remove the session variable after use
+                fetch('functions/clear_highlight.php');
+            }
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
     <script>

@@ -5,7 +5,7 @@ require_once '../conn/db_conn.php'; // This should initialize the $conn variable
 try {
     $sql = "SELECT jobs.*, company.company_name AS company, company.company_logo AS logo
             FROM jobs
-            LEFT JOIN company_profile AS company ON jobs.company_id = company.id
+            LEFT JOIN employer AS company ON jobs.company_id = company.id
             WHERE jobs.status = 'active'
             ORDER BY jobs.id DESC";
 

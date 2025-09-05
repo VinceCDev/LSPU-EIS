@@ -51,20 +51,41 @@ foreach ($saved as $savedJob) {
     $job = $jobResult->fetch_assoc();
     $stmt->close();
     if (!$job) continue;
-    // Fetch company details
+    
+    // Fetch company details including company_name
     $employer_id = $job['employer_id'];
-    $company = [];
+    $company_name = '';
+    $company_logo = '';
+    $companyDetails = [];
+    
     if ($employer_id) {
-        $stmt = $db->prepare('SELECT * FROM employer WHERE user_id = ? LIMIT 1');
+        $stmt = $db->prepare('SELECT company_name, company_logo, company_location, contact_email, contact_number, nature_of_business, industry_type, accreditation_status FROM employer WHERE user_id = ? LIMIT 1');
         $stmt->bind_param('i', $employer_id);
         $stmt->execute();
-        $companyResult = $stmt->get_result();
-        $company = $companyResult->fetch_assoc();
+        $stmt->bind_result($company_name, $company_logo, $company_location, $contact_email, $contact_number, $nature_of_business, $industry_type, $accreditation_status);
+        $stmt->fetch();
         $stmt->close();
+        
+        // Create company details array
+        $companyDetails = [
+            'company_name' => $company_name,
+            'company_logo' => $company_logo,
+            'company_location' => $company_location,
+            'contact_email' => $contact_email,
+            'contact_number' => $contact_number,
+            'nature_of_business' => $nature_of_business,
+            'industry_type' => $industry_type,
+            'accreditation_status' => $accreditation_status
+        ];
     }
+    
+    // Add both company_name at root level and companyDetails as nested object
     $job['savedDate'] = $savedDate;
-    $job['companyDetails'] = $company;
+    $job['company_name'] = $company_name; // Add company_name at root level
+    $job['companyDetails'] = $companyDetails; // Add full company details as nested object
+    
     $savedJobs[] = $job;
 }
 
 echo json_encode(['savedJobs' => $savedJobs]);
+?>

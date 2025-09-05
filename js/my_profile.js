@@ -9,7 +9,25 @@ const { createApp } = Vue;
                     mobileMenuOpen: false,
                     profileDropdownOpen: false,
                     mobileProfileDropdownOpen: false,
+                    showTutorialButton: true, // Start as false, will be updated after check
+                    showWelcomeModal: false, // Start as false
+                    currentWelcomeSlide: 0,
+                    welcomeSlides: [
+                        { title: "Welcome", content: "intro" },
+                        { title: "Navigation", content: "navigation" },
+                        { title: "Job Search", content: "job_search" },
+                        { title: "Profile", content: "profile" }
+                    ],
                     unreadNotifications: 0,
+                    showSuccessStoryModal: false,
+                    showDeleteSuccessStoryModal: false,
+                    editingSuccessStoryIndex: null,
+                    editSuccessStoryData: {
+                        title: '',
+                        content: ''
+                    },
+                    successStories: [],
+                    deletingSuccessStoryIndex: null,
                     notifications: [],
                     profile: {
                         first_name: '',
@@ -198,6 +216,12 @@ const { createApp } = Vue;
                 darkMode(val) {
                     localStorage.setItem('darkMode', val.toString());
                     this.applyDarkMode();
+                },
+                degreeInput(newVal) {
+                    this.editEducationData.degree = newVal;
+                },
+                schoolInput(newVal) {
+                    this.editEducationData.school = newVal;
                 }
             },
             methods: {
@@ -294,11 +318,15 @@ const { createApp } = Vue;
                 closeEducationModal() { this.showEducationModal = false; this.editingEducationIndex = null; },
                 saveEducation() {
                     if (this.editingEducationIndex === null) {
-                        this.addEducationToBackend();
-                    } else {
-                        // Ensure degree and school are set
+                        // For new education, make sure to set degree and school from inputs
                         this.editEducationData.degree = this.degreeInput;
                         this.editEducationData.school = this.schoolInput;
+                        this.addEducationToBackend();
+                    } else {
+                        // Ensure degree and school are set from inputs
+                        this.editEducationData.degree = this.degreeInput;
+                        this.editEducationData.school = this.schoolInput;
+                        
                         // Update existing education
                         const formData = new FormData();
                         formData.append('id', this.editEducationData.id);
@@ -307,6 +335,7 @@ const { createApp } = Vue;
                         formData.append('start_date', this.editEducationData.start_date);
                         formData.append('end_date', this.editEducationData.end_date);
                         formData.append('current', this.editEducationData.current ? 'true' : '');
+                        
                         fetch('functions/update_education.php', {
                             method: 'POST',
                             body: formData
@@ -641,6 +670,111 @@ const { createApp } = Vue;
                         this.showNotification('Failed to update document.', 'error');
                     });
                 },
+                // Success Story Methods
+                openSuccessStoryModal() {
+                    this.showSuccessStoryModal = true;
+                },
+                closeSuccessStoryModal() {
+                    this.showSuccessStoryModal = false;
+                    this.editingSuccessStoryIndex = null;
+                    this.editSuccessStoryData = { title: '', content: '' };
+                },
+                editSuccessStory(index) {
+                    this.editingSuccessStoryIndex = index;
+                    this.editSuccessStoryData = { ...this.successStories[index] };
+                    this.showSuccessStoryModal = true;
+                },
+                async saveSuccessStory() {
+                    try {
+                        const formData = new FormData();
+                        formData.append('title', this.editSuccessStoryData.title);
+                        formData.append('content', this.editSuccessStoryData.content);
+                        
+                        if (this.editingSuccessStoryIndex !== null) {
+                            formData.append('story_id', this.successStories[this.editingSuccessStoryIndex].story_id);
+                            const response = await fetch('api/update_success_story.php', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                this.successStories[this.editingSuccessStoryIndex] = result.story;
+                                this.showNotification('Success story updated successfully!', 'success');
+                            } else {
+                                this.showNotification(result.message || 'Error updating story', 'error');
+                            }
+                        } else {
+                            const response = await fetch('functions/add_success_story.php', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                this.successStories.push(result.story);
+                                this.showNotification('Success story submitted for review!', 'success');
+                            } else {
+                                this.showNotification(result.message || 'Error adding story', 'error');
+                            }
+                        }
+                        
+                        this.closeSuccessStoryModal();
+                    } catch (error) {
+                        this.showNotification('Error saving success story', 'error');
+                        console.error('Error:', error);
+                    }
+                },
+                deleteSuccessStory(index) {
+                    this.deletingSuccessStoryIndex = index;
+                    this.showDeleteSuccessStoryModal = true;
+                },
+                cancelDeleteSuccessStory() {
+                    this.showDeleteSuccessStoryModal = false;
+                    this.deletingSuccessStoryIndex = null;
+                },
+                async confirmDeleteSuccessStory() {
+                    if (this.deletingSuccessStoryIndex === null) return;
+                    
+                    try {
+                        const storyId = this.successStories[this.deletingSuccessStoryIndex].story_id;
+                        const response = await fetch('functions/delete_success_story.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ story_id: storyId })
+                        });
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            this.successStories.splice(this.deletingSuccessStoryIndex, 1);
+                            this.showNotification('Success story deleted successfully!', 'success');
+                        } else {
+                            this.showNotification(result.message || 'Error deleting story', 'error');
+                        }
+                    } catch (error) {
+                        this.showNotification('Error deleting success story', 'error');
+                        console.error('Error:', error);
+                    }
+                    
+                    this.showDeleteSuccessStoryModal = false;
+                    this.deletingSuccessStoryIndex = null;
+                },
+                async fetchSuccessStories() {
+                    try {
+                        const response = await fetch('functions/get_success_stories.php');
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            this.successStories = result.stories;
+                        } else {
+                            this.showNotification('Error loading success stories', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching success stories:', error);
+                    }
+                },
                 fetchCities() {
                     this.cities = [];
                     
@@ -692,12 +826,18 @@ const { createApp } = Vue;
                             this.profile.education = [];
                         });
                 },
-        
                 addEducationToBackend() {
+                    // Make sure degree and school are set from inputs
+                    this.editEducationData.degree = this.degreeInput;
+                    this.editEducationData.school = this.schoolInput;
+                    
                     const formData = new FormData();
                     for (const key in this.editEducationData) {
-                        formData.append(key, this.editEducationData[key]);
+                        if (this.editEducationData[key] !== null && this.editEducationData[key] !== undefined) {
+                            formData.append(key, this.editEducationData[key]);
+                        }
                     }
+                    
                     fetch('functions/insert_education.php', {
                         method: 'POST',
                         body: formData
@@ -1004,6 +1144,43 @@ const { createApp } = Vue;
                 closeDeleteProfilePicModal() {
                     this.showDeleteProfilePicModal = false;
                 },
+                openTutorial() {
+                    this.showWelcomeModal = true;
+                    this.currentWelcomeSlide = 0;
+                    
+                    // Mark tutorial as viewed in session storage
+                    sessionStorage.setItem('tutorial_viewed', 'true');
+                },
+                
+                closeWelcomeModal() {
+                    console.log('Closing welcome modal');
+                    this.showWelcomeModal = false;
+                    
+                    // Always mark as shown when user closes the modal
+                    localStorage.setItem('welcomeModalShown', 'true');
+                    console.log('Set welcomeModalShown to true in localStorage');
+                    
+                    // If user completed the tutorial (reached the end), mark it as completed
+                    if (this.currentWelcomeSlide === this.welcomeSlides.length - 1) {
+                        console.log('User completed tutorial, marking as completed');
+                        this.markTutorialCompleted();
+                    }
+                },
+                async markTutorialCompleted() {
+                    try {
+                        const response = await fetch('functions/mark_tutorial_completed.php', {
+                            method: 'POST'
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showTutorialButton = false;
+                            sessionStorage.setItem('tutorial_completed', 'true');
+                        }
+                    } catch (error) {
+                        console.error('Error marking tutorial as completed:', error);
+                    }
+                },
                 generateResumePDF() {
                     const doc = new window.jspdf.jsPDF({
                         unit: 'pt',
@@ -1307,6 +1484,7 @@ const { createApp } = Vue;
                     this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 }
                 this.applyDarkMode();
+                this.fetchSuccessStories();
 
                 this.fetchUnreadNotifications();
   

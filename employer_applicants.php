@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'employer') {
-    header('Location: employer_login.php');
+    header('Location: login.php');
     exit();
 }
 // Fetch user_id from user table using email
@@ -118,11 +118,22 @@ $_SESSION['user_id'] = $user_id;
                 <i class="fas fa-tachometer-alt w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
                 <span class="font-medium">Dashboard</span>
             </a>
+
+            <a href="employer_leaderboard" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-trophy w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
+                <span class="font-medium">Leaderboard</span>
+            </a>
             
             <!-- Jobs -->
             <a href="employer_jobposting" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
                 <i class="fas fa-briefcase w-5 mr-3 text-center text-emerald-500 dark:text-emerald-400"></i>
                 <span class="font-medium">Jobs</span>
+            </a>
+
+            <!-- Job Resources -->
+            <a href="employer_resources" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-file-alt w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Resources</span>
             </a>
             
             <!-- Applicants -->
@@ -176,9 +187,13 @@ $_SESSION['user_id'] = $user_id;
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_profile">
                                 <i class="fas fa-user mr-3"></i> Profile
                             </a>
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_terms">
+                                <i class="fas fa-file-contract mr-3"></i> Terms
+                            </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_forgot_password">
                                 <i class="fas fa-key mr-3"></i> Forgot Password
                             </a>
+                            <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="confirmLogout">
                                 <i class="fas fa-sign-out-alt mr-3"></i> 
                                 <span class="text-sm">Logout</span>
@@ -216,9 +231,10 @@ $_SESSION['user_id'] = $user_id;
                     <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full md:w-auto">
                         <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-auto" v-model="filters.status">
                             <option value="">All Statuses</option>
-                            <option value="Accepted">Accepted</option>
                             <option value="Pending">Pending</option>
-                            <option value="Rejected">Rejected</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Hired">Hired</option>
+                            <option value="Rejected">Reject</option>
                         </select>
                         <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-auto" v-model="filters.appliedFor">
                             <option value="">All Positions</option>
@@ -252,8 +268,15 @@ $_SESSION['user_id'] = $user_id;
                                 <td class="px-4 py-2 text-center text-gray-700 dark:text-gray-200">{{ applicant.appliedFor }}</td>
                                 <td class="px-4 py-2 text-center text-gray-700 dark:text-gray-200">{{ formatDate(applicant.appliedDate) }}</td>
                                 <td class="px-4 py-2 text-center text-gray-700 dark:text-gray-200">{{ applicant.experience }} years</td>
+                                <!-- In your table row -->
                                 <td class="px-4 py-2 text-center">
-                                    <span :class="['inline-block px-2 py-1 rounded text-xs font-semibold', applicant.status === 'Accepted' ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200' : applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-200' : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200']">
+                                    <span :class="[
+                                        'inline-block px-2 py-1 rounded text-xs font-semibold',
+                                        applicant.status === 'Hired' ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200' : 
+                                        applicant.status === 'Interview' ? 'bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-200' : 
+                                        applicant.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-200' : 
+                                        'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200'
+                                    ]">
                                         {{ applicant.status }}
                                     </span>
                                 </td>
@@ -261,23 +284,23 @@ $_SESSION['user_id'] = $user_id;
                                 <td class="px-4 py-2 text-center">
                                     <div class="relative inline-block text-left">
                                         <button @click="toggleActionDropdown(applicant.id)" class="p-2 rounded focus:outline-none transition-colors"
-  :class="darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200'">
-  <i class="fas fa-ellipsis-h"></i>
-</button>
-<div v-if="actionDropdown === applicant.id" class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
-  <div class="py-1">
-    <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" @click.prevent="viewApplicant(applicant)"><i class="fas fa-eye mr-2"></i>View</a>
-    <a v-if="applicant.alumni && applicant.alumni.resume_file" :href="applicant.alumni.resume_file" download class="block px-4 py-2 text-sm text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900"><i class="fas fa-download mr-2"></i>Download Resume</a>
-    <a href="#" 
-    class="block px-4 py-2 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-200" 
-    @click.prevent="updateApplicantStatus(applicant, 'Interview')">
-    <i class="fas fa-calendar-check mr-2"></i>Interview
-    </a>
-    <a href="#" class="block px-4 py-2 text-sm text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900" @click.prevent="updateApplicantStatus(applicant, 'Hired')"><i class="fas fa-user-check mr-2"></i>Hired</a>
-    <a href="#" class="block px-4 py-2 text-sm text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900" @click.prevent="updateApplicantStatus(applicant, 'Rejected')"><i class="fas fa-user-times mr-2"></i>Reject</a>
-    <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-800" @click.prevent="confirmDelete(applicant)"><i class="fas fa-trash mr-2"></i>Delete</a>
-  </div>
-</div>
+                                            :class="darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200'">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <div v-if="actionDropdown === applicant.id" class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                                            <div class="py-1">
+                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" @click.prevent="viewApplicant(applicant)"><i class="fas fa-eye mr-2"></i>View</a>
+                                                <a v-if="applicant.alumni && applicant.alumni.resume_file" :href="applicant.alumni.resume_file" download class="block px-4 py-2 text-sm text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900"><i class="fas fa-download mr-2"></i>Download Resume</a>
+                                                <a href="#" 
+                                                class="block px-4 py-2 text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-200" 
+                                                @click.prevent="updateApplicantStatus(applicant, 'Interview')">
+                                                <i class="fas fa-calendar-check mr-2"></i>Interview
+                                                </a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900" @click.prevent="updateApplicantStatus(applicant, 'Hired')"><i class="fas fa-user-check mr-2"></i>Hired</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900" @click.prevent="updateApplicantStatus(applicant, 'Rejected')"><i class="fas fa-user-times mr-2"></i>Reject</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-800" @click.prevent="confirmDelete(applicant)"><i class="fas fa-trash mr-2"></i>Delete</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -361,12 +384,14 @@ $_SESSION['user_id'] = $user_id;
                   <!-- Skills -->
                   <div v-if="selectedApplicant.alumni && selectedApplicant.alumni.skills && selectedApplicant.alumni.skills.length" class="mb-6">
                     <h4 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-cogs text-blue-500"></i> <span>Skills</span></h4>
-                    <ul class="flex flex-wrap gap-2">
-                      <li v-for="skill in selectedApplicant.alumni.skills" :key="skill.skill_id" class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                        <span>{{ skill.name }}</span>
-                        <span v-if="skill.certificate" class="ml-1 text-green-600 dark:text-green-300"><i class="fas fa-certificate"></i></span>
-                      </li>
-                    </ul>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-6">
+                        <ul class="flex flex-wrap gap-2">
+                            <li v-for="skill in selectedApplicant.alumni.skills" :key="skill.skill_id" class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                                <span>{{ skill.name }}</span>
+                                <span v-if="skill.certificate" class="ml-1 text-green-600 dark:text-green-300"><i class="fas fa-certificate"></i></span>
+                            </li>
+                        </ul>
+                    </div>
                   </div>
                   <!-- Job Details, Description, Requirements, Qualifications, Employer Question (existing) -->
                   <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-briefcase text-blue-500 dark:text-blue-300"></i> <span>Job Details</span></h4>
@@ -394,23 +419,32 @@ $_SESSION['user_id'] = $user_id;
                       <li v-for="(qual, idx) in (selectedApplicant.job && selectedApplicant.job.qualifications ? selectedApplicant.job.qualifications.split('\n') : [])" :key="'qual'+idx">{{ qual }}</li>
                     </ul>
                   </div>
-                  <!-- Employer Question (existing) -->
-                  <div v-if="selectedApplicant.job && selectedApplicant.job.employer_question">
-                    <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-question-circle text-blue-500 dark:text-blue-300"></i> <span>Employer Question</span></h4>
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-6 text-gray-700 dark:text-gray-200">
-                      {{ selectedApplicant.job.employer_question }}
-                    </div>
-                  </div>
                   <!-- Resume Preview/Download (moved below Employer Question, improved UI, no header, dark mode) -->
                   <div v-if="selectedApplicant.alumni && selectedApplicant.alumni.resume_file" class="mb-6">
                     <h4 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-file-pdf text-red-500"></i> <span>Resume</span></h4>
-                    <div class="flex flex-wrap gap-3 mb-2">
-                      <a :href="selectedApplicant.alumni.resume_file" target="_blank" class="inline-flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"><i class="fas fa-eye"></i> Preview</a>
-                      <a :href="selectedApplicant.alumni.resume_file" download class="inline-flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm font-medium"><i class="fas fa-download"></i> Download</a>
+                    <div class="flex flex-col gap-3 mb-4 w-full">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                            <a :href="selectedApplicant.alumni.resume_file" target="_blank" 
+                            class="inline-flex items-center justify-center gap-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium w-full">
+                                <i class="fas fa-eye"></i> Preview
+                            </a>
+                            <a :href="selectedApplicant.alumni.resume_file" download 
+                            class="inline-flex items-center justify-center gap-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm font-medium w-full">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
                     </div>
                     <div class="w-full rounded overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                      <iframe :src="selectedApplicant.alumni.resume_file" class="w-full" style="min-height:400px; border:none; background:transparent;" allowfullscreen></iframe>
+                      <iframe :src="selectedApplicant.alumni.resume_file + '#toolbar=0'" class="w-full"
+                                frameborder="0" style="min-height:400px; border:none; background:transparent;" allowfullscreen></iframe>
                     </div>
+                  </div>
+
+                  <div class="flex flex-col md:flex-row gap-3 mt-6 w-full">
+                        <button @click="contactAlumni(selectedApplicant.alumni)" 
+                            class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 text-sm sm:text-base">
+                        <i class="fas fa-envelope"></i> Contact
+                        </button>
                   </div>
                 </div>
               </div>

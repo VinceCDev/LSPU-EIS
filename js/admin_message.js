@@ -24,7 +24,7 @@
                 selectedIds: [],
                 notifications:[],
                 compose: {
-                    role: '',
+                    role: 'Admin',
                     receiver: '',
                     subject: '',
                     message: ''
@@ -82,6 +82,8 @@
             this.applyDarkMode();
             // Add resize event listener for responsive sidebar
             window.addEventListener('resize', this.handleResize);
+            this.checkUrlParameters();
+
         },
         beforeUnmount() {
             // Clean up event listeners
@@ -798,6 +800,26 @@
                 } catch (error) {
                     console.error('Export error:', error);
                     this.showError('Failed to export messages');
+                }
+            },
+            checkUrlParameters() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const composeParam = urlParams.get('compose');
+                const toParam = urlParams.get('to');
+                
+                if (composeParam === 'true') {
+                    this.showCompose = true;
+                    
+                    if (toParam) {
+                        // Set the receiver email if provided
+                        this.compose.receiver = decodeURIComponent(toParam);
+                        
+                        // Try to find the user in allUsers to set the role
+                        const user = this.allUsers.find(u => u.email === this.compose.receiver);
+                        if (user) {
+                            this.compose.role = user.role;
+                        }
+                    }
                 }
             },
             exportToPDF() {

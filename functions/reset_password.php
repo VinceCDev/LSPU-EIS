@@ -48,11 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['token'], $_POST['emai
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'allencristal12@gmail.com';
-            $mail->Password = 'ugwb vksz wjto zbwf';
+            $mail->Username = 'lspueis@gmail.com';
+            $mail->Password = 'afbp fcwf oujr yqzr';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
-            $mail->setFrom('allencristal12@gmail.com', 'LSPU EIS');
+            $mail->setFrom('lspueis@gmail.com', 'LSPU EIS');
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = 'Your LSPU EIS Password Was Reset';

@@ -67,23 +67,19 @@ $_SESSION['user_id'] = $user_id;
     </transition>
                
     <!-- Logout Confirmation Modal - Top positioning -->
-    <div v-if="showLogoutModal" class="fixed inset-0 flex items-start justify-center z-[100]">
+    <div v-if="showLogoutModal" class="fixed inset-0 z-[100] flex items-center justify-center md:items-start md:justify-center bg-black bg-opacity-50">
         <div class="fixed inset-0 bg-black bg-opacity-50" @click="showLogoutModal = false"></div>
-        <div class="absolute top-8 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-700 rounded-lg shadow-xl p-6 w-full max-w-md mx-1">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4 md:mt-8">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Confirm Logout</h3>
-                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Confirm Logout</h3>
+                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to logout?</p>
-            <div class="flex justify-end space-x-3">
-                <button @click="showLogoutModal = false" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                    Cancel
-                </button>
-                <button @click="logout" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
-                    Logout
-                </button>
+            <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to logout?</p>
+            <div class="flex justify-end gap-3">
+                <button @click="showLogoutModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                <button @click="logout" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Logout</button>
             </div>
         </div>
     </div>
@@ -216,6 +212,10 @@ $_SESSION['user_id'] = $user_id;
                             <a class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_reminder_settings">
                                 <i class="fas fa-bell mr-2"></i> Reminder Settings
                             </a>
+                            <a href="admin_success_stories"  class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500">
+                                <i class="fas fa-book-open mr-3"></i>
+                                <span class="font-medium">Success Stories</span>
+                            </a>
                             <a class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="forgot_password">
                                 <i class="fas fa-cog mr-2"></i> Forgot Password
                             </a>
@@ -332,13 +332,8 @@ $_SESSION['user_id'] = $user_id;
                     <form @submit.prevent="sendMessage" class="space-y-5">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role <span class="text-red-500">*</span></label>
-                            <select v-model="compose.role" required 
-                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm">
-                                <option value="">Select Role</option>
-                                <option value="admin">Admin</option>
-                                <option value="employer">Employer</option>
-                                <option value="alumni">Alumni</option>
-                            </select>
+                            <input v-model="compose.role"
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm" readonly disabled>
                         </div>
                         
                         <div>
@@ -419,8 +414,8 @@ $_SESSION['user_id'] = $user_id;
                         <!-- Inbox Table -->
                         <table v-if="activeFolder === 'inbox'" class="min-w-full text-base select-none">
                             <thead>
-                                <tr class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                                    <th><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
+                                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                    <th  v-if="filteredPaginatedMessages.length > 0" class="pl-2"><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
                                     <th class="pl-8 pr-4 py-3 text-left">Sender</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Subject</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Message</th>
@@ -431,10 +426,10 @@ $_SESSION['user_id'] = $user_id;
                                 <tr 
                                     v-for="(msg, idx) in filteredPaginatedMessages" 
                                     :key="msg.id" 
-                                    class="hover:bg-blue-50 dark:hover:bg-blue-800 cursor-pointer transition" 
+                                    class="hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition" 
                                     @click="selectMessage(msg)"
                                 >
-                                    <td @click.stop>
+                                    <td @click.stop class="pl-2">
                                         <input 
                                             type="checkbox" 
                                             :value="msg.id" 
@@ -460,8 +455,8 @@ $_SESSION['user_id'] = $user_id;
                         <!-- Sent Table -->
                         <table v-if="activeFolder === 'sent'" class="min-w-full text-base select-none">
                             <thead>
-                                <tr class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                                    <th><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
+                               <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                    <th v-if="filteredPaginatedMessages.length > 0" class="pl-2"><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
                                     <th class="pl-8 pr-4 py-3 text-left">Receiver</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Subject</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Message</th>
@@ -469,8 +464,8 @@ $_SESSION['user_id'] = $user_id;
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(msg, idx) in filteredPaginatedMessages" :key="msg.id" class="hover:bg-blue-50 dark:hover:bg-blue-800 cursor-pointer transition border-b border-gray-100 dark:border-gray-800" @click.stop="selectMessage(msg)">
-                                    <td><input type="checkbox" :value="msg.id" v-model="selectedMessages"></td>
+                                <tr v-for="(msg, idx) in filteredPaginatedMessages" :key="msg.id" class="hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition border-b border-gray-100 dark:border-gray-800" @click.stop="selectMessage(msg)">
+                                    <td class="pl-2"><input type="checkbox" :value="msg.id" v-model="selectedMessages"></td>
                                     <td class="pl-8 pr-4 py-3 text-black dark:text-white">{{ msg.sender }}</td>
                                     <td class="pl-8 pr-4 py-3 text-black dark:text-white">{{ msg.subject }}</td>
                                     <td class="pl-8 pr-4 py-3 truncate max-w-xs text-black dark:text-white">{{ stripHtml(msg.message) }}</td>
@@ -489,8 +484,8 @@ $_SESSION['user_id'] = $user_id;
                         <!-- Important Table -->
                         <table v-if="activeFolder === 'important'" class="min-w-full text-base select-none">
                             <thead>
-                                <tr class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                                    <th><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
+                                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                    <th v-if="filteredPaginatedMessages.length > 0" class="pl-2"><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
                                     <th class="pl-8 pr-4 py-3 text-left">#</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Type</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Sender / Receiver</th>
@@ -500,8 +495,8 @@ $_SESSION['user_id'] = $user_id;
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(msg, idx) in filteredImportantMessages" :key="msg.id" class="hover:bg-blue-50 dark:hover:bg-blue-800 cursor-pointer transition border-b border-gray-100 dark:border-gray-800" @click.stop="selectMessage(msg)">
-                                    <td><input type="checkbox" :value="msg.id" v-model="selectedMessages"></td>
+                                <tr v-for="(msg, idx) in filteredImportantMessages" :key="msg.id" class="hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition border-b border-gray-100 dark:border-gray-800" @click.stop="selectMessage(msg)">
+                                    <td class="pl-2"><input type="checkbox" :value="msg.id" v-model="selectedMessages"></td>
                                     <td class="pl-8 pr-4 py-3 text-black dark:text-white">{{ idx + 1 }}</td>
                                     <td class="pl-8 pr-4 py-3 text-black dark:text-white"><i class="fas fa-share"></i></td>
                                     <td class="pl-8 pr-4 py-3 text-black dark:text-white">{{ msg.sender }}</td>
@@ -522,8 +517,8 @@ $_SESSION['user_id'] = $user_id;
                         <!-- Trash Table -->
                         <table v-if="activeFolder === 'trash'" class="min-w-full text-base select-none">
                             <thead>
-                                <tr class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                                    <th><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
+                                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                    <th  v-if="filteredPaginatedMessages.length > 0"  class="pl-2"><input type="checkbox" v-model="selectAll" @change="toggleSelectAll"></th>
                                     <th class="pl-8 pr-4 py-3 text-left">Receiver</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Subject</th>
                                     <th class="pl-8 pr-4 py-3 text-left">Message</th>
@@ -531,8 +526,8 @@ $_SESSION['user_id'] = $user_id;
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(msg, idx) in filteredPaginatedMessages" :key="msg.id" class="hover:bg-blue-50 dark:hover:bg-blue-800 cursor-pointer transition border-b border-gray-100 dark:border-gray-800" @click.stop="selectMessage(msg)">
-                                    <td><input type="checkbox" :value="msg.id" v-model="selectedMessages"></td>
+                                <tr v-for="(msg, idx) in filteredPaginatedMessages" :key="msg.id" class="hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition border-b border-gray-100 dark:border-gray-800" @click.stop="selectMessage(msg)">
+                                    <td class="pl-2"><input type="checkbox" :value="msg.id" v-model="selectedMessages"></td>
                                     <td class="pl-8 pr-4 py-3 text-black dark:text-white">{{ msg.sender }}</td>
                                     <td class="pl-8 pr-4 py-3 text-black dark:text-white">{{ msg.subject }}</td>
                                     <td class="pl-8 pr-4 py-3 truncate max-w-xs text-black dark:text-white">{{ stripHtml(msg.message) }}</td>
@@ -550,12 +545,12 @@ $_SESSION['user_id'] = $user_id;
                         </table>
                     </div>
                     <!-- Pagination -->
-                    <div class="flex justify-end mt-4">
-                        <button class="px-3 py-1 rounded-l border border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-900 hover:bg-blue-100 dark:hover:bg-blue-800" :disabled="currentPage === 1" @click="prevPage">
+                    <div class="flex  gap-1 justify-center md:justify-end mt-4">
+                        <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === 1" @click="prevPage">
                             <i class="fas fa-chevron-left text-black dark:text-white"></i>
                         </button>
-                        <span class="px-4 py-1 bg-blue-700 dark:bg-blue-900 font-bold text-white dark:text-white">{{ currentPage }}</span>
-                        <button class="px-3 py-1 rounded-r border border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-900 hover:bg-blue-100 dark:hover:bg-blue-800" :disabled="currentPage === totalPages" @click="nextPage">
+                        <span class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-blue-500 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900">{{ currentPage }}</span>
+                        <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === totalPages" @click="nextPage">
                             <i class="fas fa-chevron-right text-black dark:text-white"></i>
                         </button>
                     </div>

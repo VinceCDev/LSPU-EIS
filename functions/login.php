@@ -7,6 +7,19 @@ require_once '../PHPMailer/src/Exception.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Function to log login attempts
+function logLoginAttempt($db, $email, $status, $userId = null, $failureReason = null) {
+    $ipAddress = $_SERVER['REMOTE_ADDR'];
+    $userAgent = $_SERVER['HTTP_USER_AGENT'];
+    $attemptTime = date('Y-m-d H:i:s');
+    
+    $stmt = $db->prepare("INSERT INTO login_logs (user_id, email, ip_address, user_agent, attempt_time, status, failure_reason) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param('issssss', $userId, $email, $ipAddress, $userAgent, $attemptTime, $status, $failureReason);
+    $stmt->execute();
+    $stmt->close();
+}
+
 header('Content-Type: application/json');
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($origin) {
@@ -39,6 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF check
     if (!isset($_SESSION['csrf_token']) || $csrf_token !== $_SESSION['csrf_token']) {
         file_put_contents('debug_csrf.txt', 'Session: ' . ($_SESSION['csrf_token'] ?? 'none') . ' | Posted: ' . ($csrf_token ?? 'none'));
+        
+        // Log failed CSRF attempt
+        $db = Database::getInstance()->getConnection();
+        logLoginAttempt($db, $email, 'failed', null, 'Invalid CSRF token');
+        
         echo json_encode(['success' => false, 'message' => 'Invalid CSRF token.']);
         exit;
     }
@@ -52,20 +70,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 
     if (!$user || !password_verify($password, $user['password'])) {
+        // Log failed login attempt
+        logLoginAttempt($db, $email, 'failed', null, 'Invalid credentials');
+        
         echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
         exit;
     }
+    
     if ($user['status'] !== 'Active') {
+        // Log failed login attempt due to inactive account
+        logLoginAttempt($db, $email, 'failed', $user['user_id'], 'Account not active');
+        
         echo json_encode(['success' => false, 'message' => 'Account not active.']);
         exit;
     }
+
+    // Log successful login
+    logLoginAttempt($db, $email, 'success', $user['user_id']);
 
     // Set session and redirect based on user_role
     $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['user_role'] = $user['user_role'];
     $_SESSION['email'] = $user['email'];
+    
+    // Update last login time in users table
+    $updateStmt = $db->prepare("UPDATE user SET last_login = NOW() WHERE user_id = ?");
+    $updateStmt->bind_param('i', $user['user_id']);
+    $updateStmt->execute();
+    $updateStmt->close();
+    
     if ($user['user_role'] === 'alumni') {
         echo json_encode(['success' => true, 'redirect' => '/lspu_eis/home']);
+        exit;
+    } elseif ($user['user_role'] === 'employer') {
+        echo json_encode(['success' => true, 'redirect' => '/lspu_eis/employer_dashboard']);
         exit;
     } else {
         echo json_encode(['success' => true, 'redirect' => '/lspu_eis/admin_dashboard']);

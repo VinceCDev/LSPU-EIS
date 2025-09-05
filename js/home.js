@@ -6,6 +6,16 @@ createApp({
         return {
             loading: true, // Add loading state
             notifications: [],
+            showTutorialButton: true, // Start as false, will be updated after check
+            showWelcomeModal: false, // Start as false
+            currentWelcomeSlide: 0,
+            welcomeSlides: [
+                { title: "Welcome", content: "intro" },
+                { title: "Navigation", content: "navigation" },
+                { title: "Job Search", content: "job_search" },
+                { title: "Profile", content: "profile" }
+            ],
+            highlightJobId: null,
             notificationId: 0,
             unreadNotifications: 0,
             notifications: [],
@@ -13,6 +23,8 @@ createApp({
             selectedLocation: '',
             selectedJobType: '',
             selectedSalary: '',
+            locationQuery: '', // Add this line
+            selectedLocation: '',
             showDetails: false,
             mobileProfileDropdownOpen: false,
             selectedJob: {
@@ -136,12 +148,16 @@ createApp({
                     }
                 }
             ],
-            locations: ['Manila', 'Cebu', 'Davao', 'Laguna', 'Remote'],
-            jobTypes: ['Full-time', 'Part-time', 'Contract', 'Freelance'],
+            locationSuggestions: [],
+            showLocationDropdown: false,
+            defaultLocations: ['Manila', 'Cebu', 'Davao', 'Laguna', 'Nueva Ecija', 'Bongabon', 'Quezon City', 'Makati', 'Taguig', 'Remote'],
+            jobTypes: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Remote'],
             salaryRanges: [
+                { label: '₱10,000 - ₱20,000', value: '10-20' },
                 { label: '₱20,000 - ₱30,000', value: '20-30' },
                 { label: '₱30,000 - ₱50,000', value: '30-50' },
-                { label: '₱50,000+', value: '50+' }
+                { label: '₱50,000 - ₱100,000', value: '50-100' },
+                { label: '₱100,000+', value: '100+' }
             ],
             mobileMenuOpen: false,
             profileDropdownOpen: false,
@@ -200,14 +216,24 @@ createApp({
             return this.jobs.filter(function(job) {
                 const matchesSearch = job.title.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
                                      job.company.toLowerCase().includes(this.searchQuery.toLowerCase());
-                const matchesLocation = !this.selectedLocation || job.location === this.selectedLocation;
+                
+                // Improved location filter - check if either contains the other
+                const matchesLocation = !this.selectedLocation || 
+                                      job.location.toLowerCase().includes(this.selectedLocation.toLowerCase()) ||
+                                      this.selectedLocation.toLowerCase().includes(job.location.toLowerCase());
+                
                 const matchesJobType = !this.selectedJobType || job.type === this.selectedJobType;
-                const matchesSalary = !this.selectedSalary || 
-                                    (this.selectedSalary === '20-30' && job.salary.includes('₱20,000')) ||
-                                    (this.selectedSalary === '30-50' && job.salary.includes('₱30,000')) ||
-                                    (this.selectedSalary === '50+' && job.salary.includes('₱50,000'));
+                
+                // Fixed salary filter
+                const matchesSalary = !this.selectedSalary || this.matchesSalaryRange(job.salary, this.selectedSalary);
+                
                 return matchesSearch && matchesLocation && matchesJobType && matchesSalary;
             }.bind(this));
+        },
+        clearLocation() {
+            this.locationQuery = '';
+            this.selectedLocation = '';
+            this.showLocationDropdown = false;
         },
         filteredConversations() {
             return this.conversations.filter(conversation => 
@@ -241,6 +267,11 @@ createApp({
                     header.classList.remove('header-frosted');
                 }
             }
+        },
+        locationQuery(newVal) {
+            if (!newVal.trim()) {
+                this.selectedLocation = '';
+            }
         }
     },
     mounted() {
@@ -252,18 +283,46 @@ createApp({
             this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
         this.applyDarkMode();
+        
+        this.checkForHighlight();
+        // Check if user is new based on account creation date
+        this.checkIfNewUser().then((userData) => {
+            console.log('User status:', userData);
+            
+            // Check if welcome modal was already shown
+            const welcomeModalShown = localStorage.getItem('welcomeModalShown');
+            console.log('Welcome modal shown status:', welcomeModalShown);
+            
+            // Only show welcome modal for new users who haven't seen it yet
+            // MODIFIED: Check if welcomeModalShown is null or "false" instead of just null
+            if (userData.is_new_user && (welcomeModalShown === null || welcomeModalShown === 'false')) {
+                console.log('Showing welcome modal for new user');
+                // Small delay to ensure everything is loaded
+                setTimeout(() => {
+                    this.showWelcomeModal = true;
+                }, 1000);
+            } else {
+                console.log('Not showing welcome modal. is_new_user:', userData.is_new_user, 'welcomeModalShown:', welcomeModalShown);
+                
+                // DEBUG: Force show for testing if needed
+                // this.showWelcomeModal = true;
+            }
+        }).catch((error) => {
+            console.error('Failed to check user status:', error);
+        });
+        
         // Fetch jobs and set loading=false after
         Promise.all([
             this.fetchJobs()
         ]).finally(() => {
             this.loading = false;
         });
-
+    
         this.fetchUnreadNotifications();
-  
-         // Optional: Poll for new notifications every 30 seconds
+      
+        // Optional: Poll for new notifications every 30 seconds
         this.notificationInterval = setInterval(this.fetchUnreadNotifications, 30000);
-
+    
         fetch('functions/fetch_profile_pic.php')
             .then(res => res.json())
             .then(data => {
@@ -318,7 +377,7 @@ createApp({
                         ? (logoUrl.startsWith('http') 
                             ? logoUrl 
                             : '/lspu_eis/uploads/logos/' + logoUrl.replace(/^.*[\\\/]/, ''))
-                        : '/lspu_eis/images/logo.png' + encodeURIComponent(company.company_name || job.company_name || 'Company');
+                        : '../images/logo.png' + encodeURIComponent(company.company_name || job.company_name || 'Company');
                     
                     return {
                         id: job.job_id,
@@ -341,10 +400,233 @@ createApp({
                 });
                 
                 console.log('Saved jobs:', savedJobIds, this.jobs.map(j => ({id: j.id, saved: j.saved})));
+                
+                 console.log('All job salaries:');
+                this.jobs.forEach(job => {
+                    console.log(`Job: ${job.title}, Salary: "${job.salary}"`);
+                });
             } catch (e) {
                 console.error('Error fetching jobs:', e);
                 // fallback: keep hardcoded jobs if fetch fails
             }
+        },
+
+        forceShowModal() {
+            console.log('Manually forcing modal to show');
+            this.showWelcomeModal = true;
+            this.currentWelcomeSlide = 0;
+        },
+
+        checkForHighlight() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const jobId = urlParams.get('job_id');
+            const fromNotification = urlParams.get('from_notification');
+            
+            if (jobId && fromNotification) {
+                this.highlightJobId = jobId;
+                
+                // Clean up the URL (remove the parameters without reloading)
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+                
+                // Remove highlight after 5 seconds
+                setTimeout(() => {
+                    this.highlightJobId = null;
+                }, 5000);
+            }
+        },
+        
+        shouldHighlightJob(job) {
+            const jobId = job.job_id || job.id;
+            return this.highlightJobId && jobId == this.highlightJobId;
+        },
+
+        async checkIfNewUser() {
+            try {
+                const response = await fetch('functions/check_new_user.php');
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response');
+                }
+                
+                const data = await response.json();
+                console.log('User status response:', data);
+                
+                if (data.success) {
+                    return {
+                        success: true,
+                        is_new_user: data.is_new_user,
+                        created_at: data.created_at,
+                        account_age_days: data.account_age_days,
+                        is_today: data.is_today
+                    };
+                }
+                return {success: false, is_new_user: false};
+            } catch (error) {
+                console.error('Error checking user status:', error);
+                return {success: false, is_new_user: false};
+            }
+        },
+
+        openTutorial() {
+            this.showWelcomeModal = true;
+            this.currentWelcomeSlide = 0;
+            
+            // Mark tutorial as viewed in session storage
+            sessionStorage.setItem('tutorial_viewed', 'true');
+        },
+        
+        closeWelcomeModal() {
+            console.log('Closing welcome modal');
+            this.showWelcomeModal = false;
+            
+            // Always mark as shown when user closes the modal
+            localStorage.setItem('welcomeModalShown', 'true');
+            console.log('Set welcomeModalShown to true in localStorage');
+            
+            // If user completed the tutorial (reached the end), mark it as completed
+            if (this.currentWelcomeSlide === this.welcomeSlides.length - 1) {
+                console.log('User completed tutorial, marking as completed');
+                this.markTutorialCompleted();
+            }
+        },
+
+        async markTutorialCompleted() {
+            try {
+                const response = await fetch('functions/mark_tutorial_completed.php', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    this.showTutorialButton = false;
+                    sessionStorage.setItem('tutorial_completed', 'true');
+                }
+            } catch (error) {
+                console.error('Error marking tutorial as completed:', error);
+            }
+        },
+        matchesSalaryRange(salaryString, selectedRange) {
+            if (!salaryString || !selectedRange) {
+                console.log('No salary string or selected range, returning true');
+                return true;
+            }
+            
+            console.log(`Checking salary: "${salaryString}" against range: ${selectedRange}`);
+            
+            try {
+                let minSalary;
+                
+                // Remove currency symbols and spaces
+                const cleanSalary = salaryString.replace(/[₱\s]/g, '');
+                console.log(`Cleaned salary: "${cleanSalary}"`);
+                
+                // Handle different salary formats
+                if (cleanSalary.includes('-')) {
+                    // Range format: "50000-70000" or "50,000-70,000"
+                    const [minStr] = cleanSalary.split('-');
+                    minSalary = parseInt(minStr.replace(/,/g, ''));
+                } else if (cleanSalary.includes(',')) {
+                    // Single value with comma: "59,000"
+                    minSalary = parseInt(cleanSalary.replace(/,/g, ''));
+                } else {
+                    // Simple number: "60000"
+                    minSalary = parseInt(cleanSalary);
+                }
+                
+                console.log(`Parsed minimum salary: ${minSalary}`);
+                
+                if (isNaN(minSalary)) {
+                    console.log('Could not parse salary values');
+                    return true;
+                }
+                
+                console.log(`Using minimum salary: ${minSalary}`);
+                
+                // DO NOT multiply by 1000 - the values are already the actual amount!
+                
+                switch(selectedRange) {
+                    case '10-20':
+                        return minSalary >= 10000 && minSalary <= 20000;
+                    case '20-30':
+                        return minSalary >= 20000 && minSalary <= 30000;
+                    case '30-50':
+                        return minSalary >= 30000 && minSalary <= 50000;
+                    case '50-100':
+                        return minSalary >= 50000 && minSalary <= 100000;
+                    case '100+':
+                        return minSalary > 100000;
+                    default:
+                        return true;
+                }
+            } catch (e) {
+                console.error('Error parsing salary:', salaryString, e);
+                return true;
+            }
+        },
+        async fetchLocationSuggestions() {
+            if (!this.locationQuery || this.locationQuery.length < 3) {
+                this.locationSuggestions = [];
+                this.showLocationDropdown = false;
+                return;
+            }
+            
+            const apiKey = 'b25cb94f83684f6aa21cbd86f93c9417'; // Your Geoapify API key
+            const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(this.locationQuery)}&limit=5&apiKey=${apiKey}`;
+            
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                // Extract formatted addresses from the response
+                this.locationSuggestions = data.features.map(feature => ({
+                    place_id: feature.properties.place_id,
+                    display_name: feature.properties.formatted
+                }));
+                
+                this.showLocationDropdown = true;
+            } catch (e) {
+                console.error('Error fetching location suggestions:', e);
+                // Fallback to default locations
+                this.locationSuggestions = this.defaultLocations
+                    .filter(loc => loc.toLowerCase().includes(this.locationQuery.toLowerCase()))
+                    .map(loc => ({ place_id: loc, display_name: loc }));
+                this.showLocationDropdown = this.locationSuggestions.length > 0;
+            }
+        },
+        selectLocation(location) {
+            console.log('Selected location:', location);
+            
+            // Handle both object and string inputs
+            const locationName = typeof location === 'object' ? location.display_name : location;
+            
+            // Extract just the city/province name from the full formatted address
+            const locationParts = locationName.split(', ');
+            let selectedLocation = locationParts[0]; // Default to first part
+            
+            // Try to find a more specific location (city or province)
+            const philippineLocations = ['Manila', 'Cebu', 'Davao', 'Laguna', 'Nueva Ecija', 'Bongabon', 'Quezon', 'Cavite', 'Bulacan', 'Pampanga'];
+            
+            for (const part of locationParts) {
+                if (philippineLocations.includes(part)) {
+                    selectedLocation = part;
+                    break;
+                }
+            }
+            
+            this.selectedLocation = selectedLocation;
+            this.locationQuery = selectedLocation;
+            this.showLocationDropdown = false;
+            
+            console.log('Processed selectedLocation:', this.selectedLocation);
+        },
+        hideLocationDropdown() {
+            // Use a longer timeout to ensure click events are processed
+            setTimeout(() => {
+                this.showLocationDropdown = false;
+            }, 300);
         },
         handleLogoError(event) {
             // Fallback to your default logo image
@@ -682,6 +964,18 @@ createApp({
         },
         logout() {
             window.location.href = 'logout.php';
+        },
+        messageEmployer(email) {
+        try {
+            // Redirect to messages page with employer email as parameter
+            const messagesUrl = `message.php?compose=true&to=${encodeURIComponent(email)}`;
+            window.location.href = messagesUrl;
+        } catch (error) {
+            console.error('Error redirecting to messages:', error);
+            this.showNotification('Error opening message composer', 'error');
         }
     }
+    }
 }).mount('#app');
+
+

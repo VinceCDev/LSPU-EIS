@@ -196,6 +196,16 @@ createApp({
             this.alumniDropdownOpen = true;
             this.companiesDropdownOpen = false;
         },
+        async contactAlumni(alumni) {
+            try {
+                // Redirect to messages page with alumni email as parameter
+                const messagesUrl = `admin_message.php?compose=true&to=${encodeURIComponent(alumni.email)}`;
+                window.location.href = messagesUrl;
+            } catch (error) {
+                console.error('Error redirecting to messages:', error);
+                this.showNotification('Error opening message composer', 'error');
+            }
+        },
         handleResize() {
             this.isMobile = window.innerWidth < 768;
             this.sidebarActive = window.innerWidth >= 768;
@@ -365,39 +375,133 @@ createApp({
             try {
                 const response = await fetch('functions/get_alumni_active.php', { credentials: 'include' });
                 const data = await response.json();
+                
                 if (!data.success) {
                     this.showNotification(data.message || 'Failed to load alumni data', 'error');
                     return;
                 }
-                this.alumni = data.alumni.map(alumni => ({
-                    id: alumni.alumni_id,
-                    first_name: alumni.first_name,
-                    middle_name: alumni.middle_name,
-                    last_name: alumni.last_name,
-                    email: alumni.email,
-                    secondary_email: alumni.secondary_email,
-                    gender: alumni.gender,
-                    year_graduated: alumni.year_graduated,
-                    course: alumni.course,
-                    college: alumni.college,
-                    province: alumni.province,
-                    city: alumni.city,
-                    status: alumni.status,
-                    birthdate: alumni.birthdate,
-                    contact: alumni.contact,
-                    civil_status: alumni.civil_status,
-                    verification_document: alumni.verification_document,
-                    profile_picture: alumni.profile_picture, // Correct path: /lspu_eis/uploads/profile_picture/
-                    skills: alumni.skills || [], // Array of skill names
-                    experiences: alumni.experiences || [],
-                    documents: alumni.documents || [],
-                    employment: alumni.experiences.length > 0 ? {
-                        company_name: alumni.experiences[0].company,
-                        position: alumni.experiences[0].title,
-                        status: alumni.experiences[0].employment_status,
-                        years: this.calculateYears(alumni.experiences[0].start_date, alumni.experiences[0].end_date)
-                    } : null
-                }));
+                
+                // Process each alumni to fetch their detailed information
+                const alumniWithDetails = await Promise.all(
+                    data.alumni.map(async (alumni) => {
+                        try {
+                            // Try to fetch skills for this alumni
+                            let skillsData = {success: false, skills: []};
+                            try {
+                                const skillsResponse = await fetch(`functions/get_skill.php?alumni_id=${alumni.alumni_id}`);
+                                skillsData = await skillsResponse.json();
+                            } catch (skillError) {
+                                console.error(`Error fetching skills for alumni ${alumni.alumni_id}:`, skillError);
+                            }
+                            
+                            // Try to fetch education for this alumni
+                            let educationData = {success: false, education: []};
+                            try {
+                                const educationResponse = await fetch(`functions/get_admin_education.php?alumni_id=${alumni.alumni_id}`);
+                                educationData = await educationResponse.json();
+                            } catch (educationError) {
+                                console.error(`Error fetching education for alumni ${alumni.alumni_id}:`, educationError);
+                            }
+                            
+                            // Try to fetch experience for this alumni
+                            let experienceData = {success: false, experience: []};
+                            try {
+                                const experienceResponse = await fetch(`functions/get_experience.php?alumni_id=${alumni.alumni_id}`);
+                                experienceData = await experienceResponse.json();
+                            } catch (experienceError) {
+                                console.error(`Error fetching experience for alumni ${alumni.alumni_id}:`, experienceError);
+                            }
+                            
+                            // Try to fetch resume for this alumni
+                            let resumeData = {success: false, resume: null};
+                            try {
+                                const resumeResponse = await fetch(`functions/get_admin_resume.php?alumni_id=${alumni.alumni_id}`);
+                                resumeData = await resumeResponse.json();
+                            } catch (resumeError) {
+                                console.error(`Error fetching resume for alumni ${alumni.alumni_id}:`, resumeError);
+                            }
+                            
+                            // Process resume data to include full URL
+                            let processedResume = null;
+                            if (resumeData.success && resumeData.resume) {
+                                if (typeof resumeData.resume === 'string') {
+                                    // If resume is just a filename, create full object
+                                    processedResume = {
+                                        file_name: resumeData.resume,
+                                        url: 'uploads/resume/' + resumeData.resume
+                                    };
+                                } else if (resumeData.resume.file_name) {
+                                    // If resume is an object with file_name, ensure it has URL
+                                    processedResume = {
+                                        ...resumeData.resume,
+                                        url: resumeData.resume.url || 'uploads/resume/' + resumeData.resume.file_name
+                                    };
+                                }
+                            }
+                            
+                            return {
+                                id: alumni.alumni_id,
+                                first_name: alumni.first_name,
+                                middle_name: alumni.middle_name,
+                                last_name: alumni.last_name,
+                                email: alumni.email,
+                                secondary_email: alumni.secondary_email,
+                                gender: alumni.gender,
+                                year_graduated: alumni.year_graduated,
+                                course: alumni.course,
+                                college: alumni.college,
+                                province: alumni.province,
+                                city: alumni.city,
+                                status: alumni.status,
+                                birthdate: alumni.birthdate,
+                                contact: alumni.contact,
+                                civil_status: alumni.civil_status,
+                                verification_document: alumni.verification_document,
+                                profile_picture: alumni.profile_picture,
+                                skills: skillsData.success ? skillsData.skills : [],
+                                education: educationData.success ? educationData.education : [],
+                                experiences: experienceData.success ? experienceData.experience : [],
+                                resume: processedResume,
+                                employment: experienceData.success && experienceData.experience.length > 0 ? {
+                                    company_name: experienceData.experience[0].company,
+                                    position: experienceData.experience[0].title,
+                                    status: experienceData.experience[0].employment_status,
+                                    years: this.calculateYears(experienceData.experience[0].start_date, experienceData.experience[0].end_date)
+                                } : null
+                            };
+                        } catch (error) {
+                            console.error(`Error processing alumni ${alumni.alumni_id}:`, error);
+                            // Return basic data if detailed fetch fails
+                            return {
+                                id: alumni.alumni_id,
+                                first_name: alumni.first_name,
+                                middle_name: alumni.middle_name,
+                                last_name: alumni.last_name,
+                                email: alumni.email,
+                                secondary_email: alumni.secondary_email,
+                                gender: alumni.gender,
+                                year_graduated: alumni.year_graduated,
+                                course: alumni.course,
+                                college: alumni.college,
+                                province: alumni.province,
+                                city: alumni.city,
+                                status: alumni.status,
+                                birthdate: alumni.birthdate,
+                                contact: alumni.contact,
+                                civil_status: alumni.civil_status,
+                                verification_document: alumni.verification_document,
+                                profile_picture: alumni.profile_picture,
+                                skills: [],
+                                education: [],
+                                experiences: [],
+                                resume: null,
+                                employment: null
+                            };
+                        }
+                    })
+                );
+                
+                this.alumni = alumniWithDetails;
             } catch (error) {
                 console.error('Error fetching alumni:', error);
                 this.showNotification('Error loading alumni data', 'error');
@@ -417,6 +521,8 @@ createApp({
             this.showViewModal = true;
             this.$nextTick(() => this.focusFirstInput('view-modal'));
         },
+
+        
         calculateYears(startDate, endDate) {
             const start = new Date(startDate);
             const end = endDate ? new Date(endDate) : new Date();

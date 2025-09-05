@@ -29,6 +29,8 @@ createApp({
                 special: false
             },
             loading: false,
+            agreeToDisclaimer: false, // Add this line
+            showDisclaimerModal: false, // Add this line to control modal visibility
             message: '',
             success: false,
             provinces: [],
@@ -132,6 +134,12 @@ createApp({
                 this.success = false;
             }
             this.loading = false;
+        },
+        openDisclaimerModal() {
+            this.showDisclaimerModal = true;
+        },
+        closeDisclaimerModal() {
+            this.showDisclaimerModal = false;
         }
     }
 }).mount('#signupApp');

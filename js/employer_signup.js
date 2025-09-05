@@ -45,6 +45,16 @@ window.addEventListener('DOMContentLoaded', function() {
                 addressSuggestions.value = [];
             };
 
+            const showDisclaimerModal = ref(false); // Make sure this is defined
+
+            const openDisclaimerModal = () => {
+                showDisclaimerModal.value = true;
+            };
+            
+            const closeDisclaimerModal = () => {
+                showDisclaimerModal.value = false;
+            };
+
             // File input handlers
             const handleLogo = (e) => { companyLogo.value = e.target.files[0]; };
             const handleDocument = (e) => { documentFile.value = e.target.files[0]; };
@@ -98,7 +108,10 @@ window.addEventListener('DOMContentLoaded', function() {
             };
 
             return {
-                email, password, confirmPassword, companyName, companyLogo, companyLocation, contactEmail, contactNumber, industryType, natureOfBusiness, tin, dateEstablished, companyType, accreditationStatus, documentFile, addressSuggestions, isLoading, message, messageType, passwordValid, passwordsMatch, handleLogo, handleDocument, selectSuggestion, submitForm
+                email, password, confirmPassword, companyName, companyLogo, companyLocation, contactEmail, contactNumber, industryType, natureOfBusiness, tin, dateEstablished, companyType, accreditationStatus, documentFile, addressSuggestions, isLoading, message, messageType, passwordValid, passwordsMatch, handleLogo, handleDocument, selectSuggestion, submitForm, // Make sure this is returned
+                openDisclaimerModal, 
+                closeDisclaimerModal, 
+                showDisclaimerModal // Return the ref, not its value
             };
         }
     }).mount('form');

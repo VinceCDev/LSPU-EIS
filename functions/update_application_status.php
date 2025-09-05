@@ -113,11 +113,11 @@ if (in_array($status, ['Hired', 'Rejected', 'Interview'])) {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'allencristal12@gmail.com'; // Change to your email
-            $mail->Password = 'ugwb vksz wjto zbwf'; // Change to your app password
+            $mail->Username = 'lspueis@gmail.com'; // Change to your email
+            $mail->Password = 'afbp fcwf oujr yqzr'; // Change to your app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
-            $mail->setFrom('allencristal12@gmail.com', 'LSPU EIS');
+            $mail->setFrom('lspueis@gmail.com', 'LSPU EIS');
             $mail->addAddress($recipient);
             $mail->isHTML(true);
             

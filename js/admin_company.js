@@ -192,6 +192,25 @@ function debounce(fn, delay) {
                       this.uniqueNatureOfBusiness = [...new Set(this.companies.map(c => c.nature_of_business).filter(Boolean))];
                       this.uniqueAccreditationStatus = [...new Set(this.companies.map(c => c.accreditation_status).filter(Boolean))];
                   },
+
+                // Fixed contactAlumni method with proper error handling
+                contactAlumni(company) {
+                    // Check if company exists and has email property
+                    if (!company || !company.email) {
+                        console.error('Company data is not available');
+                        this.showNotification('Company information is not available. Please select a valid company.', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        // Redirect to messages page with company email as parameter
+                        const messagesUrl = `admin_message.php?compose=true&to=${encodeURIComponent(company.email)}`;
+                        window.location.href = messagesUrl;
+                    } catch (error) {
+                        console.error('Error redirecting to messages:', error);
+                        this.showNotification('Error opening message composer', 'error');
+                    }
+                },
               filterCompanies() {
                       let filtered = this.companies;
                       // Only filter if the filter value is not empty

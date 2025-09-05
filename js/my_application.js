@@ -8,6 +8,15 @@ const { createApp } = Vue;
                       window.matchMedia('(prefers-color-scheme: dark)').matches),
                     mobileMenuOpen: false,
                     profileDropdownOpen: false,
+                    showTutorialButton: true, // Start as false, will be updated after check
+                    showWelcomeModal: false, // Start as false
+                    currentWelcomeSlide: 0,
+                    welcomeSlides: [
+                        { title: "Welcome", content: "intro" },
+                        { title: "Navigation", content: "navigation" },
+                        { title: "Job Search", content: "job_search" },
+                        { title: "Profile", content: "profile" }
+                    ],
                     unreadNotifications: 0,
                     notifications: [],
                     activeTab: 'applied',
@@ -82,6 +91,7 @@ const { createApp } = Vue;
                     applicationSkills: null,
                     applicationExperience: null,
                     applicationResume: null,
+                    highlightJobId: null
                 };
             },
             watch: {
@@ -99,6 +109,31 @@ const { createApp } = Vue;
                         html.classList.remove('dark');
                     }
                 },
+                shouldHighlightJob(job) {
+                    const jobId = job.job_id || job.id;
+                    return this.highlightJobId && jobId == this.highlightJobId;
+                },
+        
+                // Also add this method for the highlighting effect
+                checkForHighlight() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const jobId = urlParams.get('job_id');
+                    const fromNotification = urlParams.get('from_notification');
+                    
+                    if (jobId && fromNotification) {
+                        this.highlightJobId = jobId;
+                        
+                        // Clean up the URL (remove the parameters without reloading)
+                        const cleanUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, cleanUrl);
+                        
+                        // Remove highlight after 5 seconds
+                        setTimeout(() => {
+                            this.highlightJobId = null;
+                        }, 5000);
+                    }
+                },
+        
                 async fetchUnreadNotifications() {
                     try {
                       const response = await fetch('functions/get_unread_notifications.php');
@@ -136,17 +171,38 @@ const { createApp } = Vue;
                     try {
                         const res = await fetch(`functions/get_job_details.php?job_id=${jobId}`);
                         const data = await res.json();
+                        console.log('API response:', data); // Debug line to see the response structure
+                        
                         if (data.success) {
-                            this.selectedJobDetails = data.job;
+                            // Structure the data to match your template expectations
+                            this.selectedJobDetails = {
+                                ...data.jobDetails,          // Job details (title, location, etc.)
+                                company_name: data.companyDetails.company_name, // Company name at root level
+                                companyDetails: data.companyDetails, // All company details as nested object
+                                application_status: this.selectedJob.application_status
+                            };
+                            
+                            console.log('Processed job details:', this.selectedJobDetails); // Debug line
                         } else {
                             this.selectedJobDetails = null;
                             this.addNotification('error', 'Failed to fetch job details.', 'Failed to fetch job details.');
                         }
                     } catch (e) {
+                        console.error('Error fetching job details:', e);
                         this.selectedJobDetails = null;
                         this.addNotification('error', 'Failed to fetch job details.', 'Failed to fetch job details.');
                     }
                     this.jobDetailsLoading = false;
+                },
+                messageEmployer(email) {
+                    try {
+                        // Redirect to messages page with employer email as parameter
+                        const messagesUrl = `message.php?compose=true&to=${encodeURIComponent(email)}`;
+                        window.location.href = messagesUrl;
+                    } catch (error) {
+                        console.error('Error redirecting to messages:', error);
+                        this.showNotification('Error opening message composer', 'error');
+                    }
                 },
                 closeJobPanel() {
                     this.showJobPanel = false;
@@ -490,7 +546,17 @@ const { createApp } = Vue;
                                 qualifications: job.qualifications ? job.qualifications.split('\n') : [],
                                 appliedDate: job.appliedDate || job.applied_at || '',
                                 postedDate: job.postedDate || job.created_at || '',
-                                companyDetails: job.companyDetails || {},
+                                application_status: job.application_status || 'Pending',
+                                companyDetails: {
+                                    company_logo: job.company_logo || '',
+                                    company_name: job.company_name || '',
+                                    company_location: job.company_location || '',
+                                    contact_email: job.contact_email || '',
+                                    contact_number: job.contact_number || '',
+                                    nature_of_business: job.nature_of_business || '',
+                                    industry_type: job.industry_type || '',
+                                    accreditation_status: job.accreditation_status || ''
+                                }
                             }));
                         }
                     } catch (e) {
@@ -520,6 +586,43 @@ const { createApp } = Vue;
                     } catch (e) {
                         // fallback: keep hardcoded jobs if fetch fails
                     }
+                },
+                openTutorial() {
+                    this.showWelcomeModal = true;
+                    this.currentWelcomeSlide = 0;
+                    
+                    // Mark tutorial as viewed in session storage
+                    sessionStorage.setItem('tutorial_viewed', 'true');
+                },
+                
+                closeWelcomeModal() {
+                    console.log('Closing welcome modal');
+                    this.showWelcomeModal = false;
+                    
+                    // Always mark as shown when user closes the modal
+                    localStorage.setItem('welcomeModalShown', 'true');
+                    console.log('Set welcomeModalShown to true in localStorage');
+                    
+                    // If user completed the tutorial (reached the end), mark it as completed
+                    if (this.currentWelcomeSlide === this.welcomeSlides.length - 1) {
+                        console.log('User completed tutorial, marking as completed');
+                        this.markTutorialCompleted();
+                    }
+                },
+                async markTutorialCompleted() {
+                    try {
+                        const response = await fetch('functions/mark_tutorial_completed.php', {
+                            method: 'POST'
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showTutorialButton = false;
+                            sessionStorage.setItem('tutorial_completed', 'true');
+                        }
+                    } catch (error) {
+                        console.error('Error marking tutorial as completed:', error);
+                    }
                 }
             },
             mounted() {
@@ -533,6 +636,7 @@ const { createApp } = Vue;
                 this.applyDarkMode();
                 this.fetchUnreadNotifications();
   
+                this.checkForHighlight();
                 // Optional: Poll for new notifications every 30 seconds
                 this.notificationInterval = setInterval(this.fetchUnreadNotifications, 30000);
                 // Fetch applied and saved jobs for the current user

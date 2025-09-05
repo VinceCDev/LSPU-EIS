@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'employer') {
-    header('Location: employer_login.php');
+    header('Location: login.php');
     exit();
 }
 // Fetch user_id from user table using email
@@ -60,23 +60,19 @@ $_SESSION['user_id'] = $user_id;
         </div>
     </transition>
     <!-- Logout Confirmation Modal -->
-    <div v-if="showLogoutModal" class="fixed inset-0 flex items-start justify-center z-[100]">
+    <div v-if="showLogoutModal" class="fixed inset-0 z-[100] flex items-center justify-center md:items-start md:justify-center bg-black bg-opacity-50">
         <div class="fixed inset-0 bg-black bg-opacity-50" @click="showLogoutModal = false"></div>
-        <div class="absolute top-8 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-700 rounded-lg shadow-xl p-6 w-full max-w-md mx-1">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4 md:mt-8">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Confirm Logout</h3>
-                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Confirm Logout</h3>
+                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to logout?</p>
-            <div class="flex justify-end space-x-3">
-                <button @click="showLogoutModal = false" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                    Cancel
-                </button>
-                <button @click="logout" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
-                    Logout
-                </button>
+            <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to logout?</p>
+            <div class="flex justify-end gap-3">
+                <button @click="showLogoutModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                <button @click="logout" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Logout</button>
             </div>
         </div>
     </div>
@@ -119,10 +115,21 @@ $_SESSION['user_id'] = $user_id;
                 <span class="font-medium">Dashboard</span>
             </a>
             
+            <a href="employer_leaderboard" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-trophy w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
+                <span class="font-medium">Leaderboard</span>
+            </a>
+
             <!-- Jobs -->
             <a href="employer_jobposting" class="flex items-center px-6 py-3 mx-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors duration-200 border-l-4 border-blue-500 dark:border-blue-400" @click="handleNavClick">
                 <i class="fas fa-briefcase w-5 mr-3 text-center text-emerald-500 dark:text-emerald-400"></i>
                 <span class="font-medium">Jobs</span>
+            </a>
+
+            <!-- Job Resources -->
+            <a href="employer_resources" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-file-alt w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Resources</span>
             </a>
             
             <!-- Applicants -->
@@ -176,9 +183,13 @@ $_SESSION['user_id'] = $user_id;
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_profile">
                                 <i class="fas fa-user mr-3"></i> Profile
                             </a>
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_terms">
+                                <i class="fas fa-file-contract mr-3"></i> Terms
+                            </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_forgot_password">
                                 <i class="fas fa-key mr-3"></i> Forgot Password
                             </a>
+                            <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="showLogoutModal = true">
                                 <i class="fas fa-sign-out-alt mr-3"></i> Logout
                             </a>
@@ -305,16 +316,12 @@ $_SESSION['user_id'] = $user_id;
                   </h3>
                   <form @submit.prevent="modalMode === 'edit' ? updateJob() : addJob()">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <label for="jobTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Job Title*</label>
-                        <input id="jobTitle" type="text" v-model="jobForm.title" required autocomplete="off"
-                          class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                    </div>
-                      <div>
-                        <label for="jobDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Posted Date*</label>
-                        <input id="jobDate" type="date" v-model="jobForm.created_at" required
-                          class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                                </div>
+                        <div>
+                            <label for="jobTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Job Title*</label>
+                            <input id="jobTitle" type="text" v-model="jobForm.title" required autocomplete="off"
+                            class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            @input="onJobTitleChange">
+                        </div>
                       <div>
                         <label for="jobType" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type*</label>
                         <select id="jobType" v-model="jobForm.type" required
@@ -323,15 +330,22 @@ $_SESSION['user_id'] = $user_id;
                                         <option value="Full-time">Full-time</option>
                                         <option value="Part-time">Part-time</option>
                                         <option value="Contract">Contract</option>
-                                        <option value="Internship">Internship</option>
-                                        <option value="Remote">Remote</option>
+                                        <option value="Freelance">Freelance</option>
                                     </select>
                                 </div>
-                      <div>
+                     <div>
                         <label for="jobLocation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Location*</label>
-                        <input id="jobLocation" type="text" v-model="jobForm.location" required autocomplete="off"
-                          class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                                </div>
+                        <div class="relative">
+                            <input id="jobLocation" type="text" v-model="jobForm.location" required autocomplete="off"
+                              class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                              @input="fetchJobLocationSuggestions" @focus="showJobLocationSuggestions = true" @blur="hideJobLocationSuggestions" placeholder="Start typing address...">
+                            <ul v-if="showJobLocationSuggestions && jobLocationSuggestions.length" class="absolute z-10 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow mt-1 max-h-48 overflow-y-auto">
+                              <li v-for="suggestion in jobLocationSuggestions" :key="suggestion" @mousedown.prevent="selectJobLocationSuggestion(suggestion)" class="px-4 py-2 cursor-pointer text-gray-800 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-900 dark:hover:text-white transition">
+                                {{ suggestion }}
+                              </li>
+                            </ul>
+                        </div>
+                      </div>
                       <div>
                         <label for="jobSalary" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Salary</label>
                         <input id="jobSalary" type="text" v-model="jobForm.salary" autocomplete="off"
@@ -347,26 +361,76 @@ $_SESSION['user_id'] = $user_id;
                                 </div>
                             </div>
                     <div class="grid grid-cols-1 gap-4 mt-4">
-                      <div>
-                        <label for="jobDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description*</label>
-                        <textarea id="jobDescription" v-model="jobForm.description" rows="2" required
+                        <div>
+                            <label for="jobDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description*</label>
+                            <textarea id="jobDescription" v-model="jobForm.description" rows="2" required
                           class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
-                      </div>
-                      <div>
-                        <label for="jobRequirements" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Requirements*</label>
-                        <textarea id="jobRequirements" v-model="jobForm.requirements" rows="2" required
-                          class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
-                      </div>
-                      <div>
-                        <label for="jobQualifications" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Qualifications*</label>
-                        <textarea id="jobQualifications" v-model="jobForm.qualifications" rows="2" required
-                          class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
-                      </div>
-                      <div>
-                        <label for="jobEmployerQuestion" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Employer Question*</label>
-                        <textarea id="jobEmployerQuestion" v-model="jobForm.employerQuestion" rows="2" required
-                          class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
-                      </div>
+                        </div>
+                        <!-- Requirements -->
+                        <div>
+                            <label for="jobRequirements" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Requirements*
+                            </label>
+                            <div class="relative mt-1">
+                                <textarea id="jobRequirements" v-model="jobForm.requirements" rows="3" required
+                                        class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                        @input="generateSuggestions('requirements')"
+                                        @focus="generateSuggestions('requirements')"
+                                        @blur="hideSuggestionsWithDelay('requirements')"></textarea>
+                                <!-- Requirements Suggestions Dropdown -->
+                                <div v-if="showRequirementsSuggestions && requirementsSuggestions.length" 
+                                    class="absolute z-20 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-60 overflow-y-auto">
+                                <div class="p-2 bg-gray-100 dark:bg-gray-700 flex justify-between items-center text-gray-800 dark:text-white">
+                                    <span class="text-sm font-medium">Suggestions for "{{ jobForm.title }}"</span>
+                                    <button @click="closeSuggestions('requirements')" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <button @click="applyAllSuggestions('requirements')" 
+                                        class="w-full text-left px-4 py-2 text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                    <i class="fas fa-check-double mr-2"></i> Apply All Suggestions
+                                </button>
+                                <div v-for="(suggestion, index) in requirementsSuggestions" :key="index" 
+                                    @mousedown.prevent="selectSuggestion('requirements', suggestion)"
+                                    class="px-4 py-2 cursor-pointer text-gray-800 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-900 dark:hover:text-blue-100 transition border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                                     {{ suggestion }}
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+
+                            <!-- Qualifications -->
+                        <div>
+                            <label for="jobQualifications" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Qualifications*
+                            </label>
+                            <div class="relative mt-1">
+                                <textarea id="jobQualifications" v-model="jobForm.qualifications" rows="3" required
+                                        class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                        @input="generateSuggestions('qualifications')"
+                                        @focus="generateSuggestions('qualifications')"
+                                        @blur="hideSuggestionsWithDelay('qualifications')"></textarea>
+                                <!-- Qualifications Suggestions Dropdown -->
+                                <div v-if="showQualificationsSuggestions && qualificationsSuggestions.length" 
+                                    class="absolute z-20 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-60 overflow-y-auto">
+                                <div class="p-2 bg-gray-100 dark:bg-gray-700 flex justify-between items-center text-gray-800 dark:text-white">
+                                    <span class="text-sm font-medium">Suggestions for "{{ jobForm.title }}"</span>
+                                    <button @click="closeSuggestions('qualifications')" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <button @click="applyAllSuggestions('qualifications')" 
+                                        class="w-full text-left px-4 py-2 text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                    <i class="fas fa-check-double mr-2"></i> Apply All Suggestions
+                                </button>
+                                <div v-for="(suggestion, index) in qualificationsSuggestions" :key="index" 
+                                    @mousedown.prevent="selectSuggestion('qualifications', suggestion)"
+                                    class="px-4 py-2 cursor-pointer text-gray-800 dark:text-gray-100 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-900 dark:hover:text-blue-100 transition border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                                     {{ suggestion }}
+                                </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                       <button type="submit"
@@ -383,8 +447,8 @@ $_SESSION['user_id'] = $user_id;
             </div>
         </div>
         <!-- Delete Confirmation Modal -->
-            <div v-if="showDeleteModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+            <div v-if="showDeleteModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50 lg:items-start lg:pt-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative lg:mx-0">
                     <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Confirm Delete</h3>
                     <p class="mb-6 text-gray-700 dark:text-gray-200">Are you sure you want to delete this job posting?</p>
                     <div class="flex justify-end gap-2">
@@ -421,11 +485,9 @@ $_SESSION['user_id'] = $user_id;
                   <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-align-left text-blue-500 dark:text-blue-300"></i> <span>Description</span></h4>
                   <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">{{ selectedJob.description }}</div>
                   <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-tasks text-blue-500 dark:text-blue-300"></i> <span>Requirements</span></h4>
-                  <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">{{ selectedJob.requirements }}</div>
+                  <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">• {{ selectedJob.requirements }}</div>
                   <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-graduation-cap text-blue-500 dark:text-blue-300"></i> <span>Qualifications</span></h4>
-                  <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">{{ selectedJob.qualifications }}</div>
-                  <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-question-circle text-blue-500 dark:text-blue-300"></i> <span>Employer Question</span></h4>
-                  <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">{{ selectedJob.employerQuestion }}</div>
+                  <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-4 whitespace-pre-line text-gray-700 dark:text-gray-200">• {{ selectedJob.qualifications }}</div>
                     </div>
                 </div>
             </div>

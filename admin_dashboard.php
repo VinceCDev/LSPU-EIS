@@ -43,23 +43,19 @@ $_SESSION['user_id'] = $user_id;
 
 <body :class="[darkMode ? 'dark' : '', 'font-sans bg-gray-50 dark:bg-gray-800 min-h-screen']" id="app" v-cloak>
     <!-- Logout Confirmation Modal - Top positioning -->
-    <div v-if="showLogoutModal" class="fixed inset-0 flex items-start justify-center z-[100]">
+    <div v-if="showLogoutModal" class="fixed inset-0 z-[100] flex items-center justify-center md:items-start md:justify-center bg-black bg-opacity-50">
         <div class="fixed inset-0 bg-black bg-opacity-50" @click="showLogoutModal = false"></div>
-        <div class="absolute top-8 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-700 rounded-lg shadow-xl p-6 w-full max-w-md mx-1">
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4 md:mt-8">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Confirm Logout</h3>
-                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Confirm Logout</h3>
+                <button @click="showLogoutModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to logout?</p>
-            <div class="flex justify-end space-x-3">
-                <button @click="showLogoutModal = false" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                    Cancel
-                </button>
-                <button @click="logout" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
-                    Logout
-                </button>
+            <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to logout?</p>
+            <div class="flex justify-end gap-3">
+                <button @click="showLogoutModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                <button @click="logout" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Logout</button>
             </div>
         </div>
     </div>
@@ -202,6 +198,10 @@ $_SESSION['user_id'] = $user_id;
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_reminder_settings">
                                 <i class="fas fa-bell mr-3"></i> Reminder Settings
                             </a>
+                            <a href="admin_success_stories"  class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500">
+                                <i class="fas fa-book-open mr-3"></i>
+                                <span class="font-medium">Success Stories</span>
+                            </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="forgot_password">
                                 <i class="fas fa-key mr-3"></i> Forgot Password
                             </a>
@@ -219,6 +219,15 @@ $_SESSION['user_id'] = $user_id;
     <!-- Main Content -->
     <main :class="[isMobile ? 'ml-0' : (sidebarActive ? 'ml-[280px]' : 'ml-0'), 'transition-all duration-300 min-h-[calc(100vh-70px)] p-6 pt-lg-5 mt-[70px] bg-gray-50 dark:bg-gray-800']">
         <div class="container-fluid">
+
+            <div class="pb-5">
+                <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                    Welcome, {{ profile.name ? profile.name.split(' ')[0] : 'Admin' }}!
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300">
+                Welcome to the Administrator Portal of the Laguna State Polytechnic University Employment Information System.
+                </p>
+            </div>
             <!-- Dashboard Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm p-6 relative overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-md">

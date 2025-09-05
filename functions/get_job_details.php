@@ -21,21 +21,29 @@ $stmt->bind_result($job_id, $employer_id, $title, $type, $location, $salary, $st
 
 if ($stmt->fetch()) {
     $stmt->close();
-    // Fetch company name from employer table
-    $company_name = '';
-    $emp_stmt = $db->prepare('SELECT company_name FROM employer WHERE employer_id = ? LIMIT 1');
+    // Fetch company details from employer table - CORRECTED QUERY
+    $emp_stmt = $db->prepare('SELECT company_logo, company_name, company_location, contact_email, contact_number, nature_of_business, industry_type, accreditation_status FROM employer WHERE user_id = ? LIMIT 1');
     $emp_stmt->bind_param('i', $employer_id);
     $emp_stmt->execute();
-    $emp_stmt->bind_result($company_name);
+    $emp_stmt->bind_result(
+        $company_logo,
+        $company_name,
+        $company_location,
+        $contact_email,
+        $contact_number,
+        $nature_of_business,
+        $industry_type,
+        $accreditation_status
+    );    
     $emp_stmt->fetch();
     $emp_stmt->close();
+    
     echo json_encode([
         'success' => true,
-        'job' => [
+        'jobDetails' => [
             'job_id' => $job_id,
             'employer_id' => $employer_id,
-            'company_name' => $company_name,
-            'title' => $title,
+            'title' => $title, 
             'type' => $type,
             'location' => $location,
             'salary' => $salary,
@@ -45,6 +53,16 @@ if ($stmt->fetch()) {
             'requirements' => $requirements,
             'qualifications' => $qualifications,
             'employer_question' => $employer_question
+        ],
+        'companyDetails' => [
+            'company_logo' => $company_logo,
+            'company_name' => $company_name,
+            'company_location' => $company_location,
+            'contact_email' => $contact_email,
+            'contact_number' => $contact_number,
+            'nature_of_business' => $nature_of_business,
+            'industry_type' => $industry_type,
+            'accreditation_status' => $accreditation_status
         ]
     ]);
 } else {

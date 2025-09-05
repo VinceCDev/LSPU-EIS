@@ -150,8 +150,8 @@ createApp({
                         email: app.email,
                         appliedFor: app.title,
                         appliedDate: app.applied_at,
+                        status: app.application_status || 'Pending', // Use application_status instead of job_status
                         experience: app.year_graduated ? (new Date().getFullYear() - parseInt(app.year_graduated)) : '',
-                        status: app.job_status,
                         alumni: app, // full alumni details
                         job: app // full job details
                     }));
@@ -168,6 +168,16 @@ createApp({
         closeApplicantModal() {
             this.showApplicantModal = false;
             this.selectedApplicant = {};
+        },
+        async contactAlumni(alumni) {
+            try {
+                // Redirect to messages page with alumni email as parameter
+                const messagesUrl = `admin_message.php?compose=true&to=${encodeURIComponent(alumni.email)}`;
+                window.location.href = messagesUrl;
+            } catch (error) {
+                console.error('Error redirecting to messages:', error);
+                this.showNotification('Error opening message composer', 'error');
+            }
         },
         confirmDelete(applicant) {
             this.showDeleteModal = true;

@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password']);
 
     if (empty($email) || empty($password)) {
-        header("Location: ../employer_login.php?error=empty_fields");
+        header("Location: ../login.php?error=empty_fields");
         exit;
     }
 
@@ -47,23 +47,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header("Location: ../employer_dashboard.php");
                         exit;
                     } else {
-                        header("Location: ../employer_login.php?error=not_approved");
+                        header("Location: ../login.php?error=not_approved");
                         exit;
                     }
                 } else {
-                    header("Location: ../employer_login.php?error=company_not_found");
+                    header("Location: ../login.php?error=company_not_found");
                     exit;
                 }
             } else {
-                header("Location: ../employer_login.php?error=invalid_role");
+                header("Location: ../login.php?error=invalid_role");
                 exit;
             }
         } else {
-            header("Location: ../employer_login.php?error=invalid_password");
+            header("Location: ../login.php?error=invalid_password");
             exit;
         }
     } else {
-        header("Location: ../employer_login.php?error=user_not_found");
+        header("Location: ../login.php?error=user_not_found");
         exit;
     }
 }
