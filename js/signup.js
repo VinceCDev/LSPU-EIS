@@ -34,7 +34,10 @@ createApp({
             message: '',
             success: false,
             provinces: [],
-            cities: []
+            cities: [],
+            fileError: '',
+            allowedTypes: ['image/jpeg', 'image/png', 'application/pdf'],
+            maxSize: 5 * 1024 * 1024
         }
     },
     mounted() {
@@ -50,6 +53,50 @@ createApp({
             } catch (e) {
                 this.provinces = [{ name: 'Laguna', code: '0434' }]; // fallback
             }
+        },
+        validateFile(event) {
+            const fileInput = event.target;
+            const files = fileInput.files;
+            this.fileError = '';
+            
+            // Check if any file is selected
+            if (!files || files.length === 0) {
+                this.form.verification_documents = null;
+                return true;
+            }
+            
+            // Check each selected file
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // Validate file type
+                if (!this.allowedTypes.includes(file.type)) {
+                    this.fileError = 'Invalid file type. Only JPG, PNG, and PDF files are allowed.';
+                    fileInput.value = '';
+                    this.form.verification_documents = null;
+                    return false;
+                }
+                
+                // Validate file size
+                if (file.size > this.maxSize) {
+                    this.fileError = `File "${file.name}" is too large. Maximum size is 5MB.`;
+                    fileInput.value = '';
+                    this.form.verification_documents = null;
+                    return false;
+                }
+                
+                // Validate file name (prevent path traversal attacks)
+                if (file.name.includes('..') || file.name.includes('/') || file.name.includes('\\')) {
+                    this.fileError = 'Invalid file name.';
+                    fileInput.value = '';
+                    this.form.verification_documents = null;
+                    return false;
+                }
+            }
+            
+            // If all validations pass
+            this.form.verification_documents = files[0]; // Store first file only
+            return true;
         },
         async fetchCities() {
             this.cities = [];
@@ -73,7 +120,10 @@ createApp({
             }
         },
         handleFileUpload(e) {
-            this.form.verification_documents = e.target.files[0];
+            if (this.validateFile(e)) {
+                // File is valid, proceed with your existing logic
+                this.form.verification_documents = e.target.files[0];
+            }
         },
         validatePassword() {
             const p = this.form.password;
@@ -102,6 +152,12 @@ createApp({
             }
             if (!this.passwordValid.length || !this.passwordValid.upper || !this.passwordValid.lower || !this.passwordValid.number || !this.passwordValid.special) {
                 this.message = 'Password does not meet requirements.';
+                this.success = false;
+                this.loading = false;
+                return;
+            }
+            if (!this.form.verification_documents) {
+                this.message = 'Please upload a valid verification document.';
                 this.success = false;
                 this.loading = false;
                 return;

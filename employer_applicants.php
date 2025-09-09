@@ -2,7 +2,7 @@
 session_start();
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'employer') {
     header('Location: login.php');
-    exit();
+    exit;
 }
 // Fetch user_id from user table using email
 require_once 'conn/db_conn.php';
@@ -131,15 +131,20 @@ $_SESSION['user_id'] = $user_id;
             </a>
 
             <!-- Job Resources -->
-            <a href="employer_resources" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
-                <i class="fas fa-file-alt w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
-                <span class="font-medium">Resources</span>
+            <a href="employer_onboarding" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-user-check w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Onboarding</span>
             </a>
             
             <!-- Applicants -->
             <a href="employer_applicants" class="flex items-center px-6 py-3 mx-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors duration-200 border-l-4 border-blue-500 dark:border-blue-400" @click="handleNavClick">
                 <i class="fas fa-users w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
                 <span class="font-medium">Applicants</span>
+            </a>
+
+            <a href="employer_interview"  class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-calendar-alt w-5 mr-3 text-center text-violet-500 dark:text-violet-400"></i>
+                <span class="font-medium">Interviews</span>
             </a>
             
             <!-- Messages -->

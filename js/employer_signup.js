@@ -21,7 +21,10 @@ window.addEventListener('DOMContentLoaded', function() {
             const isLoading = ref(false);
             const message = ref('');
             const messageType = ref('');
-
+            const logoError = ref('');
+            const documentError = ref('');
+            const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
             // Password policy
             const passwordValid = computed(() => {
                 return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password.value);
@@ -45,7 +48,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 addressSuggestions.value = [];
             };
 
-            const showDisclaimerModal = ref(false); // Make sure this is defined
+            const showDisclaimerModal = ref(false);
 
             const openDisclaimerModal = () => {
                 showDisclaimerModal.value = true;
@@ -55,25 +58,141 @@ window.addEventListener('DOMContentLoaded', function() {
                 showDisclaimerModal.value = false;
             };
 
-            // File input handlers
-            const handleLogo = (e) => { companyLogo.value = e.target.files[0]; };
-            const handleDocument = (e) => { documentFile.value = e.target.files[0]; };
+            // File validation function
+            const validateFile = (event, fileType) => {
+                const fileInput = event.target;
+                const files = fileInput.files;
+                
+                // Reset the appropriate error
+                if (fileType === 'logo') {
+                    logoError.value = '';
+                } else {
+                    documentError.value = '';
+                }
+                
+                // Check if any file is selected
+                if (!files || files.length === 0) {
+                    if (fileType === 'logo') {
+                        companyLogo.value = null;
+                    } else {
+                        documentFile.value = null;
+                    }
+                    return true;
+                }
+                
+                const file = files[0];
+                
+                // Validate file type
+                if (!allowedTypes.includes(file.type)) {
+                    const errorMsg = 'Invalid file type. Only JPG, PNG, and PDF files are allowed.';
+                    if (fileType === 'logo') {
+                        logoError.value = errorMsg;
+                    } else {
+                        documentError.value = errorMsg;
+                    }
+                    fileInput.value = '';
+                    if (fileType === 'logo') {
+                        companyLogo.value = null;
+                    } else {
+                        documentFile.value = null;
+                    }
+                    return false;
+                }
+                
+                // Validate file size
+                if (file.size > maxSize) {
+                    const errorMsg = `File "${file.name}" is too large. Maximum size is 5MB.`;
+                    if (fileType === 'logo') {
+                        logoError.value = errorMsg;
+                    } else {
+                        documentError.value = errorMsg;
+                    }
+                    fileInput.value = '';
+                    if (fileType === 'logo') {
+                        companyLogo.value = null;
+                    } else {
+                        documentFile.value = null;
+                    }
+                    return false;
+                }
+                
+                // Validate file name (prevent path traversal attacks)
+                if (file.name.includes('..') || file.name.includes('/') || file.name.includes('\\')) {
+                    const errorMsg = 'Invalid file name.';
+                    if (fileType === 'logo') {
+                        logoError.value = errorMsg;
+                    } else {
+                        documentError.value = errorMsg;
+                    }
+                    fileInput.value = '';
+                    if (fileType === 'logo') {
+                        companyLogo.value = null;
+                    } else {
+                        documentFile.value = null;
+                    }
+                    return false;
+                }
+                
+                // If all validations pass
+                if (fileType === 'logo') {
+                    companyLogo.value = file;
+                } else {
+                    documentFile.value = file;
+                }
+                return true;
+            };
+
+            // File handlers
+            const handleLogo = (e) => { 
+                validateFile(e, 'logo');
+            };
+
+            const handleDocument = (e) => { 
+                validateFile(e, 'document');
+            };
 
             // Submit handler
             const submitForm = async (e) => {
                 e.preventDefault();
                 message.value = '';
                 messageType.value = '';
+
+                // In your submitForm function, update the file validation part:
+                // Add file validation
+                if (documentFile.value) {
+                    const tempEvent = { target: { files: [documentFile.value] } };
+                    if (!validateFile(tempEvent, 'document')) {
+                        message.value = documentError.value || 'Invalid document file.';
+                        messageType.value = 'error';
+                        return;
+                    }
+                } else {
+                    message.value = 'Please upload a required document.';
+                    messageType.value = 'error';
+                    return;
+                }
+                
+                if (companyLogo.value) {
+                    const tempEvent = { target: { files: [companyLogo.value] } };
+                    if (!validateFile(tempEvent, 'logo')) {
+                        message.value = logoError.value || 'Invalid logo file.';
+                        messageType.value = 'error';
+                        return;
+                    }
+                }
+                
                 if (!passwordValid.value) {
                     message.value = 'Password does not meet the policy.';
                     messageType.value = 'error';
                     return;
                 }
+                
                 if (!passwordsMatch.value) {
                     message.value = 'Passwords do not match.';
                     messageType.value = 'error';
                     return;
                 }
+                
                 isLoading.value = true;
                 const formData = new FormData();
                 formData.append('email', email.value);
@@ -91,6 +210,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 formData.append('company_type', companyType.value);
                 formData.append('accreditation_status', accreditationStatus.value);
                 if (documentFile.value) formData.append('document_file', documentFile.value);
+                
                 try {
                     const res = await fetch('functions/employer_registration.php', {
                         method: 'POST',
@@ -104,14 +224,20 @@ window.addEventListener('DOMContentLoaded', function() {
                     message.value = 'Error submitting form. Please try again.';
                     messageType.value = 'error';
                 }
+                
                 isLoading.value = false;
             };
 
             return {
-                email, password, confirmPassword, companyName, companyLogo, companyLocation, contactEmail, contactNumber, industryType, natureOfBusiness, tin, dateEstablished, companyType, accreditationStatus, documentFile, addressSuggestions, isLoading, message, messageType, passwordValid, passwordsMatch, handleLogo, handleDocument, selectSuggestion, submitForm, // Make sure this is returned
-                openDisclaimerModal, 
-                closeDisclaimerModal, 
-                showDisclaimerModal // Return the ref, not its value
+                email, password, confirmPassword, companyName, companyLogo, companyLocation, 
+                contactEmail, contactNumber, industryType, natureOfBusiness, tin, dateEstablished, 
+                companyType, accreditationStatus, documentFile, addressSuggestions, isLoading, 
+                message, messageType, passwordValid, passwordsMatch, handleLogo, handleDocument, 
+                selectSuggestion, submitForm, openDisclaimerModal, closeDisclaimerModal, 
+                showDisclaimerModal,  logoError, // Add this
+                documentError,
+                validateLogoFile: handleLogo,
+                validateDocumentFile: handleDocument
             };
         }
     }).mount('form');

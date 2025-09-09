@@ -2,7 +2,7 @@
 session_start();
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: login.php');
-    exit();
+    exit;
 }
 // Fetch user_id from user table using email
 require_once 'conn/db_conn.php';
@@ -266,6 +266,7 @@ $_SESSION['user_id'] = $user_id;
                                 <th class="px-4 py-2 text-center">Email</th>
                                 <th class="px-4 py-2 text-center">Role</th>
                                 <th class="px-4 py-2 text-center">Status</th>
+                                <th class="px-4 py-2 text-center">Last Login</th>
                                 <th class="px-4 py-2 text-center">Actions</th>
                             </tr>
                         </thead>
@@ -288,6 +289,7 @@ $_SESSION['user_id'] = $user_id;
                                         {{ account.status }}
                                     </span>
                                 </td>
+                                <td class="px-4 py-2 font-semibold text-gray-800 dark:text-gray-200 text-center">{{ account.last_login }}</td>
                                 <td class="px-4 py-2 text-center">
                                     <div class="relative inline-block text-left">
                                         <button @click="toggleActionDropdown(account.user_id)" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-500 dark:text-gray-200">

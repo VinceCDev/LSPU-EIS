@@ -119,7 +119,11 @@
                             </div>
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-gray-700">Company Logo (Optional)</label>
-                                <input type="file" name="company_logo" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" accept="image/jpeg, image/png, image/gif">
+                                <input type="file" name="company_logo" 
+                                    @change="handleLogo"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" 
+                                    accept="image/jpeg, image/png">
+                                <p v-if="logoError" class="text-red-500 text-sm mt-1">{{ logoError }}</p>
                             </div>
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-gray-700">Company Address</label>
@@ -222,9 +226,15 @@
                                     </select>
                                 </div>
                             </div>
+                            <!-- Document File Input -->
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-gray-700">Upload Document</label>
-                                <input type="file" name="document_file" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" required>
+                                <input type="file" name="document_file" 
+                                    @change="handleDocument"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" 
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    required>
+                                <p v-if="documentError" class="text-red-500 text-sm mt-1">{{ documentError }}</p>
                             </div>
                         </div>
                         <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">

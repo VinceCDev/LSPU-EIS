@@ -352,8 +352,12 @@
                                 <label class="block text-sm font-medium text-gray-700">Documents for Verification</label>
                                 <div class="relative">
                                     <i class="bi bi-file-earmark-text absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                    <input type="file" name="verification_documents" @change="handleFileUpload" class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" 
-                                           accept=".pdf,.jpg,.jpeg,.png,.gif" required>
+                                    <p v-if="fileError" class="text-red-500 text-sm mt-1">{{ fileError }}</p>
+                                    <input type="file" name="verification_documents" 
+                                        @change="validateFile" 
+                                        class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition" 
+                                        accept=".pdf,.jpg,.jpeg,.png" 
+                                        required>
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">Upload your Alumni Card, Diploma, or any LSPU graduate-related document (PDF, JPG, PNG, GIF - Max 5MB)</p>
                                 <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">

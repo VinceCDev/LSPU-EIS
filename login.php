@@ -24,7 +24,7 @@ setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], 0, '/', '', false, false);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+    <link rel="stylesheet" href="css/login.css">
     <script>
         tailwind.config = {
             theme: {
@@ -57,7 +57,7 @@ setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], 0, '/', '', false, false);
         }
     </style>
 </head>
-<body class="bg-gray-50 font-poppins" id="app">
+<body class="bg-gray-50 font-poppins" id="app" data-csrf-token="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" v-cloak>
     <!-- Header Section -->
     <header class="bg-gradient-to-r from-lspu-blue to-lspu-dark text-white shadow-md">
         <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-4 py-4 px-6 animate-slide-in">
@@ -139,6 +139,69 @@ setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], 0, '/', '', false, false);
                         <a href="user_type" class="text-lspu-blue hover:text-lspu-dark font-medium transition">Register now</a>
                     </p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2FA Verification Modal -->
+    <div v-if="show2FAModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="bi bi-shield-check text-lspu-blue"></i>
+                    Two-Factor Authentication
+                </h3>
+                
+                <p class="text-gray-600 mb-4">Please enter the 6-digit verification code sent to your email.</p>
+                
+                <form @submit.prevent="submit2FACode">
+                    <div class="space-y-4">
+                        <!-- Error Message -->
+                        <div 
+                            v-if="modalMessage" 
+                            :class="[modalMessageType === 'error' ? 'bg-red-100 border-red-400 text-red-700' : 'bg-blue-100 border-blue-400 text-blue-700', 'border px-4 py-3 rounded relative flex items-center gap-2']"
+                        >
+                            <span>{{ modalMessage }}</span>
+                        </div>
+
+                        <!-- Verification Code Input -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Verification Code</label>
+                            <div class="relative">
+                                <i class="bi bi-shield-check absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input 
+                                    type="text" 
+                                    class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-lspu-blue focus:border-lspu-blue transition"
+                                    v-model="verificationCode"
+                                    placeholder="Enter 6-digit code"
+                                    maxlength="6"
+                                    required
+                                    autocomplete="one-time-code"
+                                    ref="codeInput"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal Footer -->
+                    <div class="mt-6 flex gap-3">
+                        <button 
+                            type="button" 
+                            @click="show2FAModal = false" 
+                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            class="flex-1 px-4 py-2 bg-lspu-blue hover:bg-lspu-dark text-white font-semibold rounded-lg shadow-md transition duration-300"
+                            :disabled="isVerifying"
+                        >
+                            <span v-if="isVerifying">Verifying...</span>
+                            <span v-else>Verify</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
