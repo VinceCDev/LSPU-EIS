@@ -1,13 +1,12 @@
 <?php
 /**
  * Admin Interface for Reminder Settings
- * Manage reminder system settings stored in database
+ * Manage reminder system settings stored in database.
  */
-
 session_start();
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: login.php');
-    exit();
+    exit;
 }
 
 // Fetch user_id from user table using email
@@ -28,7 +27,7 @@ require_once 'functions/reminder_config.php';
 // Handle form submission will be done via AJAX
 
 // Load current settings
-$sql = "SELECT setting_key, setting_value FROM reminder_settings";
+$sql = 'SELECT setting_key, setting_value FROM reminder_settings';
 $result = $db->query($sql);
 $current_settings = [];
 if ($result) {
@@ -38,7 +37,7 @@ if ($result) {
 }
 
 // Get recent statistics
-$sql = "SELECT * FROM reminder_statistics ORDER BY date DESC LIMIT 7";
+$sql = 'SELECT * FROM reminder_statistics ORDER BY date DESC LIMIT 7';
 $stats_result = $db->query($sql);
 $recent_stats = [];
 if ($stats_result) {
@@ -48,7 +47,7 @@ if ($stats_result) {
 }
 
 // Get recent logs
-$sql = "SELECT * FROM reminder_logs ORDER BY sent_at DESC LIMIT 20";
+$sql = 'SELECT * FROM reminder_logs ORDER BY sent_at DESC LIMIT 20';
 $logs_result = $db->query($sql);
 $recent_logs = [];
 if ($logs_result) {
@@ -264,18 +263,17 @@ if ($logs_result) {
                         <a class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_profile">
                             <i class="fas fa-user mr-2"></i> View Profile
                         </a>
-                        <a class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_reminder_settings">
+                        <a class="flex items-center px-4 py-2 text-blue-800 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-500" href="admin_reminder_settings">
                             <i class="fas fa-bell mr-2"></i> Reminder Settings
                         </a>
                         <a href="admin_success_stories"  class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500">
-                            <i class="fas fa-book-open mr-3"></i>
-                            <span class="font-medium">Success Stories</span>
+                            <i class="fas fa-book-open mr-3"></i>Success Stories
                         </a>
                         <a class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="forgot_password">
                             <i class="fas fa-cog mr-2"></i> Forgot Password
                         </a>
                         <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
-                        <a class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="confirmLogout">
+                        <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-red-100 dark:hover:bg-red-500  hover:text-red-400 dark:hover:text-red-200" href="#" @click.prevent="confirmLogout">
                             <i class="fas fa-sign-out-alt mr-2"></i> Logout
                         </a>
                     </div>
@@ -392,9 +390,9 @@ if ($logs_result) {
                     <!-- Recent Statistics -->
                 <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Recent Statistics</h2>
-                        <?php if (!empty($recent_stats)): ?>
+                        <?php if (!empty($recent_stats)) { ?>
                         <div class="space-y-3">
-                                        <?php foreach ($recent_stats as $stat): ?>
+                                        <?php foreach ($recent_stats as $stat) { ?>
                                 <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-600 rounded">
                                     <div>
                                         <div class="font-medium text-gray-800 dark:text-gray-200"><?php echo date('M j, Y', strtotime($stat['date'])); ?></div>
@@ -407,30 +405,30 @@ if ($logs_result) {
                                         <div class="text-xs text-red-600"><?php echo $stat['total_failed']; ?> failed</div>
                                     </div>
                                 </div>
-                                        <?php endforeach; ?>
+                                        <?php } ?>
                             </div>
-                        <?php else: ?>
+                        <?php } else { ?>
                         <p class="text-gray-500 dark:text-gray-400 text-center py-4">No statistics available</p>
-                        <?php endif; ?>
+                        <?php } ?>
                     </div>
 
                     <!-- Recent Logs -->
                 <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Recent Activity</h2>
-                        <?php if (!empty($recent_logs)): ?>
+                        <?php if (!empty($recent_logs)) { ?>
                         <div class="space-y-3 max-h-64 overflow-y-auto">
-                                <?php foreach ($recent_logs as $log): ?>
+                                <?php foreach ($recent_logs as $log) { ?>
                                 <div class="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-600 rounded">
                                     <div class="flex-shrink-0">
-                                        <?php if ($log['type'] === 'email'): ?>
+                                        <?php if ($log['type'] === 'email') { ?>
                                             <i class="fas fa-envelope text-blue-500"></i>
-                                        <?php else: ?>
+                                        <?php } else { ?>
                                             <i class="fas fa-sms text-green-500"></i>
-                                        <?php endif; ?>
+                                        <?php } ?>
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            <?php echo ucfirst($log['type']); ?> to <?php echo substr($log['recipient'], 0, 20) . (strlen($log['recipient']) > 20 ? '...' : ''); ?>
+                                            <?php echo ucfirst($log['type']); ?> to <?php echo substr($log['recipient'], 0, 20).(strlen($log['recipient']) > 20 ? '...' : ''); ?>
                                         </div>
                                         <div class="text-xs text-gray-600 dark:text-gray-400">
                                             <?php echo date('M j, Y g:i A', strtotime($log['sent_at'])); ?>
@@ -440,11 +438,11 @@ if ($logs_result) {
                                         </div>
                                         </div>
                                     </div>
-                                <?php endforeach; ?>
+                                <?php } ?>
                             </div>
-                        <?php else: ?>
+                        <?php } else { ?>
                         <p class="text-gray-500 dark:text-gray-400 text-center py-4">No recent activity</p>
-                        <?php endif; ?>
+                        <?php } ?>
                 </div>
             </div>
         </div>

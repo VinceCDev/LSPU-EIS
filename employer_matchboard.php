@@ -116,9 +116,9 @@ $_SESSION['user_id'] = $user_id;
             </a>
             
             <!-- Jobs -->
-            <a href="employer_leaderboard" class="flex items-center px-6 py-3 mx-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors duration-200 border-l-4 border-blue-500 dark:border-blue-400" @click="handleNavClick">
-                <i class="fas fa-trophy w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
-                <span class="font-medium">Leaderboard</span>
+            <a href="employer_matchboard" class="flex items-center px-6 py-3 mx-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors duration-200 border-l-4 border-blue-500 dark:border-blue-400" @click="handleNavClick">
+                <i class="fas fa-handshake w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
+                <span class="font-medium">Matchboard</span>
             </a>
 
             <a href="employer_jobposting" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
@@ -126,12 +126,6 @@ $_SESSION['user_id'] = $user_id;
                 <span class="font-medium">Jobs</span>
             </a>
 
-            <!-- Job Resources -->
-            <a href="employer_onboarding" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
-                <i class="fas fa-user-check w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
-                <span class="font-medium">Onboarding</span>
-            </a>
-            
             <!-- Applicants -->
             <a href="employer_applicants" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
                 <i class="fas fa-users w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
@@ -141,6 +135,12 @@ $_SESSION['user_id'] = $user_id;
             <a href="employer_interview"  class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
                 <i class="fas fa-calendar-alt w-5 mr-3 text-center text-violet-500 dark:text-violet-400"></i>
                 <span class="font-medium">Interviews</span>
+            </a>
+
+            <!-- Job Resources -->
+            <a href="employer_onboarding" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-user-check w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Onboarding</span>
             </a>
             
             <!-- Messages -->
@@ -186,7 +186,7 @@ $_SESSION['user_id'] = $user_id;
                                 </label>
                             </div>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_profile">
-                                <i class="fas fa-user mr-3"></i> Profile
+                                <i class="fas fa-user mr-3"></i> View Profile
                             </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_terms">
                                 <i class="fas fa-file-contract mr-3"></i> Terms
@@ -195,7 +195,7 @@ $_SESSION['user_id'] = $user_id;
                                 <i class="fas fa-key mr-3"></i> Forgot Password
                             </a>
                             <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
-                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="showLogoutModal = true">
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-red-100 dark:hover:bg-red-500  hover:text-red-400 dark:hover:text-red-200" href="#" @click.prevent="showLogoutModal = true">
                                 <i class="fas fa-sign-out-alt mr-3"></i> Logout
                             </a>
                         </div>

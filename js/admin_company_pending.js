@@ -47,7 +47,6 @@ createApp({
         }
     },
     mounted() {
-        this.darkMode = localStorage.getItem('darkMode') === 'true' || window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.applyDarkMode();
         window.addEventListener('resize', this.handleResize);
         this.fetchEmployers();

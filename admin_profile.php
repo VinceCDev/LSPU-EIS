@@ -2,7 +2,7 @@
 session_start();
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: login.php');
-    exit();
+    exit;
 }
 // Fetch user_id from user table using email
 require_once 'conn/db_conn.php';
@@ -215,7 +215,7 @@ $_SESSION['user_id'] = $user_id;
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-400 peer-checked:bg-blue-600"></div>
                                 </label>
                             </div>
-                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="admin_profile">
+                            <a class="flex items-center px-4 py-2 text-blue-800 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-500" href="admin_profile">
                                 <i class="fas fa-user mr-3"></i> 
                                 <span class="text-sm">View Profile</span>
                             </a>
@@ -224,15 +224,14 @@ $_SESSION['user_id'] = $user_id;
                                 <span class="text-sm">Reminder Settings</span>
                             </a>
                             <a href="admin_success_stories"  class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500">
-                                <i class="fas fa-book-open mr-3"></i>
-                                <span class="font-medium">Success Stories</span>
-                            </a>
+                            <i class="fas fa-book-open mr-3"></i>Success Stories
+                        </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="forgot_password">
                                 <i class="fas fa-cog mr-3"></i> 
                                 <span class="text-sm">Forgot Password</span>
                             </a>
                             <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
-                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="confirmLogout">
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-red-100 dark:hover:bg-red-500  hover:text-red-400 dark:hover:text-red-200" href="#" @click.prevent="confirmLogout">
                                 <i class="fas fa-sign-out-alt mr-3"></i> 
                                 <span class="text-sm">Logout</span>
                             </a>

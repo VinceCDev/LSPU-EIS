@@ -182,14 +182,13 @@ $_SESSION['user_id'] = $user_id;
                             <i class="fas fa-bell mr-3"></i> Reminder Settings
                         </a>
                         <a href="admin_success_stories"  class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500">
-                            <i class="fas fa-book-open mr-3"></i>
-                            <span class="font-medium">Success Stories</span>
+                            <i class="fas fa-book-open mr-3"></i>Success Stories
                         </a>
                         <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="forgot_password">
                             <i class="fas fa-cog mr-3"></i> Forgot Password
                         </a>
                         <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
-                        <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="showLogoutModal = true">
+                        <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-red-100 dark:hover:bg-red-500  hover:text-red-400 dark:hover:text-red-200" href="#" @click.prevent="showLogoutModal = true">
                             <i class="fas fa-sign-out-alt mr-3"></i> Logout
                         </a>
                     </div>

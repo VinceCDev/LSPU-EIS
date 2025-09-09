@@ -323,9 +323,6 @@ $_SESSION['user_id'] = $user_id;
                         <a href="#" @click.prevent="openTutorial" class="block px-4 py-2 text-gray-700 dark:text-gray-200  hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
                             <i class="fas fa-graduation-cap mr-2"></i> Show Tutorial
                         </a>
-                        <a href="employer_login" class="block px-4 py-2 text-gray-700 dark:text-gray-200  hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-500 transition-colors duration-200">
-                            <i class="fas fa-briefcase mr-2"></i> Employer Site
-                        </a>
                         <div class="px-4"><div class="border-t border-gray-200 dark:border-gray-600"></div></div>
                         <a href="#" @click.prevent="showLogoutModal = true" class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-red-100 hover:text-red-700 dark:hover:bg-blue-500 transition-colors duration-200">
                             <i class="fas fa-sign-out-alt mr-2"></i> Logout

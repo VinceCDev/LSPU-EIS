@@ -94,21 +94,15 @@ $_SESSION['user_id'] = $user_id;
                 <span class="font-medium">Dashboard</span>
             </a>
 
-            <a href="employer_leaderboard" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
-                <i class="fas fa-trophy w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
-                <span class="font-medium">Leaderboard</span>
+           <a href="employer_matchboard" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-handshake w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
+                <span class="font-medium">Matchboard</span>
             </a>
             
             <!-- Jobs -->
             <a href="employer_jobposting" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
                 <i class="fas fa-briefcase w-5 mr-3 text-center text-emerald-500 dark:text-emerald-400"></i>
                 <span class="font-medium">Jobs</span>
-            </a>
-
-            <!-- Job Resources -->
-            <a href="employer_onboarding" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
-                <i class="fas fa-user-check w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
-                <span class="font-medium">Onboarding</span>
             </a>
             
             <!-- Applicants -->
@@ -120,6 +114,12 @@ $_SESSION['user_id'] = $user_id;
             <a href="employer_interview"  class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
                 <i class="fas fa-calendar-alt w-5 mr-3 text-center text-violet-500 dark:text-violet-400"></i>
                 <span class="font-medium">Interviews</span>
+            </a>
+            
+            <!-- Job Resources -->
+            <a href="employer_onboarding" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-user-check w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Onboarding</span>
             </a>
             
             <!-- Messages -->
@@ -190,9 +190,9 @@ $_SESSION['user_id'] = $user_id;
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-400 peer-checked:bg-blue-600"></div>
                                 </label>
                             </div>
-                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_profile">
+                            <a class="flex items-center px-4 py-2 text-blue-800 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-500" href="employer_profile">
                                 <i class="fas fa-user mr-3"></i> 
-                                <span class="text-sm">Profile</span>
+                                <span class="text-sm">View Profile</span>
                             </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_terms">
                                 <i class="fas fa-file-contract mr-3"></i> Terms
@@ -201,7 +201,7 @@ $_SESSION['user_id'] = $user_id;
                                 <i class="fas fa-key mr-3"></i> Forgot Password
                             </a>
                             <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
-                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="confirmLogout">
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-red-100 dark:hover:bg-red-500  hover:text-red-400 dark:hover:text-red-200" href="#" @click.prevent="confirmLogout">
                                 <i class="fas fa-sign-out-alt mr-3"></i> 
                                 <span class="text-sm">Logout</span>
                             </a>

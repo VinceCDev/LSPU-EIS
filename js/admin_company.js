@@ -51,7 +51,6 @@ function debounce(fn, delay) {
           }
       },
       mounted() {
-        this.darkMode = localStorage.getItem('darkMode') === 'true' || window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.applyDarkMode();
 
         window.addEventListener('resize', this.handleResize);
@@ -145,23 +144,23 @@ function debounce(fn, delay) {
                   }
               },
               toggleDarkMode() {
-                this.darkMode = !this.darkMode;
-                localStorage.setItem('darkMode', this.darkMode.toString());
-                this.applyDarkMode();
-                // Force a small delay to ensure the DOM updates
-                this.$nextTick(() => {
-                    this.applyDarkMode();
-                });
-            },
-            applyDarkMode() {
-                if (this.darkMode) {
-                    document.documentElement.classList.add('dark');
-                    document.body.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    document.body.classList.remove('dark');
-                }
-            },
+                        this.darkMode = !this.darkMode;
+                        localStorage.setItem('darkMode', this.darkMode.toString());
+                        this.applyDarkMode();
+                        // Force a small delay to ensure the DOM updates
+                        this.$nextTick(() => {
+                            this.applyDarkMode();
+                        });
+                    },
+                    applyDarkMode() {
+                        if (this.darkMode) {
+                            document.documentElement.classList.add('dark');
+                            document.body.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                            document.body.classList.remove('dark');
+                        }
+                    },
                   async fetchCompanies() {
                       fetch('functions/get_company_active.php')
                           .then(res => res.text())

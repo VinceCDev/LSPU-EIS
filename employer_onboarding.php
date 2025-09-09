@@ -117,9 +117,9 @@ $_SESSION['user_id'] = $user_id;
                 <span class="font-medium">Dashboard</span>
             </a>
             
-            <a href="employer_leaderboard" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
-                <i class="fas fa-trophy w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
-                <span class="font-medium">Leaderboard</span>
+           <a href="employer_matchboard" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
+                <i class="fas fa-handshake w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
+                <span class="font-medium">Matchboard</span>
             </a>
 
             <!-- Jobs -->
@@ -127,13 +127,7 @@ $_SESSION['user_id'] = $user_id;
                 <i class="fas fa-briefcase w-5 mr-3 text-center text-emerald-500 dark:text-emerald-400"></i>
                 <span class="font-medium">Jobs</span>
             </a>
-            
-            <!-- Job Resources -->
-            <a href="employer_onboarding" class="flex items-center px-6 py-3 mx-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors duration-200 border-l-4 border-blue-500 dark:border-blue-400" @click="handleNavClick">
-                <i class="fas fa-user-check w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
-                <span class="font-medium">Onboarding</span>
-            </a>
-            
+
             <!-- Applicants -->
             <a href="employer_applicants" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
                 <i class="fas fa-users w-5 mr-3 text-center text-amber-500 dark:text-amber-400"></i>
@@ -144,7 +138,13 @@ $_SESSION['user_id'] = $user_id;
                 <i class="fas fa-calendar-alt w-5 mr-3 text-center text-violet-500 dark:text-violet-400"></i>
                 <span class="font-medium">Interviews</span>
             </a>
-            
+                        
+            <!-- Job Resources -->
+            <a href="employer_onboarding" class="flex items-center px-6 py-3 mx-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 transition-colors duration-200 border-l-4 border-blue-500 dark:border-blue-400" @click="handleNavClick">
+                <i class="fas fa-user-check w-5 mr-3 text-center text-blue-500 dark:text-blue-400"></i>
+                <span class="font-medium">Onboarding</span>
+            </a>
+                
             <!-- Messages -->
             <a href="employer_messages" class="flex items-center px-6 py-3 mx-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors duration-200" @click="handleNavClick">
                 <i class="fas fa-envelope w-5 mr-3 text-center text-pink-500 dark:text-pink-400"></i>
@@ -188,7 +188,7 @@ $_SESSION['user_id'] = $user_id;
                                 </label>
                             </div>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_profile">
-                                <i class="fas fa-user mr-3"></i> Profile
+                                <i class="fas fa-user mr-3"></i> View Profile
                             </a>
                             <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="employer_terms">
                                 <i class="fas fa-file-contract mr-3"></i> Terms
@@ -197,7 +197,7 @@ $_SESSION['user_id'] = $user_id;
                                 <i class="fas fa-key mr-3"></i> Forgot Password
                             </a>
                             <div class="border-t border-gray-200 dark:border-gray-500 my-1"></div>
-                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-500" href="#" @click.prevent="showLogoutModal = true">
+                            <a class="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-red-100 dark:hover:bg-red-500  hover:text-red-400 dark:hover:text-red-200" href="#" @click.prevent="showLogoutModal = true">
                                 <i class="fas fa-sign-out-alt mr-3"></i> Logout
                             </a>
                         </div>
@@ -421,13 +421,13 @@ $_SESSION['user_id'] = $user_id;
                             </div>
                             
                             <!-- Action Buttons -->
-                            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                            <div  class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                                 <button type="button" @click="showChecklistModal = false" 
-                                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
                                     Cancel
                                 </button>
                                 <button type="submit" 
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm"
                                     :disabled="newChecklist.items.length === 0">
                                     Save Checklist
                                 </button>
