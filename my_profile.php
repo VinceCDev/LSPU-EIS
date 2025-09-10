@@ -1065,164 +1065,166 @@ $_SESSION['user_id'] = $user_id;
 
         <!-- Education Modal -->
         <transition 
-    enter-active-class="modal-enter-active"
-    enter-from-class="modal-enter-from"
-    enter-to-class="modal-enter-to"
-    leave-active-class="modal-leave-active"
-    leave-from-class="modal-leave-from"
-    leave-to-class="modal-leave-to"
->
-    <div v-if="showEducationModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg mx-2 p-6 relative max-h-[90vh] overflow-y-auto">
-            <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeEducationModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ editingEducationIndex === null ? 'Add' : 'Edit' }} Education</h3>
-            <form @submit.prevent="saveEducation">
-                <div class="space-y-4">
-                    <div class="relative">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Degree*</label>
-                        <input type="text" v-model="degreeInput" placeholder="Enter degree" required
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
-                    </div>
-                    <div class="relative">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">School/University*</label>
-                        <input type="text" v-model="schoolInput" placeholder="Enter school/university" required
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+            enter-active-class="modal-enter-active"
+            enter-from-class="modal-enter-from"
+            enter-to-class="modal-enter-to"
+            leave-active-class="modal-leave-active"
+            leave-from-class="modal-leave-from"
+            leave-to-class="modal-leave-to"
+        >
+            <div v-if="showEducationModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg mx-2 p-6 relative max-h-[90vh] overflow-y-auto">
+                    <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeEducationModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ editingEducationIndex === null ? 'Add' : 'Edit' }} Education</h3>
+                    <form @submit.prevent="saveEducation">
+                        <div class="space-y-4">
+                            <div class="relative autocomplete">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Degree*</label>
+                                <input type="text" id="degreeInput" v-model="degreeInput" placeholder="Enter degree (ex. Bachelor of Science in Information Technology" required
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                                <div id="degreeSuggestions" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg max-h-60 overflow-y-auto"></div>
                             </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date*</label>
-                            <input type="date" v-model="editEducationData.start_date" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                            <div class="relative autocomplete">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">School/University*</label>
+                                <input type="text" id="universityInput" v-model="schoolInput" placeholder="Enter school/university" required
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                                <div id="suggestions" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg max-h-60 overflow-y-auto"></div>
                             </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                            <input type="date" v-model="editEducationData.end_date" :disabled="editEducationData.current" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
-                            <div class="flex items-center mt-2">
-                                <input type="checkbox" v-model="editEducationData.current" id="eduCurrent" class="mr-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500">
-                                <label for="eduCurrent" class="text-sm text-gray-700 dark:text-gray-300">I currently study here</label>
-                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date*</label>
+                                    <input type="date" v-model="editEducationData.start_date" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                                    </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                                    <input type="date" v-model="editEducationData.end_date" :disabled="editEducationData.current" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                                    <div class="flex items-center mt-2">
+                                        <input type="checkbox" v-model="editEducationData.current" id="eduCurrent" class="mr-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500">
+                                        <label for="eduCurrent" class="text-sm text-gray-700 dark:text-gray-300">I currently study here</label>
+                                    </div>
+                                        </div>
+                                    </div>
                                 </div>
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" @click="closeEducationModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
                             </div>
-                        </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" @click="closeEducationModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
-                    </div>
-            </form>
-                    </div>
+                    </form>
                 </div>
-</transition>
+            </div>
+        </transition>
 
         <!-- Experience Modal with Job Title Auto-suggest -->
-<transition 
-    enter-active-class="modal-enter-active"
-    enter-from-class="modal-enter-from"
-    enter-to-class="modal-enter-to"
-    leave-active-class="modal-leave-active"
-    leave-from-class="modal-leave-from"
-    leave-to-class="modal-leave-to"
->
-    <div v-if="showExperienceModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl mx-2 p-6 relative max-h-[90vh] overflow-y-auto">
-            <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeExperienceModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ editingExperienceIndex === null ? 'Add' : 'Edit' }} Work Experience</h3>
-            <form @submit.prevent="saveExperience">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Job Title with Auto-suggest -->
-                    <div class="md:col-span-2 relative">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title*</label>
-                        <input 
-                            type="text" 
-                            v-model="editExperienceData.title" 
-                            @input="onTitleInput"
-                            @focus="searchJobTitles(editExperienceData.title)"
-                            @blur="hideTitleSuggestions"
-                            required 
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                            placeholder="Start typing to see job title suggestions"
-                        >
-                        <!-- Job Title Suggestions Dropdown -->
-                        <div 
-                            v-if="showTitleSuggestions && titleSuggestions.length > 0" 
-                            class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
-                        >
-                            <ul class="py-1">
-                                <li 
-                                    v-for="(title, index) in titleSuggestions" 
-                                    :key="index"
-                                    @click="selectTitleSuggestion(title)"
-                                    class="px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-800 dark:text-gray-200"
+        <transition 
+            enter-active-class="modal-enter-active"
+            enter-from-class="modal-enter-from"
+            enter-to-class="modal-enter-to"
+            leave-active-class="modal-leave-active"
+            leave-from-class="modal-leave-from"
+            leave-to-class="modal-leave-to"
+        >
+            <div v-if="showExperienceModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl mx-2 p-6 relative max-h-[90vh] overflow-y-auto">
+                    <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeExperienceModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ editingExperienceIndex === null ? 'Add' : 'Edit' }} Work Experience</h3>
+                    <form @submit.prevent="saveExperience">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Job Title with Auto-suggest -->
+                            <div class="md:col-span-2 relative">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title*</label>
+                                <input 
+                                    type="text" 
+                                    v-model="editExperienceData.title" 
+                                    @input="onTitleInput"
+                                    @focus="searchJobTitles(editExperienceData.title)"
+                                    @blur="hideTitleSuggestions"
+                                    required 
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    placeholder="Start typing to see job title suggestions"
                                 >
-                                    {{ title.name }}
-                                </li>
-                            </ul>
+                                <!-- Job Title Suggestions Dropdown -->
+                                <div 
+                                    v-if="showTitleSuggestions && titleSuggestions.length > 0" 
+                                    class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
+                                >
+                                    <ul class="py-1">
+                                        <li 
+                                            v-for="(title, index) in titleSuggestions" 
+                                            :key="index"
+                                            @click="selectTitleSuggestion(title)"
+                                            class="px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-800 dark:text-gray-200"
+                                        >
+                                            {{ title.name }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company*</label>
+                                <input type="text" v-model="editExperienceData.company" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location of Work*</label>
+                                <select v-model="editExperienceData.location_of_work" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="">Select Location</option>
+                                    <option value="Local">Local</option>
+                                    <option value="Abroad">Abroad</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employment Status*</label>
+                                <select v-model="editExperienceData.employment_status" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="">Select Status</option>
+                                    <option value="Probational">Probational</option>
+                                    <option value="Contractual">Contractual</option>
+                                    <option value="Regular">Regular</option>
+                                    <option value="Self-employed">Self-employed</option>
+                                    <option value="Unemployed">Unemployed</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date*</label>
+                                <input type="date" v-model="editExperienceData.start_date" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                                <input type="date" v-model="editExperienceData.end_date" :disabled="editExperienceData.current" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                <div class="flex items-center mt-2">
+                                    <input type="checkbox" v-model="editExperienceData.current" id="expCurrent" class="mr-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500">
+                                    <label for="expCurrent" class="text-sm text-gray-700 dark:text-gray-300">I currently work here</label>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description*</label>
+                                <textarea v-model="editExperienceData.description" rows="4" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-4">Employment Sector*</label>
+                                <select v-model="editExperienceData.employment_sector" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="">Select Sector</option>
+                                    <option value="Government">Government</option>
+                                    <option value="Private">Private</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company*</label>
-                        <input type="text" v-model="editExperienceData.company" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location of Work*</label>
-                        <select v-model="editExperienceData.location_of_work" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                            <option value="">Select Location</option>
-                            <option value="Local">Local</option>
-                            <option value="Abroad">Abroad</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employment Status*</label>
-                        <select v-model="editExperienceData.employment_status" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                            <option value="">Select Status</option>
-                            <option value="Probational">Probational</option>
-                            <option value="Contractual">Contractual</option>
-                            <option value="Regular">Regular</option>
-                            <option value="Self-employed">Self-employed</option>
-                            <option value="Unemployed">Unemployed</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date*</label>
-                        <input type="date" v-model="editExperienceData.start_date" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                        <input type="date" v-model="editExperienceData.end_date" :disabled="editExperienceData.current" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                        <div class="flex items-center mt-2">
-                            <input type="checkbox" v-model="editExperienceData.current" id="expCurrent" class="mr-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500">
-                            <label for="expCurrent" class="text-sm text-gray-700 dark:text-gray-300">I currently work here</label>
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" @click="closeExperienceModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
                         </div>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description*</label>
-                        <textarea v-model="editExperienceData.description" rows="4" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-4">Employment Sector*</label>
-                        <select v-model="editExperienceData.employment_sector" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                            <option value="">Select Sector</option>
-                            <option value="Government">Government</option>
-                            <option value="Private">Private</option>
-                        </select>
-                    </div>
+                    </form>
                 </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" @click="closeExperienceModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</transition>
+            </div>
+        </transition>
 
 </transition>
 
 <!-- Delete Work Experience Confirmation Modal -->
-        <transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
+        <transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to"             leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
             <div v-if="showDeleteExperienceModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
@@ -1237,7 +1239,7 @@ $_SESSION['user_id'] = $user_id;
 
 
                 <!-- Change Photo Modal -->
-                <transition 
+        <transition 
             enter-active-class="modal-enter-active"
             enter-from-class="modal-enter-from"
             enter-to-class="modal-enter-to"

@@ -249,6 +249,22 @@ const { createApp } = Vue;
                 },
                 schoolInput(newVal) {
                     this.editEducationData.school = newVal;
+                },
+                showEducationModal(val) {
+                    if (val) {
+                        // Wait for the modal to be rendered in DOM
+                        this.$nextTick(() => {
+                            this.initUniversityAutocomplete();
+                        });
+                    }
+                },
+                showEducationModal(val) {
+                    if (val) {
+                        // Wait for the modal to be rendered in DOM
+                        this.$nextTick(() => {
+                            this.initAutocompletes();
+                        });
+                    }
                 }
             },
             methods: {
@@ -427,6 +443,75 @@ const { createApp } = Vue;
                     this.showDeleteEducationModal = false;
                     this.educationToDeleteIndex = null;
                 },
+                async fetchDegrees(query) {
+                    const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&type=item&format=json&origin=*`;
+                    
+                    try {
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        
+                        // Filter results: only keep those with descriptions mentioning "degree", "program", or "course"
+                        return (data.search || []).filter(item => {
+                            const desc = item.description ? item.description.toLowerCase() : "";
+                            return desc.includes("degree") || desc.includes("program") || desc.includes("course") || desc.includes("academic");
+                        });
+                    } catch (err) {
+                        console.error("Fetch failed", err);
+                        return []; // Always return an array, even on error
+                    }
+                },
+                
+                initAutocompletes() {
+                    this.initUniversityAutocomplete();
+                    this.initDegreeAutocomplete();
+                },
+                
+                // Also update the autocomplete event handlers to handle undefined results
+                initDegreeAutocomplete() {
+                    const input = document.getElementById("degreeInput");
+                    const suggestions = document.getElementById("degreeSuggestions");
+                    
+                    if (!input || !suggestions) return;
+                    
+                    // Clear any existing event listeners
+                    const newInput = input.cloneNode(true);
+                    input.parentNode.replaceChild(newInput, input);
+                    
+                    const degreeInput = document.getElementById("degreeInput");
+                    const suggestionsContainer = document.getElementById("degreeSuggestions");
+                    
+                    degreeInput.addEventListener("input", this.debounce(async () => {
+                        const query = degreeInput.value.trim();
+                        suggestionsContainer.innerHTML = "";
+                        
+                        if (!query) return;
+                        
+                        const results = await this.fetchDegrees(query);
+                        
+                        // Add null/undefined check before calling slice
+                        if (results && Array.isArray(results)) {
+                            results.slice(0, 8).forEach(item => {
+                                const div = document.createElement("div");
+                                div.className = "px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-800 dark:text-gray-200";
+                                div.textContent = item.label + (item.description ? " – " + item.description : "");
+                                div.addEventListener("click", () => {
+                                    degreeInput.value = item.label;
+                                    this.degreeInput = item.label; // Update Vue data
+                                    suggestionsContainer.innerHTML = "";
+                                    console.log("Selected Degree:", item.id, item.label);
+                                });
+                                suggestionsContainer.appendChild(div);
+                            });
+                        }
+                    }, 300));
+                    
+                    document.addEventListener("click", (e) => {
+                        if (!e.target.closest(".autocomplete")) {
+                            suggestionsContainer.innerHTML = "";
+                        }
+                    });
+                },
+               
                 openSkillsModal() { this.showSkillsModal = true; this.editSkillsData = []; this.newSkill = { name: '', certificate: '' }; },
                 closeSkillsModal() { this.showSkillsModal = false; },
                 addSkill() {
@@ -820,6 +905,77 @@ const { createApp } = Vue;
                         this.closePhotoModal();
                     }
                 },
+                initUniversityAutocomplete() {
+                    const input = document.getElementById("universityInput");
+                    const suggestions = document.getElementById("suggestions");
+                    
+                    if (!input || !suggestions) return;
+                    
+                    // Clear any existing event listeners
+                    const newInput = input.cloneNode(true);
+                    input.parentNode.replaceChild(newInput, input);
+                    
+                    const universityInput = document.getElementById("universityInput");
+                    const suggestionsContainer = document.getElementById("suggestions");
+                    
+                    universityInput.addEventListener("input", this.debounce(async () => {
+                        const query = universityInput.value.trim();
+                        suggestionsContainer.innerHTML = "";
+                        
+                        if (!query) return;
+                        
+                        const results = await this.fetchUniversities(query);
+                        
+                        results.slice(0, 8).forEach(item => {
+                            const div = document.createElement("div");
+                            div.className = "px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-800 dark:text-gray-200";
+                            div.textContent = item.label + (item.description ? " – " + item.description : "");
+                            div.addEventListener("click", () => {
+                                universityInput.value = item.label;
+                                this.schoolInput = item.label; // Update Vue data
+                                suggestionsContainer.innerHTML = "";
+                                console.log("Selected:", item.id, item.label);
+                            });
+                            suggestionsContainer.appendChild(div);
+                        });
+                    }, 300));
+                    
+                    document.addEventListener("click", (e) => {
+                        if (!e.target.closest(".autocomplete")) {
+                            suggestionsContainer.innerHTML = "";
+                        }
+                    });
+                },
+                
+                debounce(func, wait) {
+                    let timeout;
+                    return function executedFunction(...args) {
+                        const later = () => {
+                            clearTimeout(timeout);
+                            func(...args);
+                        };
+                        clearTimeout(timeout);
+                        timeout = setTimeout(later, wait);
+                    };
+                },
+                
+                async fetchUniversities(query) {
+                    const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&type=item&format=json&origin=*`;
+                    
+                    try {
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        
+                        // Filter results: only items with "university", "school", or "college" in description
+                        return (data.search || []).filter(item => {
+                            const desc = item.description ? item.description.toLowerCase() : "";
+                            return desc.includes("university") || desc.includes("school") || desc.includes("college");
+                        });
+                    } catch (err) {
+                        console.error("Fetch failed", err);
+                        return [];
+                    }
+                },
                 openDocumentModal() { this.showDocumentModal = true; this.documentPreview = null; this.documentFile = null; },
                 closeDocumentModal() { this.showDocumentModal = false; this.documentPreview = null; this.documentFile = null; },
                 handleDocumentUpload(e) {
@@ -1064,38 +1220,6 @@ const { createApp } = Vue;
                         'Adamson University',
                         'Polytechnic University of the Philippines'
                     ];
-                },
-                fetchDegrees() {
-                    fetch('https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json')
-                        .then(res => res.json())
-                        .then(data => {
-                            // This is a university list, not degrees, but as a placeholder, use unique country names as degrees
-                            this.degrees = Array.from(new Set(data.map(u => u.name)));
-                        })
-                        .catch(() => {
-                            this.degrees = [
-                                'BS Information Technology',
-                                'BS Computer Science',
-                                'BS Education',
-                                'BS Business Administration',
-                                'BS Nursing',
-                                'BS Psychology',
-                                'BS Biology',
-                                'BS Mathematics',
-                                'BS Accountancy',
-                                'BS Entrepreneurship',
-                                'BS Criminology',
-                                'BS Forensic Science',
-                                'BS Medical Technology',
-                                'BS Pharmacy',
-                            ];
-                        });
-                },
-                filterDegreeSuggestions() {
-                    const val = this.degreeInput.toLowerCase();
-                    this.filteredDegreeSuggestions = this.degrees.filter(d => d.toLowerCase().includes(val)).slice(0, 8);
-                    this.showDegreeSuggestions = !!val && this.filteredDegreeSuggestions.length > 0;
-                    this.editEducationData.degree = this.degreeInput;
                 },
                 filterSchoolSuggestions() {
                     const val = this.schoolInput.trim();
