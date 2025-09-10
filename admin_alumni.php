@@ -639,12 +639,40 @@ $_SESSION['user_id'] = $user_id;
                     <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
                         <i class="fas fa-lightbulb text-blue-500 dark:text-blue-300"></i> <span>Skills</span>
                     </h4>
-                    <div v-if="viewAlumniData.skills && viewAlumniData.skills.length" class="flex flex-wrap gap-2 mb-4">
-                        <span v-for="(skill, index) in viewAlumniData.skills" :key="index" 
-                            class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold shadow">
-                            {{ skill.name || skill }}
-                            <span v-if="skill.certificate" class="ml-1 text-xs">(Certified)</span>
-                        </span>
+                    <div v-if="viewAlumniData.skills && viewAlumniData.skills.length" class="space-y-3 mb-4">
+                        <div v-for="(skill, index) in viewAlumniData.skills" :key="index" 
+                            class="bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-gray-700 dark:text-gray-200">{{ skill.name }}</span>
+                                <span v-if="skill.certificate || skill.certificate_file" 
+                                    class="inline-flex items-center bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 px-2 py-1 rounded-full text-xs">
+                                    <i class="fas fa-certificate mr-1"></i> Certified
+                                </span>
+                            </div>
+                            
+                            <!-- Certificate Text -->
+                            <div v-if="skill.certificate" class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                <span class="font-medium">Certificate:</span> {{ skill.certificate }}
+                            </div>
+                            
+                            <!-- Certificate File -->
+                            <div v-if="skill.certificate_file" class="mt-3 flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <i :class="getFileIcon(skill.certificate_file)"></i>
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">Certificate File</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a :href="getCertificateUrl(skill.certificate_file)" target="_blank" 
+                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 text-sm flex items-center gap-1">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a :href="getCertificateUrl(skill.certificate_file)" download 
+                                    class="text-green-600 hover:text-green-800 dark:text-green-300 dark:hover:text-green-200 text-sm flex items-center gap-1">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div v-else class="text-gray-500 dark:text-gray-400 mb-4">No skills listed.</div>
                     

@@ -2,7 +2,7 @@
 session_start();
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'alumni') {
     header('Location: login.php');
-    exit();
+    exit;
 }
 // Fetch user_id from user table using email
 require_once 'conn/db_conn.php';
@@ -489,7 +489,7 @@ $_SESSION['user_id'] = $user_id;
                 <div class="text-gray-800 dark:text-gray-200 uppercase">{{ profile.college || 'Not specified' }}</div>
                     </div>
             <div class="space-y-2">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Course</div>
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Program</div>
                 <div class="text-gray-800 dark:text-gray-200 uppercase">{{ profile.course || 'Not specified' }}</div>
                     </div>
             <div class="space-y-2">
@@ -537,24 +537,27 @@ $_SESSION['user_id'] = $user_id;
             </section>
 
             <!-- Skills Section -->
-    <section class="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mb-6">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 uppercase">Skills</h2>
-            <button @click="showSkillsModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                <i class="fas fa-edit mr-1"></i>Edit
+            <!-- Skills Section -->
+            <section class="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 uppercase">Skills</h2>
+                    <button @click="showSkillsModal = true"  class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors w-auto">
+                        <i class="fas fa-plus mr-1"></i>Add
                     </button>
                 </div>
-        <div class="flex flex-wrap gap-2">
-            <div v-for="(skill, index) in profile.skills" :key="skill.skill_id" class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full flex items-center gap-2">
+                <div class="flex flex-wrap gap-2">
+                    <div v-for="(skill, index) in profile.skills" :key="skill.skill_id" class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full flex items-center gap-2">
                         {{ skill.name }}
-                <span v-if="skill.certificate" class="ml-1 text-xs bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-100 px-2 py-0.5 rounded-full">
-                    <i class="fas fa-certificate"></i> {{ skill.certificate }}
+                        <span v-if="skill.certificate || skill.certificate_file" class="ml-1 text-xs bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-100 px-2 py-0.5 rounded-full flex items-center cursor-pointer" @click="viewCertificate(skill)">
+                            <i class="fas fa-certificate mr-1"></i> 
+                            {{ skill.certificate || 'Certificate' }}
+                            <i v-if="skill.certificate_file" class="fas fa-external-link-alt ml-1"></i>
                         </span>
-                <button @click="removeSkill(index)" class="ml-1 text-red-500 hover:text-red-700 dark:hover:text-red-300">
+                        <button @click="removeSkill(index)" class="ml-1 text-red-500 hover:text-red-700 dark:hover:text-red-300">
                             <i class="fas fa-times"></i>
-                </button>
+                        </button>
                     </div>
-            <div v-if="profile.skills.length === 0" class="text-gray-500 dark:text-gray-400 text-sm">No skills added yet</div>
+                    <div v-if="profile.skills.length === 0" class="text-gray-500 dark:text-gray-400 text-sm">No skills added yet</div>
                 </div>
             </section>
 
@@ -607,64 +610,64 @@ $_SESSION['user_id'] = $user_id;
 
             <!-- Success Stories Section -->
             <section class="bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 mb-6">
-    <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center">
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 uppercase">Success Stories
-            </h2>
-        </div>
-        <button @click="showSuccessStoryModal = true" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center">
-            <i class="fas fa-plus mr-2 text-sm"></i>Share Story
-        </button>
-    </div>
-    <div v-if="successStories.length > 0" class="space-y-6">
-        <div v-for="(story, index) in successStories" :key="index" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 sm:p-6">
-            <div class="flex items-start justify-between mb-4">
-                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center">
-                    <i class="fas fa-trophy text-yellow-500 mr-3 text-sm"></i>
-                    {{ story.title }}
-                </h3>
-                <div class="flex gap-2">
-                    <button @click="editSuccessStory(index)" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1.5 rounded-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-sm shadow-sm flex items-center">
-                        <i class="fas fa-edit mr-1.5 text-xs"></i> Edit
-                    </button>
-                    <button @click="deleteSuccessStory(index)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1.5 rounded-md hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm shadow-sm flex items-center">
-                        <i class="fas fa-trash mr-1.5 text-xs"></i> Delete
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 uppercase">Success Stories
+                        </h2>
+                    </div>
+                    <button @click="showSuccessStoryModal = true" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center">
+                        <i class="fas fa-plus mr-2 text-sm"></i>Share Story
                     </button>
                 </div>
-            </div>
-            <p class="text-gray-700 dark:text-gray-200 mb-4 leading-relaxed italic">{{ story.content }}</p>
-            <div class="text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-500 flex flex-wrap items-center">
-                <span class="flex items-center mr-4">
-                    <i class="far fa-calendar mr-1.5"></i> Posted on: {{ formatDate(story.created_at) }}
-                </span>
-                <span class="flex items-center">
-                    <i class="far fa-flag mr-1.5"></i> Status: 
-                    <span :class="{
-                        'text-yellow-600 dark:text-yellow-400': story.status === 'draft',
-                        'text-green-600 dark:text-green-400': story.status === 'published',
-                        'text-gray-600 dark:text-gray-400': story.status === 'archived'
-                    }" class="font-semibold capitalize ml-1.5 px-2 py-0.5 rounded-full text-xs bg-opacity-10" :class="{
-                        'bg-yellow-500': story.status === 'draft',
-                        'bg-green-500': story.status === 'published',
-                        'bg-gray-500': story.status === 'archived'
-                    }">
-                        {{ story.status }}
-                    </span>
-                </span>
-            </div>
-        </div>
-    </div>
-    <div v-else class="text-center py-12 px-4">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-5">
-            <i class="fas fa-trophy text-3xl text-green-500 dark:text-green-400"></i>
-        </div>
-        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No success stories yet</h3>
-        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">Be the first to share your achievement and inspire others!</p>
-        <button @click="showSuccessStoryModal = true" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            Share Your First Success Story
-        </button>
-    </div>
-</section>
+                <div v-if="successStories.length > 0" class="space-y-6">
+                    <div v-for="(story, index) in successStories" :key="index" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 sm:p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+                                <i class="fas fa-trophy text-yellow-500 mr-3 text-sm"></i>
+                                {{ story.title }}
+                            </h3>
+                            <div class="flex gap-2">
+                                <button @click="editSuccessStory(index)" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1.5 rounded-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-sm shadow-sm flex items-center">
+                                    <i class="fas fa-edit mr-1.5 text-xs"></i> Edit
+                                </button>
+                                <button @click="deleteSuccessStory(index)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1.5 rounded-md hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm shadow-sm flex items-center">
+                                    <i class="fas fa-trash mr-1.5 text-xs"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-200 mb-4 leading-relaxed italic">{{ story.content }}</p>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-500 flex flex-wrap items-center">
+                            <span class="flex items-center mr-4">
+                                <i class="far fa-calendar mr-1.5"></i> Posted on: {{ formatDate(story.created_at) }}
+                            </span>
+                            <span class="flex items-center">
+                                <i class="far fa-flag mr-1.5"></i> Status: 
+                                <span :class="{
+                                    'text-yellow-600 dark:text-yellow-400': story.status === 'draft',
+                                    'text-green-600 dark:text-green-400': story.status === 'published',
+                                    'text-gray-600 dark:text-gray-400': story.status === 'archived'
+                                }" class="font-semibold capitalize ml-1.5 px-2 py-0.5 rounded-full text-xs bg-opacity-10" :class="{
+                                    'bg-yellow-500': story.status === 'draft',
+                                    'bg-green-500': story.status === 'published',
+                                    'bg-gray-500': story.status === 'archived'
+                                }">
+                                    {{ story.status }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-center py-12 px-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-5">
+                        <i class="fas fa-trophy text-3xl text-green-500 dark:text-green-400"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No success stories yet</h3>
+                    <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">Be the first to share your achievement and inspire others!</p>
+                    <button @click="showSuccessStoryModal = true" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        Share Your First Success Story
+                    </button>
+                </div>
+            </section>
 
             <!-- Success Story Modal -->
             <transition 
@@ -914,9 +917,9 @@ $_SESSION['user_id'] = $user_id;
                                                 </select>
                                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Program</label>
                                 <select v-model="editProfileData.course" :disabled="!editProfileData.college" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                                                    <option value="">Select Course</option>
+                                                    <option value="">Select Program</option>
                                     <option v-for="course in collegeCourses[editProfileData.college] || []" :key="course" :value="course">{{ course }}</option>
                                                 </select>
                                             </div>
@@ -951,61 +954,114 @@ $_SESSION['user_id'] = $user_id;
         </transition>
 
         <!-- Skills Modal -->
+        <!-- Skills Modal with Auto-suggest -->
+        <!-- Skills Modal with Certificate Upload -->
         <transition 
-    enter-active-class="modal-enter-active"
-    enter-from-class="modal-enter-from"
-    enter-to-class="modal-enter-to"
-    leave-active-class="modal-leave-active"
-    leave-from-class="modal-leave-from"
-    leave-to-class="modal-leave-to"
->
-    <div v-if="showSkillsModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative max-h-[90vh] overflow-y-auto">
-            <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeSkillsModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Edit Skills</h3>
-            <form @submit.prevent="saveSkills">
-                <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Skill Name</label>
-                    <input type="text" v-model="newSkill.name" placeholder="Enter skill name" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                    </div>
+            enter-active-class="modal-enter-active"
+            enter-from-class="modal-enter-from"
+            enter-to-class="modal-enter-to"
+            leave-active-class="modal-leave-active"
+            leave-from-class="modal-leave-from"
+            leave-to-class="modal-leave-to"
+        >
+            <div v-if="showSkillsModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative max-h-[90vh] overflow-y-auto">
+                    <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" @click="closeSkillsModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Add Skill</h3>
+                    <form @submit.prevent="addSkill">
+                        <div class="mb-3 relative">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Skill Name*</label>
+                            <input 
+                                type="text" 
+                                v-model="newSkill.name" 
+                                @input="onSkillInput"
+                                @focus="searchSkills(newSkill.name)"
+                                @blur="hideSkillSuggestions"
+                                required
+                                placeholder="Start typing to see suggestions" 
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            >
+                            <!-- Skill Suggestions Dropdown -->
+                            <div 
+                                v-if="showSkillSuggestions && skillSuggestions.length > 0" 
+                                class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
+                            >
+                                <ul class="py-1">
+                                    <li 
+                                        v-for="(skill, index) in skillSuggestions" 
+                                        :key="index"
+                                        @click="selectSkillSuggestion(skill)"
+                                        class="px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-800 dark:text-gray-200"
+                                    >
+                                        {{ skill.name }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Certificate (optional)</label>
-                    <input type="text" v-model="newSkill.certificate" placeholder="Certificate name" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Certificate Name (optional)</label>
+                            <input type="text" v-model="newSkill.certificate" placeholder="Certificate name" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                         </div>
-                <button type="button" @click="addSkill" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4"><i class="fas fa-plus mr-1"></i>Add Skill</button>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <div v-for="(skill, index) in editSkillsData" :key="index" class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full flex items-center gap-2">
-                                {{ skill.name }}
-                        <span v-if="skill.certificate" class="ml-1 text-xs bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-100 px-2 py-0.5 rounded-full">
-                            <i class="fas fa-certificate"></i> {{ skill.certificate }}
-                                </span>
-                        <button @click="removeEditSkill(index)" class="ml-1 text-red-500 hover:text-red-700 dark:hover:text-red-300"><i class="fas fa-times"></i></button>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload Certificate (optional)</label>
+                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-500 transition-colors">
+                                <input 
+                                    type="file" 
+                                    ref="certificateInput" 
+                                    @change="handleCertificateUpload" 
+                                    accept=".pdf,.jpg,.jpeg,.png,.gif" 
+                                    class="hidden"
+                                >
+                                <div class="cursor-pointer" @click="$refs.certificateInput.click()">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-gray-600 dark:text-gray-300">Click to upload or drag and drop</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">PDF, JPG, PNG, GIF up to 5MB</p>
+                                </div>
                             </div>
+                            
+                            <!-- Certificate Preview -->
+                            <div v-if="certificatePreview" class="mt-3">
+                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preview:</p>
+                                <div class="relative inline-block">
+                                    <div v-if="certificatePreviewType === 'image'" class="w-32 h-32 border rounded overflow-hidden">
+                                        <img :src="certificatePreview" alt="Certificate preview" class="w-full h-full object-contain">
+                                    </div>
+                                    <div v-else-if="certificatePreviewType === 'pdf'" class="w-32 h-32 border rounded flex items-center justify-center bg-red-100 dark:bg-red-900">
+                                        <i class="fas fa-file-pdf text-4xl text-red-500"></i>
+                                    </div>
+                                    <button @click="certificatePreview = null; newSkill.certificate_file = null;" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </div>
                             </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" @click="closeSkillsModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Changes</button>
                         </div>
-            </form>
-                    </div>
-                    </div>
-</transition>
-
-
-<transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
-    <div v-if="showDeleteSkillModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
-            <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete this skill?</p>
-            <div class="flex justify-end gap-3">
-                <button @click="cancelDeleteSkill" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
-                <button @click="confirmDeleteSkill" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                        
+                        <div class="flex justify-end gap-3">
+                            <button type="button" @click="closeSkillsModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Skill</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
-</transition>
+        </transition>
+
+
+        <transition enter-active-class="modal-enter-active" enter-from-class="modal-enter-from" enter-to-class="modal-enter-to" leave-active-class="modal-leave-active" leave-from-class="modal-leave-from" leave-to-class="modal-leave-to">
+            <div v-if="showDeleteSkillModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirm Delete</h3>
+                    <p class="mb-6 text-gray-700 dark:text-gray-300">Are you sure you want to delete this skill?</p>
+                    <div class="flex justify-end gap-3">
+                        <button @click="cancelDeleteSkill" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                        <button @click="confirmDeleteSkill" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                        </div>
+                    </div>
+                </div>
+        </transition>
 
         <!-- Education Modal -->
         <transition 
@@ -1058,8 +1114,8 @@ $_SESSION['user_id'] = $user_id;
                 </div>
 </transition>
 
-        <!-- Experience Modal -->
-        <transition 
+        <!-- Experience Modal with Job Title Auto-suggest -->
+<transition 
     enter-active-class="modal-enter-active"
     enter-from-class="modal-enter-from"
     enter-to-class="modal-enter-to"
@@ -1075,14 +1131,41 @@ $_SESSION['user_id'] = $user_id;
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ editingExperienceIndex === null ? 'Add' : 'Edit' }} Work Experience</h3>
             <form @submit.prevent="saveExperience">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <!-- Job Title with Auto-suggest -->
+                    <div class="md:col-span-2 relative">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title*</label>
-                        <input type="text" v-model="editExperienceData.title" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-            </div>
+                        <input 
+                            type="text" 
+                            v-model="editExperienceData.title" 
+                            @input="onTitleInput"
+                            @focus="searchJobTitles(editExperienceData.title)"
+                            @blur="hideTitleSuggestions"
+                            required 
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                            placeholder="Start typing to see job title suggestions"
+                        >
+                        <!-- Job Title Suggestions Dropdown -->
+                        <div 
+                            v-if="showTitleSuggestions && titleSuggestions.length > 0" 
+                            class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto"
+                        >
+                            <ul class="py-1">
+                                <li 
+                                    v-for="(title, index) in titleSuggestions" 
+                                    :key="index"
+                                    @click="selectTitleSuggestion(title)"
+                                    class="px-3 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-800 dark:text-gray-200"
+                                >
+                                    {{ title.name }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company*</label>
                         <input type="text" v-model="editExperienceData.company" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-        </div>
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location of Work*</label>
                         <select v-model="editExperienceData.location_of_work" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
@@ -1112,12 +1195,12 @@ $_SESSION['user_id'] = $user_id;
                         <div class="flex items-center mt-2">
                             <input type="checkbox" v-model="editExperienceData.current" id="expCurrent" class="mr-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500">
                             <label for="expCurrent" class="text-sm text-gray-700 dark:text-gray-300">I currently work here</label>
-                                </div>
-                                </div>
+                        </div>
+                    </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description*</label>
                         <textarea v-model="editExperienceData.description" rows="4" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
-                                </div>
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-4">Employment Sector*</label>
                         <select v-model="editExperienceData.employment_sector" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
@@ -1126,14 +1209,14 @@ $_SESSION['user_id'] = $user_id;
                             <option value="Private">Private</option>
                         </select>
                     </div>
-                                </div>
+                </div>
                 <div class="flex justify-end gap-3 mt-6">
                     <button type="button" @click="closeExperienceModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
-                                </div>
+                </div>
             </form>
-                                </div>
-                                </div>
+        </div>
+    </div>
 </transition>
 
 </transition>

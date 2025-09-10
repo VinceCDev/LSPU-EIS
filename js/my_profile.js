@@ -76,7 +76,22 @@ const { createApp } = Vue;
                     editSkillsData: [],
                     newSkill: {
                         name: '',
-                        certificate: ''
+                        certificate: '',
+                        certificate_file: null
+                    },
+                    certificatePreview: null,
+                    certificatePreviewType: null, // 'image' or 'pdf'
+                    skillSuggestions: [],
+                    showSkillSuggestions: false,
+                    skillInputTimeout: null,
+                    
+                    // API credentials for EMSI skills service
+                    skillsApi: {
+                        clientId: "b6efq6u8v44x705u",
+                        clientSecret: "ogCw9Yv4",
+                        scope: "emsi_open",
+                        token: null,
+                        tokenExpiry: 0
                     },
                     editEducationData: {
                         degree: '',
@@ -210,6 +225,18 @@ const { createApp } = Vue;
                     showDeleteProfilePicModal: false,
                     newPhotoFile: null,
                     showLogoutModal: false,
+                    titleSuggestions: [],
+                    showTitleSuggestions: false,
+                    titleInputTimeout: null,
+                    
+                    // API credentials for EMSI services
+                    emsiApi: {
+                        clientId: "b6efq6u8v44x705u",
+                        clientSecret: "ogCw9Yv4",
+                        scope: "emsi_open",
+                        token: null,
+                        tokenExpiry: 0
+                    }
                 };
             },
             watch: {
@@ -404,10 +431,14 @@ const { createApp } = Vue;
                 closeSkillsModal() { this.showSkillsModal = false; },
                 addSkill() {
                     if (this.newSkill.name) {
-                        // Insert to backend
                         const formData = new FormData();
                         formData.append('name', this.newSkill.name);
                         formData.append('certificate', this.newSkill.certificate);
+                        
+                        if (this.newSkill.certificate_file) {
+                            formData.append('certificate_file', this.newSkill.certificate_file);
+                        }
+                        
                         fetch('functions/insert_skill.php', {
                             method: 'POST',
                             body: formData
@@ -417,7 +448,12 @@ const { createApp } = Vue;
                             if (data.success) {
                                 this.showNotification('Skill added!', 'success');
                                 this.fetchSkills();
-                                this.newSkill = { name: '', certificate: '' };
+                                this.newSkill = { 
+                                    name: '', 
+                                    certificate: '', 
+                                    certificate_file: null 
+                                };
+                                this.certificatePreview = null;
                             } else {
                                 this.showNotification(data.message || 'Failed to add skill.', 'error');
                             }
@@ -471,6 +507,87 @@ const { createApp } = Vue;
                 },
                 removeEditSkill(index) {
                     this.editSkillsData.splice(index, 1);
+                },
+                async getSkillsToken() {
+                    if (this.skillsApi.token && Date.now() < this.skillsApi.tokenExpiry) {
+                        return this.skillsApi.token;
+                    }
+        
+                    try {
+                        const response = await fetch("https://auth.emsicloud.com/connect/token", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: new URLSearchParams({
+                                client_id: this.skillsApi.clientId,
+                                client_secret: this.skillsApi.clientSecret,
+                                grant_type: "client_credentials",
+                                scope: this.skillsApi.scope
+                            })
+                        });
+        
+                        const data = await response.json();
+                        this.skillsApi.token = data.access_token;
+                        this.skillsApi.tokenExpiry = Date.now() + data.expires_in * 1000;
+                        return this.skillsApi.token;
+                    } catch (error) {
+                        console.error("Error fetching skills token:", error);
+                        return null;
+                    }
+                },
+        
+                async searchSkills(query) {
+                    if (!query || query.length < 2) {
+                        this.skillSuggestions = [];
+                        this.showSkillSuggestions = false;
+                        return;
+                    }
+        
+                    const token = await this.getSkillsToken();
+                    if (!token) return;
+        
+                    try {
+                        const response = await fetch(
+                            `https://emsiservices.com/skills/versions/latest/skills?q=${encodeURIComponent(query)}&limit=5`,
+                            {
+                                headers: {
+                                    "Authorization": "Bearer " + token,
+                                    "accept": "application/json"
+                                }
+                            }
+                        );
+        
+                        const data = await response.json();
+                        this.skillSuggestions = data.data || [];
+                        this.showSkillSuggestions = this.skillSuggestions.length > 0;
+                    } catch (error) {
+                        console.error("Error searching skills:", error);
+                        this.skillSuggestions = [];
+                        this.showSkillSuggestions = false;
+                    }
+                },
+        
+                onSkillInput() {
+                    // Clear previous timeout
+                    if (this.skillInputTimeout) {
+                        clearTimeout(this.skillInputTimeout);
+                    }
+                    
+                    // Set new timeout for debouncing
+                    this.skillInputTimeout = setTimeout(() => {
+                        this.searchSkills(this.newSkill.name);
+                    }, 300);
+                },
+        
+                selectSkillSuggestion(skill) {
+                    this.newSkill.name = skill.name;
+                    this.skillSuggestions = [];
+                    this.showSkillSuggestions = false;
+                },
+        
+                hideSkillSuggestions() {
+                    setTimeout(() => {
+                        this.showSkillSuggestions = false;
+                    }, 200);
                 },
                 openExperienceModal() { this.showExperienceModal = true; },
                 closeExperienceModal() { this.showExperienceModal = false; this.editingExperienceIndex = null; },
@@ -585,6 +702,85 @@ const { createApp } = Vue;
                     this.showDeleteExperienceModal = false;
                     this.experienceToDeleteIndex = null;
                     this.experienceToDeleteId = null;
+                },
+                async getEmsiToken() {
+                    if (this.emsiApi.token && Date.now() < this.emsiApi.tokenExpiry) {
+                        return this.emsiApi.token;
+                    }
+        
+                    try {
+                        const response = await fetch("https://auth.emsicloud.com/connect/token", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: new URLSearchParams({
+                                client_id: this.emsiApi.clientId,
+                                client_secret: this.emsiApi.clientSecret,
+                                grant_type: "client_credentials",
+                                scope: this.emsiApi.scope
+                            })
+                        });
+        
+                        const data = await response.json();
+                        this.emsiApi.token = data.access_token;
+                        this.emsiApi.tokenExpiry = Date.now() + data.expires_in * 1000;
+                        return this.emsiApi.token;
+                    } catch (error) {
+                        console.error("Error fetching EMSI token:", error);
+                        return null;
+                    }
+                },
+                // Job title auto-suggestion methods
+                async searchJobTitles(query) {
+                    if (!query || query.length < 2) {
+                        this.titleSuggestions = [];
+                        this.showTitleSuggestions = false;
+                        return;
+                    }
+
+                    const token = await this.getEmsiToken();
+                    if (!token) return;
+
+                    try {
+                        const response = await fetch(
+                            `https://emsiservices.com/titles/versions/latest/titles?q=${encodeURIComponent(query)}&limit=5`,
+                            {
+                                headers: {
+                                    "Authorization": "Bearer " + token,
+                                    "accept": "application/json"
+                                }
+                            }
+                        );
+
+                        const data = await response.json();
+                        this.titleSuggestions = data.data || [];
+                        this.showTitleSuggestions = this.titleSuggestions.length > 0;
+                    } catch (error) {
+                        console.error("Error searching job titles:", error);
+                        this.titleSuggestions = [];
+                        this.showTitleSuggestions = false;
+                    }
+                },
+
+                onTitleInput() {
+                    if (this.titleInputTimeout) {
+                        clearTimeout(this.titleInputTimeout);
+                    }
+                    
+                    this.titleInputTimeout = setTimeout(() => {
+                        this.searchJobTitles(this.editExperienceData.title);
+                    }, 300);
+                },
+
+                selectTitleSuggestion(title) {
+                    this.editExperienceData.title = title.name;
+                    this.titleSuggestions = [];
+                    this.showTitleSuggestions = false;
+                },
+
+                hideTitleSuggestions() {
+                    setTimeout(() => {
+                        this.showTitleSuggestions = false;
+                    }, 200);
                 },
                 openResumeModal() { this.showResumeModal = true; },
                 closeResumeModal() { this.showResumeModal = false; this.resumePreview = null; },
@@ -979,7 +1175,6 @@ const { createApp } = Vue;
                         .then(res => res.json())
                         .then(data => {
                             if (data.success) {
-                                // Ensure we're properly assigning to the reactive property
                                 this.profile.skills = data.skills || [];
                             } else {
                                 this.profile.skills = [];
@@ -988,6 +1183,36 @@ const { createApp } = Vue;
                         .catch(() => {
                             this.profile.skills = [];
                         });
+                },
+                viewCertificate(skill) {
+                    if (skill.certificate_file) {
+                        window.open('uploads/certificates/' + skill.certificate_file, '_blank');
+                    }
+                },
+                handleCertificateUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.newSkill.certificate_file = file;
+                        
+                        // Create preview
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        if (ext === 'pdf') {
+                            this.certificatePreviewType = 'pdf';
+                            this.certificatePreview = URL.createObjectURL(file);
+                        } else if (['jpg','jpeg','png','gif'].includes(ext)) {
+                            this.certificatePreviewType = 'image';
+                            const reader = new FileReader();
+                            reader.onload = (e) => { 
+                                this.certificatePreview = e.target.result; 
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            this.certificatePreview = null;
+                        }
+                    } else {
+                        this.newSkill.certificate_file = null;
+                        this.certificatePreview = null;
+                    }
                 },
                 fetchResume() {
                     fetch('functions/fetch_resume.php')

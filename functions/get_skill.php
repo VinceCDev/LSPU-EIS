@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 header('Content-Type: application/json');
 
@@ -34,26 +35,25 @@ try {
     }
 
     $skills = [];
-    $stmt = $db->prepare('SELECT skill_id, name, certificate FROM alumni_skill WHERE alumni_id = ? ORDER BY created_at DESC');
+    $stmt = $db->prepare('SELECT skill_id, name, certificate, certificate_file FROM alumni_skill WHERE alumni_id = ? ORDER BY created_at DESC');
     if (!$stmt) {
         throw new Exception('Database preparation failed.');
     }
     $stmt->bind_param('i', $alumni_id);
     $stmt->execute();
-    $stmt->bind_result($skill_id, $name, $certificate);
+    $stmt->bind_result($skill_id, $name, $certificate, $certificate_file);
     while ($stmt->fetch()) {
         $skills[] = [
             'skill_id' => $skill_id,
             'name' => $name,
-            'certificate' => $certificate
+            'certificate' => $certificate,
+            'certificate_file' => $certificate_file,
         ];
     }
     $stmt->close();
 
     echo json_encode(['success' => true, 'skills' => $skills]);
-    
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 exit;
-?>

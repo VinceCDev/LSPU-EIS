@@ -168,9 +168,38 @@ createApp({
                 this.showNotification('Failed to fetch applications', 'error');
             }
         },
+        // In the viewApplicant method, update the skills processing:
         viewApplicant(applicant) {
             this.selectedApplicant = applicant;
             this.showApplicantModal = true;
+        },
+
+        // Add these methods to handle certificate display
+        getFileIcon(filename) {
+            if (!filename) return 'fas fa-file text-gray-400';
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                pdf: 'fas fa-file-pdf text-red-500',
+                jpg: 'fas fa-file-image text-green-500',
+                jpeg: 'fas fa-file-image text-green-500',
+                png: 'fas fa-file-image text-green-500',
+                gif: 'fas fa-file-image text-green-500',
+                doc: 'fas fa-file-word text-blue-500',
+                docx: 'fas fa-file-word text-blue-500',
+                default: 'fas fa-file text-gray-400'
+            };
+            return icons[ext] || icons.default;
+        },
+
+        getCertificateUrl(filename) {
+            if (!filename) return null;
+            const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
+            const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase();
+            if (!allowedExtensions.includes(ext)) {
+                console.warn('Invalid certificate extension:', filename);
+                return null;
+            }
+            return `uploads/certificates/${encodeURIComponent(filename)}`;
         },
         closeApplicantModal() {
             this.showApplicantModal = false;

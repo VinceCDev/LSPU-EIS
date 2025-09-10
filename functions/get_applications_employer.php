@@ -1,4 +1,5 @@
 <?php
+
 // functions/get_applications_employer.php
 session_start();
 header('Content-Type: application/json');
@@ -6,7 +7,7 @@ require_once '../conn/db_conn.php';
 
 if (!isset($_SESSION['email']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'employer') {
     echo json_encode(['applications' => []]);
-    exit();
+    exit;
 }
 
 $db = Database::getInstance()->getConnection();
@@ -21,10 +22,10 @@ $stmt->fetch();
 $stmt->close();
 if (!$employer_id) {
     echo json_encode(['applications' => []]);
-    exit();
+    exit;
 }
 
-$sql = "
+$sql = '
 SELECT 
     app.application_id,
     app.applied_at,
@@ -41,7 +42,7 @@ JOIN jobs j ON app.job_id = j.job_id
 LEFT JOIN employer e ON j.employer_id = e.user_id
 WHERE j.employer_id = ?
 ORDER BY app.applied_at DESC
-";
+';
 
 $stmt = $db->prepare($sql);
 $stmt->bind_param('i', $employer_id);
@@ -49,7 +50,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $applications = [];
 while ($row = $result->fetch_assoc()) {
-    $row['alumni_name'] = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+    $row['alumni_name'] = trim($row['first_name'].' '.$row['middle_name'].' '.$row['last_name']);
     // Fallback: if company_name is empty but employer_id is set, fetch company_name manually
     if ((empty($row['company_name']) || is_null($row['company_name'])) && !empty($row['employer_id'])) {
         $emp_stmt = $db->prepare('SELECT company_name FROM employer WHERE user_id = ? LIMIT 1');
@@ -67,7 +68,7 @@ while ($row = $result->fetch_assoc()) {
     $pic_stmt->execute();
     $pic_stmt->bind_result($profile_pic);
     if ($pic_stmt->fetch() && $profile_pic) {
-        $row['profile_image'] = 'uploads/profile_picture/' . $profile_pic;
+        $row['profile_image'] = 'uploads/profile_picture/'.$profile_pic;
     } else {
         $row['profile_image'] = null;
     }
@@ -78,7 +79,7 @@ while ($row = $result->fetch_assoc()) {
     $resume_stmt->execute();
     $resume_stmt->bind_result($resume_file);
     if ($resume_stmt->fetch() && $resume_file) {
-        $row['resume_file'] = 'uploads/resumes/' . $resume_file;
+        $row['resume_file'] = 'uploads/resumes/'.$resume_file;
     } else {
         $row['resume_file'] = null;
     }
@@ -105,8 +106,8 @@ while ($row = $result->fetch_assoc()) {
     }
     $row['educations'] = $educations;
     $edu_stmt->close();
-    // Fetch skills
-    $skill_stmt = $db->prepare('SELECT skill_id, name, certificate, created_at FROM alumni_skill WHERE alumni_id = ?');
+    // Fetch skills with certificate and certificate_file
+    $skill_stmt = $db->prepare('SELECT skill_id, name, certificate, certificate_file, created_at FROM alumni_skill WHERE alumni_id = ?');
     $skill_stmt->bind_param('i', $row['alumni_id']);
     $skill_stmt->execute();
     $skill_result = $skill_stmt->get_result();
@@ -119,4 +120,4 @@ while ($row = $result->fetch_assoc()) {
     $applications[] = $row;
 }
 $stmt->close();
-echo json_encode(['applications' => $applications]); 
+echo json_encode(['applications' => $applications]);

@@ -387,17 +387,63 @@ $_SESSION['user_id'] = $user_id;
                     </ul>
                   </div>
                   <!-- Skills -->
-                  <div v-if="selectedApplicant.alumni && selectedApplicant.alumni.skills && selectedApplicant.alumni.skills.length" class="mb-6">
-                    <h4 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-cogs text-blue-500"></i> <span>Skills</span></h4>
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-6">
-                        <ul class="flex flex-wrap gap-2">
-                            <li v-for="skill in selectedApplicant.alumni.skills" :key="skill.skill_id" class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                                <span>{{ skill.name }}</span>
-                                <span v-if="skill.certificate" class="ml-1 text-green-600 dark:text-green-300"><i class="fas fa-certificate"></i></span>
-                            </li>
-                        </ul>
+                  <!-- Skills Section -->
+                    <div v-if="selectedApplicant.alumni && selectedApplicant.alumni.skills && selectedApplicant.alumni.skills.length" class="mb-6">
+                        <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i class="fas fa-cogs text-blue-500 dark:text-blue-300"></i> 
+                            <span>Skills & Certifications</span>
+                        </h4>
+                        <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm">
+                            <div class="space-y-4">
+                                <div v-for="skill in selectedApplicant.alumni.skills" :key="skill.skill_id" class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0 last:pb-0">
+                                    <!-- Skill Name -->
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-semibold text-gray-800 dark:text-gray-100 text-lg">{{ skill.name }}</span>
+                                        <span v-if="skill.certificate || skill.certificate_file" 
+                                            class="inline-flex items-center bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-xs font-medium">
+                                            <i class="fas fa-certificate mr-1.5"></i> Certified
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Certificate Details -->
+                                    <div class="space-y-3 pl-2">
+                                        <!-- Certificate Name -->
+                                        <div v-if="skill.certificate" class="flex items-start">
+                                            <i class="fas fa-file-alt text-blue-500 dark:text-blue-300 mt-1 mr-3"></i>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Certificate Name</p>
+                                                <p class="text-gray-600 dark:text-gray-400 text-sm">{{ skill.certificate }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Certificate File -->
+                                        <div v-if="skill.certificate_file" class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div class="flex items-center gap-2">
+                                                    <i :class="getFileIcon(skill.certificate_file) + ' text-lg'"></i>
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Certificate File</span>
+                                                </div>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ skill.certificate_file.split('.').pop().toUpperCase() }} File
+                                                </span>
+                                            </div>
+                                            
+                                            <div class="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                                <a :href="getCertificateUrl(skill.certificate_file)" target="_blank" 
+                                                class="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded-md text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                                                    <i class="fas fa-eye text-xs"></i> Preview
+                                                </a>
+                                                <a :href="getCertificateUrl(skill.certificate_file)" download 
+                                                class="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300 rounded-md text-sm font-medium hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors">
+                                                    <i class="fas fa-download text-xs"></i> Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                   <!-- Job Details, Description, Requirements, Qualifications, Employer Question (existing) -->
                   <h4 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2"><i class="fas fa-briefcase text-blue-500 dark:text-blue-300"></i> <span>Job Details</span></h4>
                   <div class="grid grid-cols-1 gap-3 bg-gray-50 dark:bg-gray-900 rounded-xl p-4 shadow-sm mb-6">

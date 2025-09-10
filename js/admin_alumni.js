@@ -509,6 +509,7 @@ createApp({
                 this.isLoading = false;
             }
         },
+        // In the viewAlumniDetails method, update the skills display logic:
         viewAlumniDetails(alumni) {
             this.viewAlumniData = {
                 ...alumni,
@@ -516,12 +517,39 @@ createApp({
                 experiences: alumni.experiences || [],
                 documents: alumni.documents || [],
                 employment: alumni.employment,
-                profile_picture: alumni.profile_picture // Correct path: /lspu_eis/uploads/profile_picture/
+                profile_picture: alumni.profile_picture
             };
             this.showViewModal = true;
             this.$nextTick(() => this.focusFirstInput('view-modal'));
         },
 
+        // Update the getFileIcon method to handle certificate files:
+        getFileIcon(filename) {
+            if (!filename) return 'fas fa-file text-gray-400';
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                pdf: 'fas fa-file-pdf text-red-500',
+                jpg: 'fas fa-file-image text-green-500',
+                jpeg: 'fas fa-file-image text-green-500',
+                png: 'fas fa-file-image text-green-500',
+                doc: 'fas fa-file-word text-blue-500',
+                docx: 'fas fa-file-word text-blue-500',
+                default: 'fas fa-file text-gray-400'
+            };
+            return icons[ext] || icons.default;
+        },
+
+        // Add a method to get certificate URL
+        getCertificateUrl(filename) {
+            if (!filename) return null;
+            const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
+            const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase();
+            if (!allowedExtensions.includes(ext)) {
+                console.warn('Invalid certificate extension:', filename);
+                return null;
+            }
+            return `uploads/certificates/${encodeURIComponent(filename)}`;
+        },
         
         calculateYears(startDate, endDate) {
             const start = new Date(startDate);

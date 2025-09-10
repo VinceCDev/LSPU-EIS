@@ -33,11 +33,11 @@
                 },
                 activePage: 'leaderboard',
                 
-                // Statistics
+                // In your data() return object, update the statistics property:
                 statistics: {
                     totalMatches: 0,
                     highMatches: 0,
-                    applied: 0,
+                    recentMatches: 0, // Replace applied with this
                     averageMatch: 0
                 }
             };
@@ -218,13 +218,26 @@
             
             calculateStatistics() {
                 if (this.matches.length === 0) {
-                    this.statistics = { totalMatches: 0, highMatches: 0, applied: 0, averageMatch: 0 };
+                    this.statistics = { 
+                        totalMatches: 0, 
+                        highMatches: 0, 
+                        recentMatches: 0,  // Updated
+                        averageMatch: 0 
+                    };
                     return;
                 }
                 
                 this.statistics.totalMatches = this.matches.length;
                 this.statistics.highMatches = this.matches.filter(m => m.match_percentage >= 80).length;
-                this.statistics.applied = this.matches.filter(m => m.status === 'applied').length;
+                
+                // Calculate matches from the last 7 days
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                
+                this.statistics.recentMatches = this.matches.filter(match => {
+                    const matchDate = new Date(match.matched_at);
+                    return matchDate >= sevenDaysAgo;
+                }).length;
                 
                 const totalPercentage = this.matches.reduce((sum, match) => sum + match.match_percentage, 0);
                 this.statistics.averageMatch = Math.round(totalPercentage / this.matches.length);
@@ -234,7 +247,7 @@
                 this.actionDropdown = this.actionDropdown === matchId ? null : matchId;
             },
 
-            // Alumni modal methods
+            // In the viewAlumniProfile method, update the skills processing:
             async viewAlumniProfile(match) {
                 try {
                     console.log('Fetching alumni details for ID:', match.alumni_id);
@@ -256,7 +269,7 @@
                         }
                         
                         console.log('Found alumni data:', alumniData);
-                        console.log('Profile picture path:', alumniData.profile_pic); // Debug profile picture
+                        console.log('Skills with certificates:', alumniData.skills); // Debug skills with certificates
                         
                         this.selectedAlumni = {
                             ...match,
@@ -265,10 +278,11 @@
                             experiences: alumniData.experiences || [],
                             educations: alumniData.educations || [],
                             resume_file: alumniData.resume_file || match.file_name,
-                            profile_picture: alumniData.profile_pic // Changed to profile_picture to match template
+                            profile_picture: alumniData.profile_pic,
+                            skills: alumniData.skills || [] // This now includes certificate and certificate_file
                         };
                         
-                        console.log('Final alumni data with experiences:', this.selectedAlumni.experiences);
+                        console.log('Final alumni data with skills:', this.selectedAlumni.skills);
                         this.showAlumniModal = true;
                     } else {
                         console.log('API returned success: false');
@@ -278,6 +292,34 @@
                     console.error('Error in viewAlumniProfile:', error);
                     this.showNotification('Error loading alumni profile', 'error');
                 }
+            },
+
+            getFileIcon(filename) {
+                if (!filename) return 'fas fa-file text-gray-400';
+                const ext = filename.split('.').pop().toLowerCase();
+                const icons = {
+                    pdf: 'fas fa-file-pdf text-red-500',
+                    jpg: 'fas fa-file-image text-green-500',
+                    jpeg: 'fas fa-file-image text-green-500',
+                    png: 'fas fa-file-image text-green-500',
+                    gif: 'fas fa-file-image text-green-500',
+                    doc: 'fas fa-file-word text-blue-500',
+                    docx: 'fas fa-file-word text-blue-500',
+                    default: 'fas fa-file text-gray-400'
+                };
+                return icons[ext] || icons.default;
+            },
+            
+            // Add this method to get certificate URLs
+            getCertificateUrl(filename) {
+                if (!filename) return null;
+                const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
+                const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase();
+                if (!allowedExtensions.includes(ext)) {
+                    console.warn('Invalid certificate extension:', filename);
+                    return null;
+                }
+                return `uploads/certificates/${encodeURIComponent(filename)}`;
             },
             
             calculateSkillsMatch(match) {
