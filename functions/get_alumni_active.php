@@ -1,12 +1,11 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: http://localhost'); // Adjust if frontend is on a different port/domain
+header('Access-Control-Allow-Origin: http://localhost');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Enable error reporting for debugging
 ini_set('display_errors', 0);
 error_log("Starting get_alumni_active.php");
 error_log("Session Data: " . print_r($_SESSION, true));
@@ -24,8 +23,7 @@ $db = Database::getInstance()->getConnection();
 $sql = "SELECT a.alumni_id, a.user_id, a.first_name, a.middle_name, a.last_name, a.birthdate, a.contact, a.gender, a.civil_status, a.city, a.province, a.year_graduated, a.college, a.course, a.verification_document, a.profile_pic, u.email, u.secondary_email, u.status
         FROM alumni a
         JOIN user u ON a.user_id = u.user_id
-        WHERE u.status = 'active'
-        ORDER BY a.alumni_id DESC";
+        WHERE u.status = 'active'";
 $result = $db->query($sql);
 
 $alumni = [];
@@ -86,7 +84,7 @@ while ($row = $result->fetch_assoc()) {
         'email' => $row['email'],
         'secondary_email' => $row['secondary_email'],
         'status' => $row['status'],
-        'skills' => $skills, // Array of skill names
+        'skills' => $skills,
         'experiences' => $experiences,
         'documents' => $row['verification_document'] ? [
             [
@@ -96,6 +94,29 @@ while ($row = $result->fetch_assoc()) {
         ] : []
     ];
 }
+
+// Sort the alumni array by YEAR first, then COLLEGE, then NAME
+usort($alumni, function($a, $b) {
+    // Compare by YEAR GRADUATED (descending - newest first)
+    if ($a['year_graduated'] != $b['year_graduated']) {
+        return $b['year_graduated'] - $a['year_graduated'];
+    }
+    
+    // If years are the same, compare by COLLEGE
+    $collegeCompare = strcmp($a['college'], $b['college']);
+    if ($collegeCompare !== 0) {
+        return $collegeCompare;
+    }
+    
+    // If same college, compare by LAST NAME
+    $lastNameCompare = strcmp($a['last_name'], $b['last_name']);
+    if ($lastNameCompare !== 0) {
+        return $lastNameCompare;
+    }
+    
+    // If same last name, compare by FIRST NAME
+    return strcmp($a['first_name'], $b['first_name']);
+});
 
 echo json_encode(['success' => true, 'alumni' => $alumni]);
 exit();

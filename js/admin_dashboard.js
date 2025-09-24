@@ -351,22 +351,38 @@ createApp({
             }
         },
         async geocodeLocation(location) {
-            // Hardcoded coordinates for known locations
-            const hardcodedCoords = {
-                'Santa Cruz, Zambales': { lat: 15.718, lng: 119.999 },
-                'Tanza, Cavite': { lat: 14.389, lng: 120.853 }
-            };
-            if (hardcodedCoords[location]) return hardcodedCoords[location];
             if (this.geocodeCache[location]) return this.geocodeCache[location];
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location + ', Philippines')}`;
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data && data.length > 0) {
-                const coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-                this.geocodeCache[location] = coords;
-                return coords;
+            
+            // Try different CORS proxies
+            const proxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?',
+                'https://proxy.cors.sh/'
+            ];
+            
+            const targetUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location + ', Philippines')}`;
+            
+            for (const proxy of proxies) {
+                try {
+                    const res = await fetch(proxy + encodeURIComponent(targetUrl));
+                    
+                    if (!res.ok) continue;
+                    
+                    const text = await res.text();
+                    const data = JSON.parse(text);
+                    
+                    if (data && data.length > 0) {
+                        const coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+                        this.geocodeCache[location] = coords;
+                        return coords;
+                    }
+                } catch (error) {
+                    console.log(`Proxy ${proxy} failed, trying next...`);
+                    continue;
+                }
             }
-            // Fallback to LSPU main campus
+            
+            // Fallback if all proxies fail
             const fallback = { lat: 14.1667, lng: 121.2167 };
             this.geocodeCache[location] = fallback;
             return fallback;

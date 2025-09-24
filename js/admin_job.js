@@ -470,7 +470,6 @@ createApp({
                     }
                 } catch (error) {
                     console.error('Error generating suggestions:', error);
-                    this.showNotification('Failed to generate suggestions. Please try again.', 'error', 'Suggestion Error');
                 }
             }, 500); // 500ms debounce delay
         },

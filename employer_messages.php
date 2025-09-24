@@ -583,7 +583,7 @@ $_SESSION['user_id'] = $user_id;
                         <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === 1" @click="prevPage">
                             <i class="fas fa-chevron-left text-black dark:text-white"></i>
                         </button>
-                        <span class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-blue-500 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900">{{ currentPage }}</span>
+                        <span class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-blue-600 text-white dark:bg-blue-500 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900">{{ currentPage }}</span>
                         <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === totalPages" @click="nextPage">
                             <i class="fas fa-chevron-right text-black dark:text-white"></i>
                         </button>

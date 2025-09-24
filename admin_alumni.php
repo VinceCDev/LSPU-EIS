@@ -286,7 +286,7 @@ $_SESSION['user_id'] = $user_id;
                             <option v-for="college in colleges" :key="college.name" :value="college.name">{{ college.name }}</option>
                         </select>
                         <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-[150px] md:w-[180px] lg:w-[250px]" v-model="filters.course" :disabled="!filters.college">
-                            <option value="">All Courses</option>
+                            <option value="">All Programs</option>
                             <option v-for="course in filterCourseOptions" :key="course" :value="course">{{ course }}</option>
                         </select>
                         <select class="form-select px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 w-full sm:w-[150px] md:w-[180px] lg:w-[210px]" v-model="filters.status">
@@ -298,14 +298,14 @@ $_SESSION['user_id'] = $user_id;
                     </div>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left data-table">
+                    <table class="min-w-full text-sm text-center data-table">
                             <thead>
                             <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
                                 <th class="px-4 py-2">Name</th>
                                 <th class="px-4 py-2">Email</th>
                                 <th class="px-4 py-2">Gender</th>
                                 <th class="px-4 py-2">Year Graduated</th>
-                                <th class="px-4 py-2">Course</th>
+                                <th class="px-4 py-2">Program</th>
                                 <th class="px-4 py-2">College</th>
                                 <th class="px-4 py-2">Province</th>
                                 <th class="px-4 py-2">City/Municipality</th>
@@ -363,7 +363,7 @@ $_SESSION['user_id'] = $user_id;
                         <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === 1" @click="prevPage">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button v-for="page in totalPages" :key="page" class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900" :class="{'bg-blue-600 text-white dark:bg-blue-500 dark:text-white': page === currentPage}" @click="goToPage(page)">{{ page }}</button>
+                        <button v-for="page in totalPages" :key="page" class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900" :class="{'bg-blue-600 text-white dark:bg-blue-500 dark:text-white': page === currentPage}" @click="goToPage(page)">{{ page }}</button>
                         <button class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" :disabled="currentPage === totalPages" @click="nextPage">
                             <i class="fas fa-chevron-right"></i>
                         </button>
@@ -430,7 +430,7 @@ $_SESSION['user_id'] = $user_id;
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course*</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Program*</label>
                             <select v-model="alumniForm.course" required
                                 class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
                                 <option value="">Select Course</option>
@@ -543,7 +543,7 @@ $_SESSION['user_id'] = $user_id;
                         </div>
                         <div class="flex items-center gap-3">
                             <i class="fas fa-book text-blue-500 dark:text-blue-300"></i>
-                            <span class="font-semibold text-gray-700 dark:text-gray-200">Course:</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">Programs:</span>
                             <span class="ml-1 text-gray-700 dark:text-gray-200">{{ viewAlumniData.course || 'N/A' }}</span>
                         </div>
                         <div class="flex items-center gap-3">
